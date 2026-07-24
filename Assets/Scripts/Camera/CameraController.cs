@@ -39,9 +39,18 @@ public class CameraController: MonoBehaviour
 	[SerializeField] private float distanceDamping = 0.15f;
 	[SerializeField] private float distanceChangeThreshold = 0.5f;
 	[SerializeField] private float minDistanceChangeForUpdate = 0.1f;
+	[SerializeField] private float zoomInReleaseDelay = 0.25f;
+
+	[Header("Safe Area Hysteresis")]
+	[SerializeField] private float innerSafeLeft = 0.12f;
+	[SerializeField] private float innerSafeRight = 0.88f;
+	[SerializeField] private float innerSafeBottom = 0.15f;
+	[SerializeField] private float innerSafeTop = 0.85f;
 
 	private Vector3 cameraVelocity = Vector3.zero;
 	private CameraState state = CameraState.Follow;
+	private bool isZoomedOut = false;
+	private float zoomInReleaseTimer = 0f;
 	private Coroutine resultCoroutine;
 
 	private float currentDistance;
@@ -107,11 +116,42 @@ public class CameraController: MonoBehaviour
         bool outOfSafeArea =
             IsBoundsOutsideSafeArea(bounds1) ||
             IsBoundsOutsideSafeArea(bounds2);
+        bool wellInsideSafeArea =
+            IsBoundsWellInsideSafeArea(bounds1) &&
+            IsBoundsWellInsideSafeArea(bounds2);
         bool canAutoZoom =
             GameManager.currentState == GameManager.GameState.Playing;
+
         if (canAutoZoom && outOfSafeArea)
         {
             targetDistance += zoomOutBoost;
+            isZoomedOut = true;
+            zoomInReleaseTimer = 0f;
+        }
+        else if (canAutoZoom && isZoomedOut)
+        {
+            if (wellInsideSafeArea)
+            {
+                zoomInReleaseTimer += Time.deltaTime;
+                if (zoomInReleaseTimer < zoomInReleaseDelay)
+                {
+                    targetDistance += zoomOutBoost;
+                }
+                else
+                {
+                    isZoomedOut = false;
+                }
+            }
+            else
+            {
+                zoomInReleaseTimer = 0f;
+                targetDistance += zoomOutBoost;
+            }
+        }
+        else if (wellInsideSafeArea)
+        {
+            zoomInReleaseTimer = 0f;
+            isZoomedOut = false;
         }
 
         targetDistance = Mathf.Clamp(targetDistance, minDistance, maxDistance);
@@ -159,17 +199,13 @@ public class CameraController: MonoBehaviour
     private bool IsBoundsWellInsideSafeArea(Bounds bounds)
     {
         Vector3[] corners = GetBoundsCorners(bounds);
-		float innerLeft = 0.12f;
-        float innerRight = 0.88f;
-		float innerBottom = 0.15f;
-        float innerTop = 0.85f;
 
         foreach (Vector3 corner in corners)
         {
             Vector3 vp = cam.WorldToViewportPoint(corner);
             if (vp.z < 0f) return false;
-            if (vp.x < innerLeft || vp.x > innerRight ||
-                vp.y < innerBottom || vp.y > innerTop)
+            if (vp.x < innerSafeLeft || vp.x > innerSafeRight ||
+                vp.y < innerSafeBottom || vp.y > innerSafeTop)
             {
                 return false;
             }

@@ -111,11 +111,17 @@ public class JumpTest : MonoBehaviour
         float diff = charge - peak;
         float power = 1f - diff * diff * 2.5f;
         power = Mathf.Clamp(power, 0.3f, 1f);
-        Vector3 forwardDirection = modelTransform != null
-            ? -modelTransform.forward
-            : transform.forward;
+        Vector3 forwardDirection =
+            transform.TransformDirection(jumpDirection);
 
         forwardDirection.y = 0f;
+
+        if (forwardDirection.sqrMagnitude < 0.0001f)
+        {
+            Debug.LogWarning($"{name}: Jump Directionが0です。");
+            return;
+        }
+
         forwardDirection.Normalize();
 
         Vector3 force = Vector3.up * jumpUpForce +

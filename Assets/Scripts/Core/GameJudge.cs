@@ -18,6 +18,9 @@ public class GameJudge: MonoBehaviour
 
 	[SerializeField] private float resultTextDelay = 2.2f;
 
+	[SerializeField] private BattleRecordManager battleRecordManager;
+	[SerializeField] private ScoreUI scoreUI;
+
     private void ShowResult(string result)
 	{
 		if (resultText != null)
@@ -165,6 +168,7 @@ public class GameJudge: MonoBehaviour
                 result = winner != null
                     ? $"{winner.gameObject.name} WIN!!"
                     : "DRAW !";
+				battleRecordManager.AddPlayerWin(winner);
             }
         }
 		else
@@ -206,13 +210,18 @@ public class GameJudge: MonoBehaviour
 		{
 			ShowResult(result);
 		}
+		
 	}
 	
 	public void ResetJudge()
 	{
 		judged = false;
 		frogs = FindObjectsByType<FlipCheck>();
-		
+		if (scoreUI != null)
+		{
+			scoreUI.UpdateScore();
+			Debug.Log("ScoreUI updated after battle result.");
+		}
 		if (resultText != null)
 		{
 			resultText.text = "";

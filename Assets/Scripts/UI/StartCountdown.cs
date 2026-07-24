@@ -52,6 +52,8 @@ public class StartCountdown: MonoBehaviour
 
 	private IEnumerator Countdown()
 	{
+		GameManager.currentState = GameManager.GameState.Waiting;
+
 		IsReadyTime = false;
 		IsGoTime = false;
 
@@ -77,6 +79,7 @@ public class StartCountdown: MonoBehaviour
 		startText.color = readyColor;
 		startText.rectTransform.anchoredPosition = new Vector2(0f, 50f);
 		ApplyOutline(startText, readyUseOutline, readyOutlineColor, readyOutlineWidth);
+		GameManager.currentState = GameManager.GameState.Ready;
 		startText.text = "READY";
 		audioSource.PlayOneShot(readySE);
 
@@ -87,6 +90,7 @@ public class StartCountdown: MonoBehaviour
 		startText.color = goColor;
 		startText.fontSize = goFontSize;
 		ApplyOutline(startText, goUseOutline, goOutlineColor, goOutlineWidth);
+		GameManager.currentState = GameManager.GameState.Go;
 		startText.text = "GO";
 		IsGoTime = true;
 
@@ -97,7 +101,7 @@ public class StartCountdown: MonoBehaviour
 		}
 
 		startText.gameObject.SetActive(false);
-
+		
 	}
 
 	private void ApplyOutline(TextMeshProUGUI text, bool useOutline, Color outlineColor, float outlineWidth)
