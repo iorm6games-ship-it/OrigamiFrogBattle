@@ -9,6 +9,7 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
         [Header("References")]
         public Transform paper;
         public SkinnedMeshRenderer skinnedMeshRenderer;
+        public Transform lightTarget;
 
         [Header("Timing")]
         [Min(0f)]
@@ -17,6 +18,9 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
         [Header("Start Position")]
         [Tooltip("降下開始位置の左右差")]
         public float startXOffset;
+        
+        [Tooltip("着地時の上下順。0が最も低い紙")]
+        public float landingOrder;
 
         [Header("Variation")]
         [Range(-1f, 1f)]
@@ -48,10 +52,11 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
     [SerializeField]
     private AnimationCurve moveCurve =
         AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+    [SerializeField]
+    private float startYSpacing = 0.45f;
 
     [Header("Floating")]
     [Tooltip("紙全体の左右への漂い")]
-    [SerializeField]
     private float swayAmount = 0.08f;
     [Header("Flutter Rotation")]
     [SerializeField]
@@ -280,8 +285,8 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
         {
             yield return new WaitForSeconds(entry.delay);
         }
-
         Vector3 startPosition = GetStartPosition(index);
+
         Vector3 startScale =
             targetScales[index] * startScaleMultiplier;
 
@@ -375,10 +380,15 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
     private Vector3 GetStartPosition(int index)
     {
         PaperEntry entry = papers[index];
+        float centerOrder =
+            (papers.Length -1) * 0.5f;
+        float orderedYOffset =
+            (entry.landingOrder -centerOrder)
+            * startYSpacing;
 
         return targetPositions[index]
-            + Vector3.up * startYOffset
-            + Vector3.right * entry.startXOffset;
+            + Vector3.up * 
+                (startYOffset + orderedYOffset);
     }
 
     private void UpdatePosition(
@@ -391,13 +401,15 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
     {
         PaperEntry entry = papers[index];
 
+        // 縦方向の降下と最終位置への基本移動
         Vector3 position =
             Vector3.Lerp(
                 startPosition,
                 targetPositions[index],
                 easedTime
             );
-
+        
+        // 紙ごとの左右への漂い
         float sidewaysOffset =
             swayWave *
             swayAmount *

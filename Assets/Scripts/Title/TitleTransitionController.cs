@@ -17,6 +17,9 @@ public class TitleTransitionController : MonoBehaviour
     [Header("PaperSelection")]
     [SerializeField]
     private GameObject paperSelectionRoot;
+    [Header("Next Sequence")]
+    [SerializeField]
+    private SummonLightController summonLightController;
 
     private List<Vector3> startScales = new();
     private Button playButton;
@@ -44,6 +47,19 @@ public class TitleTransitionController : MonoBehaviour
                 break;
             }   
         }
+    }
+    private void StartSummonSequence()
+    {
+        if (summonLightController == null)
+        {
+            Debug.LogError(
+                $"{nameof(TitleTransitionController)}: " +
+                "Summon Light Controller が設定されていません",
+                this
+            );
+            return;
+        }
+        summonLightController.PlayIntroSequence();
     }
     public void StartTitleTransition()
     {
@@ -78,10 +94,9 @@ public class TitleTransitionController : MonoBehaviour
         SetObjectScale(1f);
 
         DisableFadeObjects();
-        if (paperSelectionRoot != null)
-        {
-            paperSelectionRoot.SetActive(true);
-        }
+        isTransitioning = false;
+
+        StartSummonSequence();
     }
 
     private void CollectStartScales()
