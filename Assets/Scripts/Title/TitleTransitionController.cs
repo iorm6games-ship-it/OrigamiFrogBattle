@@ -21,6 +21,11 @@ public class TitleTransitionController : MonoBehaviour
     [SerializeField]
     private SummonLightController summonLightController;
 
+    [Header("Sequence Timing")]
+    [Tooltip("タイトルが完全に消えてから星が光り始めるまでの間")]
+    [SerializeField, Min(0f)]
+    private float afterTitleFadeDelay = 0.35f;
+
     private List<Vector3> startScales = new();
     private Button playButton;
     private bool isTransitioning;
@@ -76,7 +81,7 @@ public class TitleTransitionController : MonoBehaviour
             playButton.interactable = false;
         }
         float elapsed = 0f;
-
+        
         while (elapsed < fadeDuration)
         {
             elapsed += Time.deltaTime;
@@ -94,6 +99,12 @@ public class TitleTransitionController : MonoBehaviour
         SetObjectScale(1f);
 
         DisableFadeObjects();
+        if (afterTitleFadeDelay > 0f)
+        {
+            yield return new WaitForSeconds(
+                afterTitleFadeDelay
+            );
+        }
         isTransitioning = false;
 
         StartSummonSequence();

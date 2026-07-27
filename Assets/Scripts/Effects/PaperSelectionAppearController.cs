@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -32,6 +33,8 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
         [Min(0f)]
         public float bendMultiplier = 1f;
     }
+    
+    public event Action AppearCompleted;
 
     [Header("Papers")]
     [SerializeField]
@@ -270,6 +273,8 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
         yield return new WaitForSeconds(totalDuration);
 
         appearCoroutine = null;
+
+        AppearCompleted?.Invoke();
     }
 
     private IEnumerator AnimatePaper(int index)
