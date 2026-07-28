@@ -81,18 +81,33 @@ public class PaperSelectionController : MonoBehaviour
     {
         if (appearController != null)
         {
-            appearController.AppearCompleted +=
+            appearController.AppearCompleted -=
                 HandleAppearCompleted;
         }
 
         if (guideCoroutine != null)
         {
             StopCoroutine(guideCoroutine);
-            guideCoroutine(null);
+            guideCoroutine = null;
         }
-        CanSelect(false);
+        CanSelect = false;
     }
+    private void HandleAppearCompleted()
+    {
+        SelectedPaper = null;
+        CanSelect = false;
 
+        SetPapersInteraction(false);
+
+        if (guideCoroutine != null)
+        {
+            StopCoroutine(guideCoroutine);
+            guideCoroutine = null;
+        }
+
+        guideCoroutine =
+            StartCoroutine(ShowGuide());
+    }
     /// <summary>
     /// この紙が現在引っ張り操作を開始できるか
     /// </summary>
@@ -154,5 +169,111 @@ public class PaperSelectionController : MonoBehaviour
 
         SelectionConfirmed?.Invoke(selectedPaper);
     }
+    private void HandleApearCompleted()
+    {
+        SelectedPaper = null;
+        CanSelect = false;
 
+        SetPapersInteraction(false);
+
+        if (guideCoroutine != null)
+        {
+            StopCoroutine(guideCoroutine);
+        }
+
+        guideCoroutine = StartCoroutine(ShowGuide());
+    }
+
+    private IEnumerator ShowGuide()
+    {
+        SetGuideImmediately(0f);
+
+        if (guideShowDelay > 0f)
+        {
+            yield return new WaitForSeconds(
+                guideShowDelay
+            );
+        }
+
+        yield return FadeGuide(1f);
+
+        CanSelect = true;
+        SetPapersInteraction(true);
+
+        guideCoroutine = null;
+    }
+    private IEnumerator HideGuide()
+    {
+        yield return FadeGuide(0f);
+
+        guideCoroutine = null;
+    }
+    private IEnumerator FadeGuide(
+        float targetAlpha
+    )
+    {
+        if (guideCanvasGroup == null)
+        {
+            yield break;
+        }
+        float startAlpha =
+            guideCanvasGroup.alpha;
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < guideFadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+
+            float normalizedTime =
+                Mathf.Clamp01(
+                    elapsedTime /
+                        guideFadeDuration
+                );
+            float easedTime =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    normalizedTime
+                );
+            
+            guideCanvasGroup.alpha = 
+                Mathf.Lerp(
+                    startAlpha,
+                    targetAlpha,
+                    easedTime
+                );
+            yield return null;
+        }
+        guideCanvasGroup.alpha = targetAlpha;
+    }
+
+    private void SetGuideImmediately(
+        float alpha
+    )
+    {
+        if (guideCanvasGroup == null)
+        {
+            return;
+        }
+        guideCanvasGroup.alpha = alpha;
+
+        guideCanvasGroup.interactable = false;
+        guideCanvasGroup.blocksRaycasts = false;
+    }
+
+    private void SetPapersInteraction(
+        bool isEnabled
+    )
+    {
+        foreach (PaperPullSelectable paper in papers)
+        {
+            if (paper != null)
+            {
+                paper.SetInteractionEnabled(
+                    isEnabled
+                );
+            }
+        }
+    }
 }
