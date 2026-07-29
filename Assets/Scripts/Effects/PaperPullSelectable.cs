@@ -124,6 +124,10 @@ public class PaperPullSelectable :
         PointerEventData eventData
     )
     {
+        Debug.Log(
+            $"PointerDown: {name}",
+            this
+        );
         if (
             !interactionEnabled ||
             owner == null ||

@@ -151,7 +151,7 @@ public class PaperSelectionController : MonoBehaviour
             }
             else
             {
-                paper.CancelAndReturn();
+                paper.gameObject.SetActive(false);
             }
         }
 
