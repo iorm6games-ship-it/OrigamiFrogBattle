@@ -20,9 +20,6 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
         [Tooltip("降下開始位置の左右差")]
         public float startXOffset;
         
-        [Tooltip("着地時の上下順。0が最も低い紙")]
-        public float landingOrder;
-
         [Header("Variation")]
         [Range(-1f, 1f)]
         public float swayDirection = 1f;
@@ -32,6 +29,10 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
 
         [Min(0f)]
         public float bendMultiplier = 1f;
+        
+        [Header("Stacking")]
+        [Tooltip("降下中の前後関係。値が小さいほど前")]
+        public float fallDepthOrder;
     }
     
     public event Action AppearCompleted;
@@ -55,8 +56,6 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
     [SerializeField]
     private AnimationCurve moveCurve =
         AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
-    [SerializeField]
-    private float startYSpacing = 0.45f;
 
     [Header("Floating")]
     [Tooltip("紙全体の左右への漂い")]
@@ -385,15 +384,15 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
     private Vector3 GetStartPosition(int index)
     {
         PaperEntry entry = papers[index];
-        float centerOrder =
-            (papers.Length -1) * 0.5f;
-        float orderedYOffset =
-            (entry.landingOrder -centerOrder)
-            * startYSpacing;
+        
+        Vector3 startPosition =
+            targetPositions[index] +
+            Vector3.up * startYOffset;
 
-        return targetPositions[index]
-            + Vector3.up * 
-                (startYOffset + orderedYOffset);
+        startPosition.x +=
+            entry.startXOffset;
+
+        return startPosition;
     }
 
     private void UpdatePosition(
@@ -420,9 +419,18 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
             swayAmount *
             entry.swayDirection *
             settleAmount;
-
+            
         position += Vector3.right * sidewaysOffset;
-
+        
+        float depthOffset =
+            Mathf.Lerp(
+                entry.fallDepthOrder,
+                0f,
+                easedTime
+            );
+        
+        position.z += depthOffset;
+        
         entry.paper.localPosition = position;
     }
 
@@ -588,4 +596,5 @@ public sealed class PaperSelectionAppearController : MonoBehaviour
             weight
         );
     }
+
 }

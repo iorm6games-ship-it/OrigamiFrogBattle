@@ -26,6 +26,11 @@ public class PaperSelectionController : MonoBehaviour
     [SerializeField]
     private PaperPullSelectable[] papers;
 
+    [Header("Selected Paper Motion")]
+    [SerializeField]
+    private Transform selectedPaperCenterPoint;
+
+
     /// <summary>
     /// 紙の選択が確定したときに通知する
     /// 次の召喚演出から、このイベントを利用する
@@ -148,10 +153,13 @@ public class PaperSelectionController : MonoBehaviour
             if (paper == selectedPaper)
             {
                 paper.LockAsSelected();
+                paper.MoveToSelectedPosition(
+                    selectedPaperCenterPoint
+                );
             }
             else
             {
-                paper.gameObject.SetActive(false);
+                paper.FadeOutAsUnselected();
             }
         }
 
@@ -276,4 +284,5 @@ public class PaperSelectionController : MonoBehaviour
             }
         }
     }
+
 }
