@@ -43,13 +43,6 @@ public class PaperPullSelectable :
     [SerializeField]
     private float confirmThreshold = 0.65f;
 
-    // [Tooltip(
-    //     "引っ張った紙をカメラ側へ出すZ差" +
-    //     "現在のシーンではマイナス側が手前"
-    // )]
-    // [SerializeField]
-    // private float frontZOffset = -0.08f;
-
     [Tooltip("最大まで引いた時の拡大率")]
     [Min(1f)]
     [SerializeField]
@@ -136,6 +129,10 @@ public class PaperPullSelectable :
 
     private MaterialPropertyBlock propertyBlock;
 
+    [Header("Bone Pull")]
+    [SerializeField]
+    private PaperPullBoneController bonePullController;
+    
     private void Awake()
     {
         EnsureReferences();
@@ -402,7 +399,21 @@ public class PaperPullSelectable :
         float pullAmount
     )
     {
-        
+        if (bonePullController != null)
+        {
+            bonePullController.ApplyPullAmount(
+                pullAmount
+            );
+            transform.localScale =
+                Vector3.Lerp(
+                    restLocalScale,
+                    restLocalScale *
+                    pullScaleMultiplier,
+                    pullAmount
+                );
+            return;
+        }
+
         if (
             targetCamera == null ||
             transform.parent == null
@@ -560,12 +571,18 @@ public class PaperPullSelectable :
                 pullAmount
             );
     }
+
     private IEnumerator ReturnToResetCoroutine()
     {
+        float startPullAmount =
+            currentPullAmount;
+
         Vector3 startPosition =
             transform.localPosition;
+
         Vector3 startScale =
             transform.localScale;
+
         float elapsedTime = 0f;
 
         while (elapsedTime < returnDuration)
@@ -574,39 +591,66 @@ public class PaperPullSelectable :
 
             float normalizedTime =
                 Mathf.Clamp01(
-                    elapsedTime / returnDuration
+                    elapsedTime /
+                    returnDuration
                 );
-            
+
             float easedTime =
                 Mathf.SmoothStep(
                     0f,
                     1f,
                     normalizedTime
                 );
-            
-            transform.localPosition =
-                Vector3.Lerp(
-                    startPosition,
-                    restLocalPosition,
-                    easedTime
+
+            if (bonePullController != null)
+            {
+                currentPullAmount =
+                    Mathf.Lerp(
+                        startPullAmount,
+                        0f,
+                        easedTime
+                    );
+
+                ApplyPullPose(
+                    currentPullAmount
                 );
-            transform.localScale = 
-                Vector3.Lerp(
-                    startScale,
-                    restLocalScale,
-                    easedTime
-                );
+            }
+            else
+            {
+                transform.localPosition =
+                    Vector3.Lerp(
+                        startPosition,
+                        restLocalPosition,
+                        easedTime
+                    );
+
+                transform.localScale =
+                    Vector3.Lerp(
+                        startScale,
+                        restLocalScale,
+                        easedTime
+                    );
+            }
 
             yield return null;
         }
-        transform.localPosition = 
-            restLocalPosition;
+
+        currentPullAmount = 0f;
+
+        if (bonePullController != null)
+        {
+            bonePullController.ApplyPullAmount(0f);
+        }
+        else
+        {
+            transform.localPosition =
+                restLocalPosition;
+        }
+
         transform.localScale =
             restLocalScale;
 
-        currentPullAmount = 0f;
         moveCoroutine = null;
-
     }
 
     private void StopMoveCoroutine()
