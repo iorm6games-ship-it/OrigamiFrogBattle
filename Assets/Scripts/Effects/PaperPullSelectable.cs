@@ -276,6 +276,8 @@ public class PaperPullSelectable :
     
         StopMoveCoroutine();
         CacheResetPose();
+        
+        bonePullController?.InitializeBoneChain();
 
         dragging = true;
         trailPrototype?.BeginRecording();
@@ -309,6 +311,11 @@ public class PaperPullSelectable :
                 draggedPixels /
                 maxDragPixels
             );
+
+        Debug.Log(
+            $"OnDrag: {name}, pull={currentPullAmount:F3}",
+            this
+        );
         ApplyPullPose(
             currentPullAmount
         );
@@ -399,6 +406,14 @@ public class PaperPullSelectable :
         float pullAmount
     )
     {
+        Debug.Log(
+            $"ApplyPullPose: {name}, " +
+            $"pull={pullAmount:F3}, " +
+            $"boneController=" +
+            $"{(bonePullController != null)}",
+            this
+        );
+        
         if (bonePullController != null)
         {
             bonePullController.ApplyPullAmount(

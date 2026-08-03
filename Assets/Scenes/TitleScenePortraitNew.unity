@@ -168,6 +168,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &87194161 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4399297380550577486, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+  m_PrefabInstance: {fileID: 909455287}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &117052748
 GameObject:
   m_ObjectHideFlags: 0
@@ -1103,6 +1108,7 @@ MonoBehaviour:
   selectedMultiplier: 1.05
   unselectedFadeDuration: 0.45
   trailPrototype: {fileID: 1088001042}
+  bonePullController: {fileID: 0}
 --- !u!65 &467715883
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2193,6 +2199,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       insertIndex: -1
       addedObject: {fileID: 909455291}
+    - targetCorrespondingSourceObject: {fileID: -4267425209909500052, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1127052782}
   m_SourcePrefab: {fileID: 100100000, guid: dfb1958f229adca49975306dc64b5378, type: 3}
 --- !u!4 &909455288 stripped
 Transform:
@@ -2237,6 +2246,7 @@ MonoBehaviour:
   selectedMultiplier: 1.05
   unselectedFadeDuration: 0.45
   trailPrototype: {fileID: 1088001042}
+  bonePullController: {fileID: 1127052782}
 --- !u!65 &909455292
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2408,6 +2418,7 @@ MonoBehaviour:
   selectedMultiplier: 1.05
   unselectedFadeDuration: 0.45
   trailPrototype: {fileID: 0}
+  bonePullController: {fileID: 0}
 --- !u!65 &971893294
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2906,6 +2917,83 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TitleManager
   mainSceneName: MainScene
+--- !u!1 &1127052780 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -4267425209909500052, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+  m_PrefabInstance: {fileID: 909455287}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1127052782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1127052780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9db1432401bb23a45b7fc08e1bd32aa2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PaperPullBoneController
+  firstBone: {fileID: 87194161}
+  boneCount: 10
+  paperReference: {fileID: 909455290}
+  targetCamera: {fileID: 2107679577}
+  localPaperNormal: {x: 0, y: 1, z: 0}
+  maxPullDistance: 0.55
+  headRotationOffsetEuler: {x: 0, y: 0, z: 35}
+  positionCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  rotationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  pathSampleCount: 96
+  maxLiftDistance: 0.18
+  liftPeakProgress: 0.35
+  invertLiftDirection: 0
+  logBoneInformation: 1
 --- !u!1 &1176528980
 GameObject:
   m_ObjectHideFlags: 0
@@ -3030,6 +3118,7 @@ MonoBehaviour:
   selectedMultiplier: 1.05
   unselectedFadeDuration: 0.45
   trailPrototype: {fileID: 0}
+  bonePullController: {fileID: 0}
 --- !u!65 &1200428429
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3725,6 +3814,7 @@ MonoBehaviour:
   selectedMultiplier: 1.05
   unselectedFadeDuration: 0.45
   trailPrototype: {fileID: 0}
+  bonePullController: {fileID: 0}
 --- !u!65 &1520854883
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4790,6 +4880,7 @@ MonoBehaviour:
   selectedMultiplier: 1.05
   unselectedFadeDuration: 0.45
   trailPrototype: {fileID: 0}
+  bonePullController: {fileID: 0}
 --- !u!65 &1809437082
 BoxCollider:
   m_ObjectHideFlags: 0

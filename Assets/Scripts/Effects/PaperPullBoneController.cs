@@ -193,6 +193,7 @@ public sealed class PaperPullBoneController : MonoBehaviour
     }
     public void ApplyPullAmount(float pullAmount)
     {
+        
         if (!IsInitialized)
         {
             InitializeBoneChain();
@@ -205,13 +206,10 @@ public sealed class PaperPullBoneController : MonoBehaviour
 
         pullAmount = Mathf.Clamp01(pullAmount);
 
-        float curvePullAmount =
-            positionCurve.Evaluate(pullAmount);
-        
         float headDistance =
             initialChainLength +
             forwardPathLength *
-            curvePullAmount;
+            pullAmount;
         
         /* 親から子の順番にWorld Poseを設定する。
          * 親を動かすとこも動くが、その後に子自身の
@@ -219,17 +217,38 @@ public sealed class PaperPullBoneController : MonoBehaviour
          */
         for (int i = 0; i < pullBones.Length; i++)
         {
+            /*
+            * PullBone_09を動作上の先端として扱う。
+            *
+            * cumulativeDistances:
+            * Bone00 = 0
+            * Bone09 = initialChainLength
+            *
+            * そのため、09から見た遅れ距離へ変換する。
+            */
+            float distanceFromHead =
+                initialChainLength -
+                cumulativeDistances[i];
+
             float sampleDistance =
                 headDistance -
-                cumulativeDistances[i];
+                distanceFromHead;
+
             PathPose sampledPose =
-                SamplePathByDistance(sampleDistance);
-            
+                SamplePathByDistance(
+                    sampleDistance
+                );
+
+            /*
+            * Transform階層を壊さないように、
+            * 必ず親Boneから子Boneの順で設定する。
+            */
             pullBones[i].SetPositionAndRotation(
                 sampledPose.position,
                 sampledPose.rotation
             );
         }
+
     }
 
     public void ResetBonesImmediately()
@@ -341,26 +360,29 @@ public sealed class PaperPullBoneController : MonoBehaviour
     {
         pathPoses.Clear();
 
-        /* PullBone_09 から PullBone_00 までを、
-         * 初期状態の経路として登録する。
-         * 
-         * これにより、pullAmount = 0のとき、
-         * 各Boneが自分自身の初期地点を参照できる。
-         */
+        /*
+        * PullBone_00からPullBone_09までを、
+        * 初期状態の経路として登録する。
+        *
+        * PullBone_09が引っ張る側の先端なので、
+        * 初期経路の末尾がPullBone_09になる。
+        */
         float cumulativeDistance = 0f;
 
-        for (int i = pullBones.Length - 1; i >= 0; i--)
+        for (int i = 0; i < pullBones.Length; i++)
         {
             if (pathPoses.Count > 0)
             {
                 PathPose previousPose =
                     pathPoses[pathPoses.Count - 1];
+
                 cumulativeDistance +=
                     Vector3.Distance(
                         previousPose.position,
                         restWorldPositions[i]
                     );
             }
+
             pathPoses.Add(
                 new PathPose(
                     restWorldPositions[i],
@@ -369,14 +391,18 @@ public sealed class PaperPullBoneController : MonoBehaviour
                 )
             );
         }
+
         initialChainLength = cumulativeDistance;
 
+        int headIndex =
+            pullBones.Length - 1;
+
         Vector3 headStartPosition =
-            restWorldPositions[0];
-        
+            restWorldPositions[headIndex];
+
         Quaternion headStartRotation =
-            restWorldRotations[0];
-        
+            restWorldRotations[headIndex];
+
         Vector3 slideDirection =
             CalculateSlideDirection();
 
@@ -396,33 +422,34 @@ public sealed class PaperPullBoneController : MonoBehaviour
             Quaternion.Euler(
                 headRotationOffsetEuler
             );
-        
-        for (int sample = 1; sample <= pathSampleCount; sample++)
+
+        for (
+            int sample = 1;
+            sample <= pathSampleCount;
+            sample++
+        )
         {
             float normalizedTime =
                 sample /
                 (float)pathSampleCount;
+
             float positionTime =
                 positionCurve.Evaluate(
                     normalizedTime
                 );
+
             float rotationTime =
                 rotationCurve.Evaluate(
                     normalizedTime
                 );
-            
-            /*
-             * 引き始めからliftPeakProgress までは
-             * 徐々に紙面から浮かせる。
-             * それ以降は浮いた状態を維持する
-             */
+
             float liftTime =
                 Mathf.InverseLerp(
                     0f,
                     liftPeakProgress,
                     normalizedTime
                 );
-            
+
             liftTime =
                 Mathf.SmoothStep(
                     0f,
@@ -438,14 +465,14 @@ public sealed class PaperPullBoneController : MonoBehaviour
                 paperNormalWorld *
                 maxLiftDistance *
                 liftTime;
-            
+
             Quaternion rotation =
                 Quaternion.Slerp(
                     headStartRotation,
                     headEndRotation,
                     rotationTime
                 );
-            
+
             PathPose previousPose =
                 pathPoses[pathPoses.Count - 1];
 
