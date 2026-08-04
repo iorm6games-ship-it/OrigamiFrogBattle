@@ -1,9 +1,6 @@
 using System;
 using System.Collections;
-using System.ComponentModel;
-using System.Reflection;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 [DisallowMultipleComponent]
@@ -106,7 +103,7 @@ public class PaperPullSelectable :
     private BoxCollider hitCollider;
     private bool interactionEnabled;
     private bool dragging;
-
+    private Transform selectedTargetPoint;
     private float pressScreenY;
     private float currentPullAmount;
     private Vector3 restLocalPosition;
@@ -132,7 +129,7 @@ public class PaperPullSelectable :
     [Header("Bone Pull")]
     [SerializeField]
     private PaperPullBoneController bonePullController;
-    
+
     private void Awake()
     {
         EnsureReferences();
@@ -232,7 +229,12 @@ public class PaperPullSelectable :
         owner = selectionController;
         EnsureReferences();
     }
-
+    public void SetSelectedTarget(
+        Transform targetPoint
+    )
+    {
+        selectedTargetPoint = targetPoint;
+    }
     public void SetInteractionEnabled(
         bool isEnabled
     )
@@ -277,7 +279,21 @@ public class PaperPullSelectable :
         StopMoveCoroutine();
         CacheResetPose();
         
-        bonePullController?.InitializeBoneChain();
+        if (bonePullController != null)
+        {
+            bool pathPrepared =
+                bonePullController.PreparePath(
+                    selectedTargetPoint
+                );
+            if (!pathPrepared)
+            {
+                Debug.LogWarning(
+                    $"{name}: Bone経路を作成できませんでした",
+                    this
+                );
+                return;
+            }
+        }
 
         dragging = true;
         trailPrototype?.BeginRecording();
@@ -699,29 +715,63 @@ public class PaperPullSelectable :
         }
     }
     public void MoveToSelectedPosition(
-        Transform targetPoint
+        Transform targetPoint,
+        Action onCompleted = null
     )
     {
         if (targetPoint == null)
         {
             Debug.LogWarning(
-                $"{name}: SelectedPaperCenterPoint が未設定です",
+                $"{name}: SelectedPaperCenterPointが未設定です。",
                 this
             );
+
+            onCompleted?.Invoke();
             return;
         }
 
         StopMoveCoroutine();
 
+        if (bonePullController != null)
+        {
+            /*
+            * 通常はPointerDown時に作成済みだが、
+            * 念のため最終地点を使って再準備できるようにする。
+            */
+            if (!bonePullController.IsPathPrepared)
+            {
+                if (
+                    !bonePullController.PreparePath(
+                        targetPoint
+                    )
+                )
+                {
+                    onCompleted?.Invoke();
+                    return;
+                }
+            }
+
+            moveCoroutine =
+                StartCoroutine(
+                    CompleteBonePathCoroutine(
+                        onCompleted
+                    )
+                );
+
+            return;
+        }
+
         moveCoroutine =
             StartCoroutine(
                 MoveToSelectedPositionCoroutine(
-                    targetPoint
+                    targetPoint,
+                    onCompleted
                 )
             );
     }
     private IEnumerator MoveToSelectedPositionCoroutine(
-        Transform targetPoint
+       Transform targetPoint,
+       Action onCompleted
     )
     {
         Vector3 startPosition =
@@ -781,5 +831,88 @@ public class PaperPullSelectable :
             targetScale;
 
         moveCoroutine = null;
+        onCompleted?.Invoke();
+    }
+    private IEnumerator CompleteBonePathCoroutine(
+        Action onCompleted
+    )
+    {
+        float startProgress =
+            currentPullAmount;
+
+        Vector3 startScale =
+            transform.localScale;
+
+        Vector3 targetScale =
+            restLocalScale *
+            selectedMultiplier;
+
+        /*
+        * すでに最大まで引いていた場合でも、
+        * 極端に長い待ち時間にならないよう調整する。
+        */
+        float remainingProgress =
+            1f - startProgress;
+
+        float duration =
+            Mathf.Max(
+                0.01f,
+                selectedMoveDuration *
+                remainingProgress
+            );
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime +=
+                Time.deltaTime;
+
+            float normalizedTime =
+                Mathf.Clamp01(
+                    elapsedTime /
+                    duration
+                );
+
+            float easedTime =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    normalizedTime
+                );
+
+            currentPullAmount =
+                Mathf.Lerp(
+                    startProgress,
+                    1f,
+                    easedTime
+                );
+
+            ApplyPullPose(
+                currentPullAmount
+            );
+
+            transform.localScale =
+                Vector3.Lerp(
+                    startScale,
+                    targetScale,
+                    easedTime
+                );
+
+            yield return null;
+        }
+
+        currentPullAmount = 1f;
+
+        bonePullController.ApplyPullAmount(
+            1f
+        );
+
+        transform.localScale =
+            targetScale;
+
+        moveCoroutine = null;
+
+        onCompleted?.Invoke();
     }
 }

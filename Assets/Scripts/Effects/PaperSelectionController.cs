@@ -63,10 +63,16 @@ public class PaperSelectionController : MonoBehaviour
 
         foreach (PaperPullSelectable paper in papers)
         {
-            if (paper != null)
+            if (paper == null)
             {
-                paper.Initialize(this);
+                continue;
             }
+
+            paper.Initialize(this);
+
+            paper.SetSelectedTarget(
+                selectedPaperCenterPoint
+            );
         }
 
         SetGuideImmediately(0f);
@@ -141,21 +147,23 @@ public class PaperSelectionController : MonoBehaviour
             return;
         }
 
-        SelectedPaper = selectedPaper;
+        SelectedPaper =
+            selectedPaper;
+
         CanSelect = false;
 
-        foreach (PaperPullSelectable paper in papers)
+        foreach (
+            PaperPullSelectable paper in papers
+        )
         {
             if (paper == null)
             {
                 continue;
             }
+
             if (paper == selectedPaper)
             {
                 paper.LockAsSelected();
-                paper.MoveToSelectedPosition(
-                    selectedPaperCenterPoint
-                );
             }
             else
             {
@@ -165,17 +173,31 @@ public class PaperSelectionController : MonoBehaviour
 
         if (guideCoroutine != null)
         {
-            StopCoroutine(guideCoroutine);
+            StopCoroutine(
+                guideCoroutine
+            );
         }
 
         guideCoroutine =
-            StartCoroutine(HideGuide());
-        Debug.Log(
-            $"選択された紙: {selectedPaper.ColorName}",
-            selectedPaper
-        );
+            StartCoroutine(
+                HideGuide()
+            );
 
-        SelectionConfirmed?.Invoke(selectedPaper);
+        selectedPaper.MoveToSelectedPosition(
+            selectedPaperCenterPoint,
+            () =>
+            {
+                Debug.Log(
+                    $"選択された紙: "
+                    + $"{selectedPaper.ColorName}",
+                    selectedPaper
+                );
+
+                SelectionConfirmed?.Invoke(
+                    selectedPaper
+                );
+            }
+        );
     }
     private void HandleApearCompleted()
     {
