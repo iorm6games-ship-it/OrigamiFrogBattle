@@ -2293,7 +2293,7 @@ MonoBehaviour:
   selectedMoveDuration: 0.8
   selectedMultiplier: 1.05
   unselectedFadeDuration: 0.45
-  trailPrototype: {fileID: 1088001042}
+  trailPrototype: {fileID: 0}
   bonePullController: {fileID: 1127052782}
 --- !u!65 &909455292
 BoxCollider:
@@ -2886,7 +2886,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1088001041
 Transform:
   m_ObjectHideFlags: 0
@@ -2986,10 +2986,42 @@ MonoBehaviour:
   boneCount: 10
   paperReference: {fileID: 909455290}
   targetCamera: {fileID: 2107679577}
-  localPaperNormal: {x: 0, y: 1, z: 0}
-  maxPullDistance: 0.55
-  headRotationOffsetEuler: {x: 0, y: 0, z: 35}
-  positionCurve:
+  pathArcCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.5
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  pathFrontOffset: 0.2
+  invertFrontDirection: 0
+  pathProgressCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
@@ -3013,7 +3045,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  rotationCurve:
+  maximumBendOffset: 0
+  bendWaveWidth: 5
+  bendEnvelope:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
@@ -3026,8 +3060,35 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1
+      time: 0.12
+      value: 0.75
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.35
       value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.75
+      value: 0.55
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -3037,11 +3098,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  pathSampleCount: 96
-  maxLiftDistance: 0.18
-  liftPeakProgress: 0.35
-  invertLiftDirection: 0
-  logBoneInformation: 1
+  localBoneForwardAxis: {x: 0, y: 1, z: 0}
+  logInformation: 0
 --- !u!1 &1176528980
 GameObject:
   m_ObjectHideFlags: 0

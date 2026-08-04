@@ -908,6 +908,14 @@ public class PaperPullSelectable :
             1f
         );
 
+        /*
+        * Boneで作った最終見た目と同じ位置へ
+        * Paper_Red本体を移動し、Boneを通常姿勢へ戻す。
+        *
+        * 見た目上の移動は発生しない。
+        */
+        bonePullController.CommitTargetPose();
+
         transform.localScale =
             targetScale;
 

@@ -1,32 +1,11 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public sealed class PaperPullBoneController : MonoBehaviour
 {
-    [Serializable]
-    private struct PathPose
-    {
-        public Vector3 position;
-        public Quaternion rotation;
-        public float distance;
-
-        public PathPose(
-            Vector3 position,
-            Quaternion rotation,
-            float distance
-        )
-        {
-            this.position = position;
-            this.rotation = rotation;
-            this.distance = distance;
-        }
-    }
-
     [Header("Bone Chain")]
 
-    [Tooltip("階層のルートBone。現在はPullBone_00")]
+    [Tooltip("階層ルート。PullBone_00を設定")]
     [SerializeField]
     private Transform firstBone;
 
@@ -36,69 +15,124 @@ public sealed class PaperPullBoneController : MonoBehaviour
 
     [Header("References")]
 
-    [Tooltip("紙全体のTransform")]
+    [Tooltip("Paper_Redを設定")]
     [SerializeField]
     private Transform paperReference;
 
-    [Header("Complete Path")]
-
-    [Tooltip("開始地点から終点までのカーブ分割数")]
-    [Range(16, 256)]
+    [Tooltip("Main Cameraを設定")]
     [SerializeField]
-    private int curveSampleCount = 96;
+    private Camera targetCamera;
+    [Header("Single Path")]
 
-    [Tooltip("カーブのハンドル長。開始点と終点の距離に対する割合")]
-    [Range(0.05f, 0.8f)]
+    [Tooltip(
+        "経路途中の膨らみ方。" +
+        "0と1では必ず0になるようにする"
+    )]
     [SerializeField]
-    private float curveHandleRatio = 0.3f;
+    private AnimationCurve pathArcCurve =
+        new AnimationCurve(
+            new Keyframe(0f, 0f),
+            new Keyframe(0.5f, 1f),
+            new Keyframe(1f, 0f)
+        );
 
-    [Tooltip("経路を紙面から浮かせる距離")]
+    [Tooltip("経路をカメラ手前へ持ち上げる距離")]
     [Min(0f)]
     [SerializeField]
-    private float curveLiftDistance = 0.35f;
+    private float pathFrontOffset = 0.45f;
 
-    [Tooltip("浮かせる方向に使う紙のローカル法線")]
+    [Tooltip("カメラ手前方向を反転する")]
     [SerializeField]
-    private Vector3 localPaperNormal = Vector3.up;
+    private bool invertFrontDirection;
 
-    [Tooltip("浮かせる方向を反転する")]
+    [Tooltip("経路上の進み方")]
     [SerializeField]
-    private bool invertLiftDirection;
+    private AnimationCurve pathProgressCurve =
+        AnimationCurve.EaseInOut(
+            0f,
+            0f,
+            1f,
+            1f
+        );
+
+    [Header("Continuous Bone Bend")]
+
+    [Tooltip(
+        "Bone列を紙面手前へ曲げる最大距離。"
+        + "角度ではなく位置変形"
+    )]
+    [Min(0f)]
+    [SerializeField]
+    private float maximumBendOffset = 0.15f;
+
+    [Tooltip(
+        "湾曲が影響するBoneの幅。"
+        + "小さすぎると裂けたように見える"
+    )]
+    [Range(2f, 9f)]
+    [SerializeField]
+    private float bendWaveWidth = 5f;
+
+    [Tooltip(
+        "09側から00側へ湾曲が流れる進み方"
+    )]
+    [SerializeField]
+    private AnimationCurve bendEnvelope =
+        new AnimationCurve(
+            new Keyframe(0f, 0f),
+            new Keyframe(0.15f, 0.75f),
+            new Keyframe(0.4f, 1f),
+            new Keyframe(0.75f, 0.55f),
+            new Keyframe(1f, 0f)
+        );
+
+    [Tooltip(
+        "Boneの長手方向ローカル軸。"
+        + "Blender Boneは通常Y軸"
+    )]
+    [SerializeField]
+    private Vector3 localBoneForwardAxis =
+        Vector3.up;
 
     [Header("Debug")]
 
     [SerializeField]
-    private bool logBoneInformation;
+    private bool logInformation;
 
     private Transform[] pullBones;
 
-    private Vector3[] restWorldPositions;
-    private Quaternion[] restWorldRotations;
+    private Vector3[] bindLocalPositions;
+    private Quaternion[] bindLocalRotations;
 
-    private Vector3[] restLocalPositions;
-    private Quaternion[] restLocalRotations;
+    private Vector3[] startWorldPositions;
+    private Quaternion[] startWorldRotations;
 
     private Vector3[] targetWorldPositions;
     private Quaternion[] targetWorldRotations;
 
-    private float[] cumulativeBoneDistances;
+    private Vector3[] currentWorldPositions;
+    private Quaternion[] currentWorldRotations;
 
-    private readonly List<PathPose> pathPoses =
-        new List<PathPose>();
+    private Vector3 startPaperPosition;
+    private Quaternion startPaperRotation;
 
-    private float initialChainLength;
-    private float completeTravelLength;
+    private Vector3 targetPaperPosition;
+    private Quaternion targetPaperRotation;
 
-    private Vector3 restPaperPosition;
-    private Quaternion restPaperRotation;
+    private Vector3 pathArcDirection;
+    private Vector3 bendDirection;
 
-    public bool IsInitialized { get; private set; }
-    public bool IsPathPrepared { get; private set; }
+    public bool IsInitialized
+    {
+        get;
+        private set;
+    }
 
-    public int BoneCount =>
-        pullBones != null
-            ? pullBones.Length
-            : 0;
+    public bool IsPathPrepared
+    {
+        get;
+        private set;
+    }
 
     private void Awake()
     {
@@ -131,6 +165,11 @@ public sealed class PaperPullBoneController : MonoBehaviour
             return;
         }
 
+        if (targetCamera == null)
+        {
+            targetCamera = Camera.main;
+        }
+
         if (!CollectBoneChain())
         {
             return;
@@ -138,16 +177,16 @@ public sealed class PaperPullBoneController : MonoBehaviour
 
         IsInitialized = true;
 
-        if (logBoneInformation)
+        if (logInformation)
         {
-            LogBoneInformation();
+            Debug.Log(
+                $"{name}: Boneチェーン初期化完了。"
+                + $" Bone数={pullBones.Length}",
+                this
+            );
         }
     }
 
-    /// <summary>
-    /// 現在の紙の姿勢を開始状態として保存し、
-    /// targetPointを紙全体の最終Poseとして完全経路を作る。
-    /// </summary>
     public bool PreparePath(
         Transform targetPoint
     )
@@ -155,58 +194,66 @@ public sealed class PaperPullBoneController : MonoBehaviour
         if (targetPoint == null)
         {
             Debug.LogWarning(
-                $"{name}: 最終地点が未設定です。",
+                $"{name}: SelectedPaperCenterPointが未設定です。",
                 this
             );
 
-            return false;
-        }
-
-        /*
-         * ドラッグ開始時のBone姿勢を改めて保存する。
-         * 降下演出後の正しい配置を開始姿勢にするため。
-         */
-        if (!CollectBoneChain())
-        {
-            IsInitialized = false;
             IsPathPrepared = false;
             return false;
         }
 
-        restPaperPosition =
+        if (!IsInitialized)
+        {
+            InitializeBoneChain();
+        }
+
+        if (!IsInitialized)
+        {
+            return false;
+        }
+
+        /*
+         * 前回の変形が残っていた場合に備え、
+         * Boneを初期Local Poseへ戻す。
+         */
+        RestoreBindPose();
+
+        startPaperPosition =
             paperReference.position;
 
-        restPaperRotation =
+        startPaperRotation =
             paperReference.rotation;
 
-        CalculateTargetBonePoses(
-            targetPoint
-        );
+        targetPaperPosition =
+            targetPoint.position;
 
-        BuildCompletePath();
+        targetPaperRotation =
+            targetPoint.rotation;
 
-        IsInitialized = true;
-        IsPathPrepared =
-            pathPoses.Count >= 2 &&
-            completeTravelLength > 0.0001f;
+        CacheStartWorldPoses();
+        CalculateTargetWorldPoses();
+        BuildPathOffsets();
 
-        if (
-            IsPathPrepared &&
-            logBoneInformation
-        )
+        IsPathPrepared = true;
+
+        ApplyPullAmount(0f);
+
+        if (logInformation)
         {
             Debug.Log(
-                $"{name}: 完全経路を作成しました。"
-                + $" 経路移動量={completeTravelLength:F4}",
+                $"{name}: 一本のBone経路を準備しました。"
+                + $" Start={startPaperPosition},"
+                + $" Target={targetPaperPosition}",
                 this
             );
         }
 
-        return IsPathPrepared;
+        return true;
     }
 
     /// <summary>
-    /// 0～1を完全経路の進捗として適用する。
+    /// ドラッグ中と確定後の自動再生で共通使用する。
+    /// 0が開始地点、1がSelectedPaperCenterPoint。
     /// </summary>
     public void ApplyPullAmount(
         float progress
@@ -220,49 +267,50 @@ public sealed class PaperPullBoneController : MonoBehaviour
             return;
         }
 
-        progress =
-            Mathf.Clamp01(progress);
+        progress = Mathf.Clamp01(progress);
 
-        /*
-         * progress=0:
-         * PullBone_09が初期位置にいる状態
-         *
-         * progress=1:
-         * PullBone_09が最終Poseの先端位置にいる状態
-         */
-        float tipDistance =
-            initialChainLength +
-            completeTravelLength *
-            progress;
+        float pathProgress =
+            Mathf.Clamp01(
+                pathProgressCurve.Evaluate(
+                    progress
+                )
+            );
 
-        /*
-         * Transform階層が00→09なので、
-         * 必ず親から子の順でWorld Poseを適用する。
-         */
-        for (
-            int i = 0;
-            i < pullBones.Length;
-            i++
+        CalculateCurrentBonePositions(
+            progress,
+            pathProgress
+        );
+
+        CalculateCurrentBoneRotations(
+            pathProgress
+        );
+
+        ApplyCurrentWorldPoses();
+    }
+
+    /// <summary>
+    /// 選択確定後、見た目を変えずに
+    /// Paper_Red本体を最終地点へ移し、
+    /// Boneを通常のLocal Poseへ戻す。
+    /// </summary>
+    public void CommitTargetPose()
+    {
+        if (
+            !IsInitialized ||
+            !IsPathPrepared
         )
         {
-            float distanceBehindTip =
-                initialChainLength -
-                cumulativeBoneDistances[i];
-
-            float sampleDistance =
-                tipDistance -
-                distanceBehindTip;
-
-            PathPose pose =
-                SamplePathByDistance(
-                    sampleDistance
-                );
-
-            pullBones[i].SetPositionAndRotation(
-                pose.position,
-                pose.rotation
-            );
+            return;
         }
+
+        paperReference.SetPositionAndRotation(
+            targetPaperPosition,
+            targetPaperRotation
+        );
+
+        RestoreBindPose();
+
+        IsPathPrepared = false;
     }
 
     public void ResetBonesImmediately()
@@ -277,18 +325,8 @@ public sealed class PaperPullBoneController : MonoBehaviour
             return;
         }
 
-        for (
-            int i = 0;
-            i < pullBones.Length;
-            i++
-        )
-        {
-            pullBones[i].localPosition =
-                restLocalPositions[i];
-
-            pullBones[i].localRotation =
-                restLocalRotations[i];
-        }
+        RestoreBindPose();
+        IsPathPrepared = false;
     }
 
     private bool CollectBoneChain()
@@ -296,16 +334,16 @@ public sealed class PaperPullBoneController : MonoBehaviour
         pullBones =
             new Transform[boneCount];
 
-        restWorldPositions =
+        bindLocalPositions =
             new Vector3[boneCount];
 
-        restWorldRotations =
+        bindLocalRotations =
             new Quaternion[boneCount];
 
-        restLocalPositions =
+        startWorldPositions =
             new Vector3[boneCount];
 
-        restLocalRotations =
+        startWorldRotations =
             new Quaternion[boneCount];
 
         targetWorldPositions =
@@ -314,8 +352,11 @@ public sealed class PaperPullBoneController : MonoBehaviour
         targetWorldRotations =
             new Quaternion[boneCount];
 
-        cumulativeBoneDistances =
-            new float[boneCount];
+        currentWorldPositions =
+            new Vector3[boneCount];
+
+        currentWorldRotations =
+            new Quaternion[boneCount];
 
         Transform currentBone =
             firstBone;
@@ -336,71 +377,58 @@ public sealed class PaperPullBoneController : MonoBehaviour
                 return false;
             }
 
-            pullBones[i] =
-                currentBone;
+            pullBones[i] = currentBone;
 
-            restWorldPositions[i] =
-                currentBone.position;
-
-            restWorldRotations[i] =
-                currentBone.rotation;
-
-            restLocalPositions[i] =
+            bindLocalPositions[i] =
                 currentBone.localPosition;
 
-            restLocalRotations[i] =
+            bindLocalRotations[i] =
                 currentBone.localRotation;
 
-            if (i > 0)
+            if (i >= boneCount - 1)
             {
-                float distance =
-                    Vector3.Distance(
-                        restWorldPositions[i - 1],
-                        restWorldPositions[i]
-                    );
-
-                cumulativeBoneDistances[i] =
-                    cumulativeBoneDistances[i - 1] +
-                    distance;
+                continue;
             }
 
-            if (i < boneCount - 1)
+            if (currentBone.childCount == 0)
             {
-                if (currentBone.childCount == 0)
-                {
-                    Debug.LogError(
-                        $"{currentBone.name}に"
-                        + "次の子Boneがありません。",
-                        currentBone
-                    );
+                Debug.LogError(
+                    $"{currentBone.name}に"
+                    + "次の子Boneがありません。",
+                    currentBone
+                );
 
-                    return false;
-                }
-
-                currentBone =
-                    currentBone.GetChild(0);
+                return false;
             }
+
+            currentBone =
+                currentBone.GetChild(0);
         }
-
-        initialChainLength =
-            cumulativeBoneDistances[
-                cumulativeBoneDistances.Length - 1
-            ];
 
         return true;
     }
 
-    /// <summary>
-    /// 紙全体がtargetPointのPoseになった場合に、
-    /// 各Boneが来るべきWorld Poseを計算する。
-    /// </summary>
-    private void CalculateTargetBonePoses(
-        Transform targetPoint
-    )
+    private void CacheStartWorldPoses()
     {
-        Quaternion paperRotationInverse =
+        for (
+            int i = 0;
+            i < pullBones.Length;
+            i++
+        )
+        {
+            startWorldPositions[i] =
+                pullBones[i].position;
+
+            startWorldRotations[i] =
+                pullBones[i].rotation;
+        }
+    }
+
+    private void CalculateTargetWorldPoses()
+    {
+        Quaternion inverseStartRotation =
             Quaternion.Inverse(
-                restPaperRotation
+                startPaperRotation
             );
 
         for (
@@ -410,40 +438,271 @@ public sealed class PaperPullBoneController : MonoBehaviour
         )
         {
             /*
-             * 紙全体に対するBoneの相対位置。
-             * Scaleの影響を追加せず、紙の実寸を維持する。
+             * 開始時のPaper_Redに対する
+             * Boneの相対Poseを取得する。
              */
             Vector3 relativePosition =
-                paperRotationInverse *
+                inverseStartRotation *
                 (
-                    restWorldPositions[i] -
-                    restPaperPosition
+                    startWorldPositions[i] -
+                    startPaperPosition
                 );
 
             Quaternion relativeRotation =
-                paperRotationInverse *
-                restWorldRotations[i];
+                inverseStartRotation *
+                startWorldRotations[i];
 
+            /*
+             * Paper_RedがSelectedPaperCenterPointへ
+             * 移動した場合のBone最終Pose。
+             */
             targetWorldPositions[i] =
-                targetPoint.position +
-                targetPoint.rotation *
+                targetPaperPosition +
+                targetPaperRotation *
                 relativePosition;
 
             targetWorldRotations[i] =
-                targetPoint.rotation *
+                targetPaperRotation *
                 relativeRotation;
         }
     }
 
-    private void BuildCompletePath()
+    private void BuildPathOffsets()
     {
-        pathPoses.Clear();
+        Vector3 directVector =
+            targetPaperPosition -
+            startPaperPosition;
 
-        float cumulativeDistance = 0f;
+        if (
+            directVector.sqrMagnitude <
+            0.000001f
+        )
+        {
+            pathArcDirection =
+                Vector3.zero;
 
+            bendDirection =
+                Vector3.zero;
+
+            return;
+        }
+
+        Vector3 pathDirection =
+            directVector.normalized;
+
+        pathArcDirection =
+            CalculatePathArcDirection(
+                pathDirection
+            );
+
+        bendDirection =
+            pathArcDirection;
+
+        if (logInformation)
+        {
+            Debug.Log(
+                $"{name}: 経路を準備しました。"
+                + $" Start={startPaperPosition}"
+                + $" Target={targetPaperPosition}"
+                + $" Difference={directVector}"
+                + $" ArcDirection={pathArcDirection}",
+                this
+            );
+        }
+    }
+    private void CalculateCurrentBonePositions(
+        float rawProgress,
+        float pathProgress
+    )
+    {
+        float lastIndex =
+            pullBones.Length - 1f;
+
+        float waveCenter =
+            Mathf.Lerp(
+                lastIndex,
+                0f,
+                rawProgress
+            );
+
+        float envelope =
+            Mathf.Max(
+                0f,
+                bendEnvelope.Evaluate(
+                    rawProgress
+                )
+            );
+
+        float safeWidth =
+            Mathf.Max(
+                0.0001f,
+                bendWaveWidth
+            );
+
+        float arcAmount =
+            Mathf.Max(
+                0f,
+                pathArcCurve.Evaluate(
+                    pathProgress
+                )
+            );
+
+        Vector3 arcOffset =
+            pathArcDirection *
+            pathFrontOffset *
+            arcAmount;
+
+        for (
+            int i = 0;
+            i < pullBones.Length;
+            i++
+        )
+        {
+            Vector3 start =
+                startWorldPositions[i];
+
+            Vector3 target =
+                targetWorldPositions[i];
+
+            /*
+            * 全Boneの基本位置は、
+            * 開始Poseから最終Poseへの直線補間。
+            *
+            * 下ドラッグ方向はここでは使用しない。
+            */
+            Vector3 straightPosition =
+                Vector3.Lerp(
+                    start,
+                    target,
+                    pathProgress
+                );
+
+            /*
+            * 全Boneへ同じ手前方向の膨らみを加える。
+            * 開始時と終了時には必ず0になる。
+            */
+            Vector3 basePosition =
+                straightPosition +
+                arcOffset;
+
+            float distanceFromCenter =
+                Mathf.Abs(
+                    i - waveCenter
+                );
+
+            float normalizedDistance =
+                Mathf.Clamp01(
+                    distanceFromCenter /
+                    safeWidth
+                );
+
+            float waveAmount =
+                1f -
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    normalizedDistance
+                );
+
+            Vector3 bendOffset =
+                bendDirection *
+                maximumBendOffset *
+                envelope *
+                waveAmount;
+
+            currentWorldPositions[i] =
+                basePosition +
+                bendOffset;
+        }
+    }
+    private void CalculateCurrentBoneRotations(
+        float pathProgress
+    )
+    {
+        Vector3 localForward =
+            localBoneForwardAxis.sqrMagnitude > 0.000001f
+                ? localBoneForwardAxis.normalized
+                : Vector3.up;
+
+        for (
+            int i = 0;
+            i < pullBones.Length;
+            i++
+        )
+        {
+            /*
+            * 紙全体が開始姿勢から最終姿勢へ変わる分の
+            * 基本回転。
+            */
+            Quaternion baseRotation =
+                Quaternion.Slerp(
+                    startWorldRotations[i],
+                    targetWorldRotations[i],
+                    pathProgress
+                );
+
+            /*
+            * 現在のBone列の並びから、
+            * 各Boneが向くべき方向を求める。
+            */
+            Vector3 desiredDirection;
+
+            if (i < pullBones.Length - 1)
+            {
+                desiredDirection =
+                    currentWorldPositions[i + 1] -
+                    currentWorldPositions[i];
+            }
+            else
+            {
+                desiredDirection =
+                    currentWorldPositions[i] -
+                    currentWorldPositions[i - 1];
+            }
+
+            if (
+                desiredDirection.sqrMagnitude <
+                0.000001f
+            )
+            {
+                currentWorldRotations[i] =
+                    baseRotation;
+
+                continue;
+            }
+
+            desiredDirection.Normalize();
+
+            Vector3 currentForward =
+                baseRotation *
+                localForward;
+
+            if (
+                currentForward.sqrMagnitude <
+                0.000001f
+            )
+            {
+                currentWorldRotations[i] =
+                    baseRotation;
+
+                continue;
+            }
+
+            Quaternion alignmentRotation =
+                Quaternion.FromToRotation(
+                    currentForward.normalized,
+                    desiredDirection
+                );
+
+            currentWorldRotations[i] =
+                alignmentRotation *
+                baseRotation;
+        }
+    }
+    private void ApplyCurrentWorldPoses()
+    {
         /*
-         * 初期Boneチェーンを00→09で登録。
-         * progress=0で全Boneが初期位置へ並ぶために必要。
+         * PullBone_00 → PullBone_09の親子順で適用する。
          */
         for (
             int i = 0;
@@ -451,312 +710,102 @@ public sealed class PaperPullBoneController : MonoBehaviour
             i++
         )
         {
-            AddPathPose(
-                restWorldPositions[i],
-                restWorldRotations[i],
-                ref cumulativeDistance
+            pullBones[i].SetPositionAndRotation(
+                currentWorldPositions[i],
+                currentWorldRotations[i]
             );
         }
+    }
 
-        initialChainLength =
-            cumulativeDistance;
-
-        int tipIndex =
-            pullBones.Length - 1;
-
-        Vector3 curveStart =
-            restWorldPositions[tipIndex];
-
-        /*
-         * カーブの終点は最終姿勢のPullBone_00。
-         * その後に最終Boneチェーン00→09を接続する。
-         */
-        Vector3 curveEnd =
-            targetWorldPositions[0];
-
-        Quaternion curveStartRotation =
-            restWorldRotations[tipIndex];
-
-        Quaternion curveEndRotation =
-            targetWorldRotations[0];
-
-        Vector3 startDirection =
-            GetInitialTipDirection();
-
-        Vector3 targetDirection =
-            GetTargetChainDirection();
-
-        float directDistance =
-            Vector3.Distance(
-                curveStart,
-                curveEnd
-            );
-
-        float handleDistance =
-            Mathf.Max(
-                0.01f,
-                directDistance *
-                curveHandleRatio
-            );
-
-        Vector3 liftDirection =
-            paperReference.TransformDirection(
-                localPaperNormal.normalized
-            );
-
-        if (invertLiftDirection)
-        {
-            liftDirection =
-                -liftDirection;
-        }
-
-        Vector3 controlPoint1 =
-            curveStart +
-            startDirection *
-            handleDistance +
-            liftDirection *
-            curveLiftDistance;
-
-        Vector3 controlPoint2 =
-            curveEnd -
-            targetDirection *
-            handleDistance +
-            liftDirection *
-            curveLiftDistance;
-
-        for (
-            int sample = 1;
-            sample <= curveSampleCount;
-            sample++
+    private void RestoreBindPose()
+    {
+        if (
+            pullBones == null ||
+            bindLocalPositions == null ||
+            bindLocalRotations == null
         )
         {
-            float t =
-                sample /
-                (float)curveSampleCount;
-
-            Vector3 position =
-                EvaluateCubicBezier(
-                    curveStart,
-                    controlPoint1,
-                    controlPoint2,
-                    curveEnd,
-                    t
-                );
-
-            float easedRotation =
-                Mathf.SmoothStep(
-                    0f,
-                    1f,
-                    t
-                );
-
-            Quaternion rotation =
-                Quaternion.Slerp(
-                    curveStartRotation,
-                    curveEndRotation,
-                    easedRotation
-                );
-
-            AddPathPose(
-                position,
-                rotation,
-                ref cumulativeDistance
-            );
+            return;
         }
 
         /*
-         * カーブ終点はtargetBone00なので、
-         * targetBone01から09までを追加する。
-         *
-         * 経路末尾のチェーン形状が、
-         * 完成時のBone配置そのものになる。
+         * 親から子の順で初期Local Poseへ戻す。
          */
         for (
-            int i = 1;
+            int i = 0;
             i < pullBones.Length;
             i++
         )
         {
-            AddPathPose(
-                targetWorldPositions[i],
-                targetWorldRotations[i],
-                ref cumulativeDistance
+            pullBones[i].localPosition =
+                bindLocalPositions[i];
+
+            pullBones[i].localRotation =
+                bindLocalRotations[i];
+        }
+    }
+
+
+    private Vector3 CalculatePathArcDirection(
+        Vector3 pathDirection
+    )
+    {
+        Vector3 cameraFrontDirection;
+
+        if (targetCamera != null)
+        {
+            /*
+            * カメラ手前方向。
+            */
+            cameraFrontDirection =
+                -targetCamera.transform.forward;
+        }
+        else
+        {
+            cameraFrontDirection =
+                -paperReference.forward;
+        }
+
+        if (invertFrontDirection)
+        {
+            cameraFrontDirection =
+                -cameraFrontDirection;
+        }
+
+        /*
+        * 開始点から終点へ向かう成分を取り除く。
+        *
+        * これにより、手前へ膨らませても
+        * 終点方向へ過剰に進んだり、
+        * 開始地点側へ逆戻りしたりしない。
+        */
+        Vector3 perpendicularDirection =
+            Vector3.ProjectOnPlane(
+                cameraFrontDirection,
+                pathDirection
             );
-        }
 
-        completeTravelLength =
-            cumulativeDistance -
-            initialChainLength;
-    }
+        /*
+        * 画面上下方向の成分も除去する。
+        *
+        * カメラが傾いていても、
+        * pathFrontOffsetによって紙が池の下へ
+        * 沈み込まないようにする。
+        */
+        perpendicularDirection =
+            Vector3.ProjectOnPlane(
+                perpendicularDirection,
+                Vector3.up
+            );
 
-    private void AddPathPose(
-        Vector3 position,
-        Quaternion rotation,
-        ref float cumulativeDistance
-    )
-    {
-        if (pathPoses.Count > 0)
-        {
-            PathPose previous =
-                pathPoses[
-                    pathPoses.Count - 1
-                ];
-
-            cumulativeDistance +=
-                Vector3.Distance(
-                    previous.position,
-                    position
-                );
-        }
-
-        pathPoses.Add(
-            new PathPose(
-                position,
-                rotation,
-                cumulativeDistance
-            )
-        );
-    }
-
-    private Vector3 GetInitialTipDirection()
-    {
-        int tipIndex =
-            pullBones.Length - 1;
-
-        Vector3 direction =
-            restWorldPositions[tipIndex] -
-            restWorldPositions[tipIndex - 1];
-
-        if (direction.sqrMagnitude < 0.000001f)
-        {
-            return -paperReference.up;
-        }
-
-        return direction.normalized;
-    }
-
-    private Vector3 GetTargetChainDirection()
-    {
-        Vector3 direction =
-            targetWorldPositions[1] -
-            targetWorldPositions[0];
-
-        if (direction.sqrMagnitude < 0.000001f)
-        {
-            return paperReference.up;
-        }
-
-        return direction.normalized;
-    }
-
-    private static Vector3 EvaluateCubicBezier(
-        Vector3 start,
-        Vector3 control1,
-        Vector3 control2,
-        Vector3 end,
-        float t
-    )
-    {
-        float inverseT =
-            1f - t;
-
-        return
-            inverseT * inverseT * inverseT * start +
-            3f * inverseT * inverseT * t * control1 +
-            3f * inverseT * t * t * control2 +
-            t * t * t * end;
-    }
-
-    private PathPose SamplePathByDistance(
-        float targetDistance
-    )
-    {
-        if (targetDistance <= 0f)
-        {
-            return pathPoses[0];
-        }
-
-        PathPose lastPose =
-            pathPoses[
-                pathPoses.Count - 1
-            ];
-
-        if (targetDistance >= lastPose.distance)
-        {
-            return lastPose;
-        }
-
-        for (
-            int i = 1;
-            i < pathPoses.Count;
-            i++
+        if (
+            perpendicularDirection.sqrMagnitude <
+            0.000001f
         )
         {
-            PathPose next =
-                pathPoses[i];
-
-            if (next.distance < targetDistance)
-            {
-                continue;
-            }
-
-            PathPose previous =
-                pathPoses[i - 1];
-
-            float segmentLength =
-                next.distance -
-                previous.distance;
-
-            float amount =
-                segmentLength > 0.000001f
-                    ? (
-                        targetDistance -
-                        previous.distance
-                    ) / segmentLength
-                    : 0f;
-
-            return new PathPose(
-                Vector3.Lerp(
-                    previous.position,
-                    next.position,
-                    amount
-                ),
-                Quaternion.Slerp(
-                    previous.rotation,
-                    next.rotation,
-                    amount
-                ),
-                targetDistance
-            );
+            return Vector3.zero;
         }
 
-        return lastPose;
-    }
-
-    private void LogBoneInformation()
-    {
-        Debug.Log(
-            $"{name}: Bone数={BoneCount}, "
-            + $"Boneチェーン長={initialChainLength:F6}",
-            this
-        );
-
-        for (
-            int i = 1;
-            i < pullBones.Length;
-            i++
-        )
-        {
-            float segmentDistance =
-                cumulativeBoneDistances[i] -
-                cumulativeBoneDistances[i - 1];
-
-            Debug.Log(
-                $"{pullBones[i - 1].name} → "
-                + $"{pullBones[i].name}: "
-                + $"{segmentDistance:F6}",
-                pullBones[i]
-            );
-        }
+        return perpendicularDirection.normalized;
     }
 }
