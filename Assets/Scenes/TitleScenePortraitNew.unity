@@ -1928,7 +1928,7 @@ Transform:
   m_GameObject: {fileID: 746368334}
   serializedVersion: 2
   m_LocalRotation: {x: -0.056937248, y: 0.38019747, z: -0.023584181, w: 0.9228499}
-  m_LocalPosition: {x: 0, y: 1, z: -21}
+  m_LocalPosition: {x: 0, y: 0.5, z: -21}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2138,7 +2138,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.1
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2677,6 +2677,7 @@ Transform:
   - {fileID: 686168156}
   - {fileID: 1330770015}
   - {fileID: 1472054876}
+  - {fileID: 2107055800}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1061959545
@@ -3279,6 +3280,11 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   localBoneForwardAxis: {x: 0, y: 1, z: 0}
+  localPaperNormalAxis: {x: -1, y: 0, z: 0}
+  tangentRotationStartProgress: 0.18
+  tangentRotationWeight: 0
+  sideClearanceOffset: 0
+  localClearanceDirection: {x: 0, y: 0, z: 1}
   logInformation: 0
 --- !u!1 &1176528980
 GameObject:
@@ -3823,10 +3829,10 @@ MonoBehaviour:
   boneCount: 10
   middlePoint: {fileID: 1472054876}
   targetPoint: {fileID: 1706473055}
-  firstHandleRatio: 0.33
-  middleInHandleRatio: 0.25
-  middleOutHandleRatio: 0.15
-  targetHandleRatio: 0.17
+  firstHandleRatio: 0.22
+  middleInHandleRatio: 0.18
+  middleOutHandleRatio: 0.1
+  targetHandleRatio: 0.12
   curveSegmentCount: 80
   previewProgress: 0
   pathPointRadius: 0.06
@@ -3954,7 +3960,7 @@ Transform:
   m_GameObject: {fileID: 1472054875}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.1, z: -3}
+  m_LocalPosition: {x: 0, y: -0.8, z: -3.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4368,11 +4374,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 0b1b58657c66d714f9b8bbff83c96aee, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.7
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 0b1b58657c66d714f9b8bbff83c96aee, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.039
+      value: -0.3
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 0b1b58657c66d714f9b8bbff83c96aee, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4823,7 +4829,7 @@ Transform:
   m_GameObject: {fileID: 1706374230}
   serializedVersion: 2
   m_LocalRotation: {x: 0.05939118, y: 0.92541665, z: -0.16317591, w: 0.33682415}
-  m_LocalPosition: {x: -0.3, y: -1.1, z: 0}
+  m_LocalPosition: {x: -0.3, y: -1.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4933,7 +4939,7 @@ Transform:
   m_GameObject: {fileID: 1706473054}
   serializedVersion: 2
   m_LocalRotation: {x: -0.258819, y: 0, z: 0, w: 0.9659259}
-  m_LocalPosition: {x: -0.4, y: 0.1, z: -7.5}
+  m_LocalPosition: {x: -0.4, y: -0.5, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5042,7 +5048,7 @@ Transform:
   m_GameObject: {fileID: 1765903434}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.38268343, z: 0, w: 0.92387956}
-  m_LocalPosition: {x: 0.55, y: -0.4, z: -0.3}
+  m_LocalPosition: {x: 0.3, y: -0.7, z: -0.3}
   m_LocalScale: {x: 0.65, y: 1, z: 0.65}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15730,6 +15736,66 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!1 &2107055799
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2107055800}
+  - component: {fileID: 2107055801}
+  m_Layer: 0
+  m_Name: PullPathPreview
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2107055800
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107055799}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1025863796}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2107055801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107055799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dda6dc1d56c3b54cba671ed434a79da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PaperPullPathPreview
+  firstBone: {fileID: 87194161}
+  boneCount: 10
+  middlePoint: {fileID: 1472054876}
+  targetPoint: {fileID: 1706473055}
+  firstHandleRatio: 0.33
+  middleInHandleRatio: 0.25
+  middleOutHandleRatio: 0.15
+  targetHandleRatio: 0.17
+  curveSegmentCount: 80
+  previewProgress: 0
+  pathPointRadius: 0.06
+  bonePointRadius: 0.09
+  tangentLength: 0.6
+  drawControlPoints: 1
+  drawInitialBoneChain: 1
+  drawFollowingBones: 1
 --- !u!1 &2107679575
 GameObject:
   m_ObjectHideFlags: 0

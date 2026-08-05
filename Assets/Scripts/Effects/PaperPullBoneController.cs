@@ -122,8 +122,58 @@ public sealed class PaperPullBoneController : MonoBehaviour
     private Vector3 localBoneForwardAxis =
         Vector3.up;
 
+    [SerializeField]
+    private Vector3 localPaperNormalAxis =
+        Vector3.left;
+
     private Quaternion[] initialWorldRotations;
     private Vector3[] initialPathTangents;
+    private Vector3[] initialPathNormals;
+
+    [Header("Bone Rotation Test")]
+    [SerializeField]
+    private float tangentRotationStartProgress = 0.18f;
+
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float tangentRotationWeight =
+        0.4f;
+
+    [Tooltip(
+        "紙をめくる際、隣の紙と反対方向へ" +
+        "Bone中心を逃がす最大距離"
+    )]
+    [Min(0f)]
+    [SerializeField]
+    private float sideClearanceOffset =
+        0.12f;
+
+    [Tooltip(
+        "赤い紙から見て、青い紙と反対側を示すローカル軸"
+    )]
+    [SerializeField]
+    private Vector3 localClearanceDirection =
+        Vector3.forward;
+    [Tooltip(
+        "引き抜き中の紙をカメラ側へ浮かせ、" +
+        "隣の紙との奥行き交差を防ぐ"
+    )]
+    [Min(0f)]
+    [SerializeField]
+    private float cameraDepthClearance =
+        0.08f;
+
+    [Tooltip(
+        "開始直後から浮かせ、終了付近で元の経路へ戻す"
+    )]
+    [SerializeField]
+    private AnimationCurve depthClearanceCurve =
+        new AnimationCurve(
+            new Keyframe(0f, 0f),
+            new Keyframe(0.08f, 1f),
+            new Keyframe(0.75f, 1f),
+            new Keyframe(1f, 0f)
+        );
 
     [Header("Debug")]
 
@@ -257,6 +307,11 @@ public sealed class PaperPullBoneController : MonoBehaviour
             return false;
         }
 
+        Vector3 normalAxis =
+            localPaperNormalAxis.sqrMagnitude >
+            0.000001f
+                ? localPaperNormalAxis.normalized
+                : Vector3.left;
         for (
             int i = 0;
             i < pullBones.Length;
@@ -271,6 +326,41 @@ public sealed class PaperPullBoneController : MonoBehaviour
                     i,
                     0f
                 );
+            if (
+                initialPathTangents[i].sqrMagnitude <
+                0.000001f
+            )
+            {
+                initialPathTangents[i] =
+                    initialWorldRotations[i] *
+                    localBoneForwardAxis.normalized;
+            }
+
+            initialPathTangents[i].Normalize();
+
+            Vector3 initialWorldNormal =
+                initialWorldRotations[i] *
+                normalAxis;
+            /*
+             * 法線から接線方向の成分を除き
+             * 経路に対して直角な紙面法線を作る
+             */
+            initialPathNormals[i] =
+                Vector3.ProjectOnPlane(
+                    initialWorldNormal,
+                    initialPathTangents[i]
+                );
+            if (
+                initialPathNormals[i].sqrMagnitude <
+                0.000001f
+            )
+            {
+                initialPathNormals[i] =
+                    Vector3.up;
+            }
+
+            initialPathNormals[i].Normalize();
+            
         }
 
         IsPathPrepared = true;
@@ -319,18 +409,13 @@ public sealed class PaperPullBoneController : MonoBehaviour
         float progress
     )
     {
-        Vector3 forwardAxis =
-            localBoneForwardAxis.sqrMagnitude >
+
+        Vector3 normalAxis =
+            localPaperNormalAxis.sqrMagnitude >
             0.000001f
-                ? localBoneForwardAxis.normalized
-                : Vector3.up;
-        
-        /* 親から子の順で適用する
-         * 
-         * 親Boneの回転で子が一時的に動いても
-         * 後続のBoneでWorld Positionを再設定するため、
-         * 最終的には全Boneが経路上へ設置される。
-         */
+                ? localPaperNormalAxis.normalized
+                : Vector3.left;
+
         for (
             int i = 0;
             i < pullBones.Length;
@@ -339,49 +424,176 @@ public sealed class PaperPullBoneController : MonoBehaviour
         {
             Transform bone =
                 pullBones[i];
+
             Vector3 targetPosition =
                 pathPreview.EvaluateBonePosition(
                     i,
                     progress
                 );
+            Vector3 cameraFrontDirection =
+                targetCamera != null
+                    ? targetCamera.transform.forward
+                    : Vector3.zero;
+
+            float depthClearanceAmount =
+                Mathf.Max(
+                    0f,
+                    depthClearanceCurve.Evaluate(
+                        progress
+                    )
+                );
+
+            targetPosition +=
+                cameraFrontDirection *
+                cameraDepthClearance *
+                depthClearanceAmount;
             Vector3 currentTangent =
                 pathPreview.EvaluateBoneTangent(
                     i,
                     progress
                 );
 
-            bone.position =
-                targetPosition;
             if (
                 currentTangent.sqrMagnitude <
-                0.000001f ||
-                initialPathTangents[i].sqrMagnitude <
                 0.000001f
             )
             {
-                bone.rotation =
-                    initialWorldRotations[i];
+                bone.SetPositionAndRotation(
+                    targetPosition,
+                    initialWorldRotations[i]
+                );
+
                 continue;
             }
 
-            Vector3 initialWorldForward =
-                initialWorldRotations[i] *
-                forwardAxis;
-            
-            /*
-             * 初期Bone方向から現在の経路接線まで
-             * 回転差だけを適用する
-             */
-            Quaternion tangentRotation =
-                Quaternion.FromToRotation(
-                    initialWorldForward.normalized,
-                    currentTangent.normalized
-                );
-            bone.rotation =
-                tangentRotation *
-                initialWorldRotations[i];
-        }
+            currentTangent.Normalize();
 
+            /*
+            * 初期の紙面法線を現在の接線に対して
+            * 直角になるよう投影する。
+            *
+            * これにより、Boneの長手方向だけでなく、
+            * 紙の表裏方向も維持する。
+            */
+            Vector3 initialWorldNormal =
+                initialWorldRotations[i] *
+                normalAxis;
+
+            Vector3 currentNormal =
+                Vector3.ProjectOnPlane(
+                    initialWorldNormal,
+                    currentTangent
+                );
+
+            if (
+                currentNormal.sqrMagnitude <
+                0.000001f
+            )
+            {
+                currentNormal =
+                    initialPathNormals[i];
+            }
+
+            currentNormal.Normalize();
+
+            /*
+            * LookRotationは、
+            * 第1引数をZ方向、
+            * 第2引数をY方向として回転を作る。
+            *
+            * ここでは直接Boneへ使わず、
+            * 初期フレームから現在フレームへの
+            * 回転差を計算するために使用する。
+            */
+            Quaternion initialFrame =
+                Quaternion.LookRotation(
+                    initialPathTangents[i],
+                    initialPathNormals[i]
+                );
+
+            Quaternion currentFrame =
+                Quaternion.LookRotation(
+                    currentTangent,
+                    currentNormal
+                );
+
+            Quaternion frameDifference =
+                currentFrame *
+                Quaternion.Inverse(
+                    initialFrame
+                );
+
+            Quaternion fullTangentRotation =
+                frameDifference *
+                initialWorldRotations[i];
+            
+            float rotationProgress =
+                Mathf.InverseLerp(
+                    tangentRotationStartProgress,
+                    1f,
+                    progress
+                );
+
+            rotationProgress =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    rotationProgress
+                );
+
+            float effectiveRotationWeight =
+                tangentRotationWeight *
+                rotationProgress;
+
+            Quaternion targetRotation =
+                Quaternion.Slerp(
+                    initialWorldRotations[i],
+                    fullTangentRotation,
+                    effectiveRotationWeight
+                );
+            /*
+            * 親から子の順にWorld Poseを確定する。
+            */
+            Vector3 clearanceAxis =
+                localClearanceDirection.sqrMagnitude >
+                0.000001f
+                    ? localClearanceDirection.normalized
+                    : Vector3.forward;
+
+                /*
+                * 初期回転から現在回転までの角度。
+                * 回転が大きいほど隣の紙と反対側へ逃がす。
+                */
+                float rotationAngle =
+                    Quaternion.Angle(
+                        initialWorldRotations[i],
+                        targetRotation
+                    );
+
+                float clearanceAmount =
+                    Mathf.Sin(
+                        rotationAngle *
+                        Mathf.Deg2Rad
+                    ) *
+                    sideClearanceOffset;
+
+                /*
+                * 初期姿勢を基準に、紙幅方向へ補正する。
+                */
+                Vector3 clearanceDirectionWorld =
+                    initialWorldRotations[i] *
+                    clearanceAxis;
+
+                Vector3 correctedPosition =
+                    targetPosition +
+                    clearanceDirectionWorld *
+                    clearanceAmount;
+
+                bone.SetPositionAndRotation(
+                    correctedPosition,
+                    targetRotation
+                );
+        }
     }
     /// <summary>
     /// 確定時の最終Poseを保証する。
@@ -447,6 +659,8 @@ public sealed class PaperPullBoneController : MonoBehaviour
             new Quaternion[boneCount];
         
         initialPathTangents =
+            new Vector3[boneCount];
+        initialPathNormals =
             new Vector3[boneCount];
 
         Transform currentBone =
