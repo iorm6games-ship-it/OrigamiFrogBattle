@@ -30,6 +30,19 @@ public class PaperPullSelectable :
     [SerializeField]
     private float screenDragRatioForMax = 0.16f;
 
+    [Tooltip(
+        "ドラッグ距離を軌跡進捗へ変換するカーブ。" +
+        "開始を緩くすると引き抜く抵抗感が出る"
+    )]
+    [SerializeField]
+    private AnimationCurve dragResponseCurve =
+        AnimationCurve.Linear(
+            0f,
+            0f,
+            1f,
+            1f
+        );
+
     [Tooltip("紙を下へ動かす最大距離")]
     [Min(0.01f)]
     [SerializeField]
@@ -322,11 +335,18 @@ public class PaperPullSelectable :
                 Screen.height *
                 screenDragRatioForMax
             );
-        currentPullAmount =
+        float rawDragAmount =
             Mathf.Clamp01(
                 draggedPixels /
                 maxDragPixels
             );
+
+        currentPullAmount =
+            Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    rawDragAmount
+                );
 
         Debug.Log(
             $"OnDrag: {name}, pull={currentPullAmount:F3}",
