@@ -691,6 +691,7 @@ public class PaperPullSelectable :
         if (bonePullController != null)
         {
             bonePullController.ApplyPullAmount(0f);
+            bonePullController.ResetBonesImmediately();
         }
         else
         {

@@ -96,6 +96,8 @@ public sealed class PaperPullPathPreview : MonoBehaviour
     private readonly List<float> initialBoneDistances =
         new List<float>();
 
+    private bool runtimePathPrepared;
+
     private bool TryBuildPreview()
     {
         if (
@@ -618,9 +620,15 @@ public sealed class PaperPullPathPreview : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (!TryBuildPreview())
+        if (
+            !Application.isPlaying ||
+            !runtimePathPrepared
+        )
         {
-            return;
+            if (!TryBuildPreview())
+            {
+                return;
+            }            
         }
 
         DrawCompletePath();
@@ -893,6 +901,16 @@ public sealed class PaperPullPathPreview : MonoBehaviour
     /// </summary>
     public bool PrepareRuntimePath()
     {
-        return TryBuildPreview();
-    }    
+        
+        runtimePathPrepared =
+            TryBuildPreview();
+        
+        return runtimePathPrepared;
+
+    }
+
+    public void ReleaseRuntimePath()
+    {
+        runtimePathPrepared = false;
+    }
 }

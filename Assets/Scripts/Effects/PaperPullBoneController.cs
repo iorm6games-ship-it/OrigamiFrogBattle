@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -110,6 +111,21 @@ public sealed class PaperPullBoneController : MonoBehaviour
             1f,
             1f
         );
+
+    [Header("Bone Rotation Test")]
+
+    [Tooltip(
+        "PullBone の長手方向を表すローカル軸" 
+        + "まずは（0, 1, 0）で確認"
+    )]
+    [SerializeField]
+    private Vector3 localBoneForwardAxis =
+        Vector3.up;
+    [Tooltip("PullBone_09だけを軌跡の接線方向へ向ける")]
+    [SerializeField]
+    private bool rotateHeadBoneOnly = true;
+
+    private Quaternion headInitialWorldRotation;
 
     [Header("Debug")]
 
@@ -228,6 +244,11 @@ public sealed class PaperPullBoneController : MonoBehaviour
         * 初期姿勢へ戻してから経路を構築する。
         */
         RestoreBindPose();
+        Transform headBone =
+            pullBones[pullBones.Length - 1];
+
+        headInitialWorldRotation =
+            headBone.rotation;        
 
         bool prepared =
             pathPreview.PrepareRuntimePath();
@@ -284,7 +305,74 @@ public sealed class PaperPullBoneController : MonoBehaviour
         ApplyBonePathPositions(
             progress
         );
+        if (rotateHeadBoneOnly)
+        {
+            ApplyHeadBoneTangentRotation(
+                progress
+            );
+        }        
     }
+    private void ApplyHeadBoneTangentRotation(
+        float progress
+    )
+    {
+        int headBoneIndex =
+            pullBones.Length - 1;
+
+        Transform headBone =
+            pullBones[headBoneIndex];
+
+        Vector3 tangent =
+            pathPreview.EvaluateBoneTangent(
+                headBoneIndex,
+                progress
+            );
+
+        if (
+            tangent.sqrMagnitude <
+            0.000001f
+        )
+        {
+            return;
+        }
+
+        tangent.Normalize();
+
+        Vector3 forwardAxis =
+            localBoneForwardAxis.sqrMagnitude >
+            0.000001f
+                ? localBoneForwardAxis.normalized
+                : Vector3.up;
+
+        /*
+        * 09の初期姿勢において、
+        * 指定したローカル軸が向いているWorld方向。
+        */
+        Vector3 initialWorldForward =
+            headInitialWorldRotation *
+            forwardAxis;
+
+        if (
+            initialWorldForward.sqrMagnitude <
+            0.000001f
+        )
+        {
+            return;
+        }
+
+        /*
+        * 初期の長手方向を、軌跡の接線方向へ合わせる。
+        */
+        Quaternion alignmentRotation =
+            Quaternion.FromToRotation(
+                initialWorldForward.normalized,
+                tangent
+            );
+
+        headBone.rotation =
+            alignmentRotation *
+            headInitialWorldRotation;
+    }    
 
     private void ApplyBonePathPositions(
         float progress
@@ -329,11 +417,14 @@ public sealed class PaperPullBoneController : MonoBehaviour
 
         /*
         * 現段階では、Progress=1のBone配置を維持する。
-        *
-        * Paper_Red本体の移動やBind Poseへの復帰は、
-        * Bone追従と回転を確認した後に実装する。
+        * Paper_Red本体の移動やBind Poseへの復帰はまだ行わない。
         */
         IsPathPrepared = false;
+
+        if (pathPreview != null)
+        {
+            pathPreview.ReleaseRuntimePath();
+        }
     }
 
     public void ResetBonesImmediately()
@@ -349,7 +440,13 @@ public sealed class PaperPullBoneController : MonoBehaviour
         }
 
         RestoreBindPose();
+
         IsPathPrepared = false;
+
+        if (pathPreview != null)
+        {
+            pathPreview.ReleaseRuntimePath();
+        }
     }
 
     private bool CollectBoneChain()

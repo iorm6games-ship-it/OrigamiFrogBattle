@@ -3278,6 +3278,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  localBoneForwardAxis: {x: 0, y: 1, z: 0}
+  rotateHeadBoneOnly: 1
   logInformation: 0
 --- !u!1 &1176528980
 GameObject:
@@ -3824,8 +3826,8 @@ MonoBehaviour:
   targetPoint: {fileID: 1706473055}
   firstHandleRatio: 0.33
   middleInHandleRatio: 0.25
-  middleOutHandleRatio: 0.3
-  targetHandleRatio: 0.35
+  middleOutHandleRatio: 0.15
+  targetHandleRatio: 0.17
   curveSegmentCount: 80
   previewProgress: 0
   pathPointRadius: 0.06
@@ -3953,7 +3955,7 @@ Transform:
   m_GameObject: {fileID: 1472054875}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.3, y: 0.15, z: -3}
+  m_LocalPosition: {x: -0.5, y: -0.1, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4932,7 +4934,7 @@ Transform:
   m_GameObject: {fileID: 1706473054}
   serializedVersion: 2
   m_LocalRotation: {x: -0.258819, y: 0, z: 0, w: 0.9659259}
-  m_LocalPosition: {x: -0.5, y: 1, z: -7.5}
+  m_LocalPosition: {x: 0, y: 0.1, z: -7.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
