@@ -175,6 +175,10 @@ public sealed class PaperPullBoneController : MonoBehaviour
             new Keyframe(1f, 0f)
         );
 
+    private Vector3 committedPaperPosition;
+    private Quaternion committedPaperRotation;
+    private bool hasCommittedPaperPose;
+
     [Header("Debug")]
 
     [SerializeField]
@@ -266,6 +270,23 @@ public sealed class PaperPullBoneController : MonoBehaviour
         Transform targetPoint
     )
     {
+        if (targetPoint == null)
+        {
+            Debug.LogWarning(
+                $"{name}: Target Point が未設定です。",
+                this
+            );
+            IsPathPrepared = false;
+            return false;
+        }
+
+        committedPaperPosition =
+            targetPoint.position;
+        committedPaperRotation =
+            targetPoint.rotation;
+
+        hasCommittedPaperPose = true;
+
         if (!IsInitialized)
         {
             InitializeBoneChain();
@@ -443,11 +464,12 @@ public sealed class PaperPullBoneController : MonoBehaviour
                     )
                 );
 
-            targetPosition +=
-                cameraFrontDirection *
-                cameraDepthClearance *
-                depthClearanceAmount;
-            Vector3 currentTangent =
+                targetPosition +=
+                    targetCamera.transform.forward *
+                    cameraDepthClearance *
+                    depthClearanceAmount;
+
+                Vector3 currentTangent =
                 pathPreview.EvaluateBoneTangent(
                     i,
                     progress
@@ -604,16 +626,31 @@ public sealed class PaperPullBoneController : MonoBehaviour
     {
         if (
             !IsInitialized ||
-            !IsPathPrepared
+            !IsPathPrepared ||
+            !hasCommittedPaperPose
         )
         {
             return;
         }
 
         /*
-        * 現段階では、Progress=1のBone配置を維持する。
-        * Paper_Red本体の移動やBind Poseへの復帰はまだ行わない。
+        * Bone変形で経路上に伸びていたPaper_Red本体を、
+        * 選択確定地点へ移動する。
         */
+        paperReference.SetPositionAndRotation(
+            committedPaperPosition,
+            committedPaperRotation
+        );
+
+        /*
+        * Paper_Red本体が確定地点へ移動した後、
+        * Boneを本来の平らなLocal Poseへ戻す。
+        *
+        * これにより、確定後の紙が経路上へ
+        * 細長く伸びた状態になるのを防ぐ。
+        */
+        RestoreBindPose();
+
         IsPathPrepared = false;
 
         if (pathPreview != null)
