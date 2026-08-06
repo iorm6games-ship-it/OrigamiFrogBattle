@@ -129,6 +129,55 @@ public sealed class PaperPullBoneController : MonoBehaviour
     private Quaternion[] initialWorldRotations;
     private Vector3[] initialPathTangents;
     private Vector3[] initialPathNormals;
+    private Quaternion[] committedWorldRotations;
+    private Vector3[] committedWorldPositions;
+
+    [Header("Rigid Shape Blend")]
+
+    [Tooltip(
+        "経路後半で、引き伸ばされたBone配置を" +
+        "確定地点の平らな紙の形へ戻す割合"
+    )]
+    [SerializeField]
+    private AnimationCurve rigidShapeBlendCurve =
+        new AnimationCurve(
+            new Keyframe(0f, 0f),
+            new Keyframe(0.55f, 0f),
+            new Keyframe(0.75f, 0.2f),
+            new Keyframe(0.9f, 0.75f),
+            new Keyframe(1f, 1f)
+        );
+
+    [Header("Target Rotation Blend")]
+
+    [Tooltip(
+        "移動中にSelectedPaperCenterPointの向きへ" +
+        "移行する割合"
+    )]
+    [SerializeField]
+    private AnimationCurve targetRotationBlendCurve =
+        new AnimationCurve(
+            new Keyframe(0f, 0f),
+            new Keyframe(0.3f, 0f),
+            new Keyframe(0.5f, 0.35f),
+            new Keyframe(1f, 1f)
+        );
+
+    [Header("Camera Facing Correction")]
+
+    [Tooltip(
+        "移動中に紙面をカメラへ向ける補正量。" +
+        "開始時と終了時は0にする"
+    )]
+    [SerializeField]
+    private AnimationCurve cameraFacingBlendCurve =
+        new AnimationCurve(
+            new Keyframe(0f, 0f),
+            new Keyframe(0.5f, 0f),
+            new Keyframe(0.75f, 0.2f),
+            new Keyframe(0.9f, 0.75f),
+            new Keyframe(1f, 1f)
+        );
 
     [Header("Bone Rotation Test")]
     [SerializeField]
@@ -333,6 +382,11 @@ public sealed class PaperPullBoneController : MonoBehaviour
             0.000001f
                 ? localPaperNormalAxis.normalized
                 : Vector3.left;
+        Quaternion inverseStartPaperRotation =
+            Quaternion.Inverse(
+                paperReference.rotation
+            );
+
         for (
             int i = 0;
             i < pullBones.Length;
@@ -342,11 +396,45 @@ public sealed class PaperPullBoneController : MonoBehaviour
             initialWorldRotations[i] =
                 pullBones[i].rotation;
             
+            /*
+            * 現在のPaper_Redに対するBoneの相対回転を取得し、
+            * SelectedPaperCenterPointへ移動した場合の
+            * 最終World Rotationを計算する。
+            */
+            Quaternion relativeBoneRotation =
+                inverseStartPaperRotation *
+                initialWorldRotations[i];
+
+            committedWorldRotations[i] =
+                committedPaperRotation *
+                relativeBoneRotation;
+
+            /*
+            * Paper_Redを基準としたBoneの現在位置を保存する。
+            * Bind Pose状態なので、紙が平らなときの配置になる。
+            */
+            Vector3 relativeBoneOffset =
+                inverseStartPaperRotation *
+                (
+                    pullBones[i].position -
+                    paperReference.position
+                );
+
+            /*
+            * SelectedPaperCenterPointへPaper_Redを移動した場合の
+            * Boneの最終World Positionを計算する。
+            */
+            committedWorldPositions[i] =
+                committedPaperPosition +
+                committedPaperRotation *
+                relativeBoneOffset;
+            
             initialPathTangents[i] =
                 pathPreview.EvaluateBoneTangent(
                     i,
                     0f
                 );
+
             if (
                 initialPathTangents[i].sqrMagnitude <
                 0.000001f
@@ -436,6 +524,12 @@ public sealed class PaperPullBoneController : MonoBehaviour
             0.000001f
                 ? localPaperNormalAxis.normalized
                 : Vector3.left;
+        float rigidShapeBlend =
+            Mathf.Clamp01(
+                rigidShapeBlendCurve.Evaluate(
+                    progress
+                )
+            );                
 
         for (
             int i = 0;
@@ -451,6 +545,16 @@ public sealed class PaperPullBoneController : MonoBehaviour
                     i,
                     progress
                 );
+            /*
+            * 後半では、経路上へ細長く並んだBone位置から、
+            * 確定地点の平らな紙のBone配置へ戻していく。
+            */
+            targetPosition =
+                Vector3.Lerp(
+                    targetPosition,
+                    committedWorldPositions[i],
+                    rigidShapeBlend
+                );                
             Vector3 cameraFrontDirection =
                 targetCamera != null
                     ? targetCamera.transform.forward
@@ -464,16 +568,17 @@ public sealed class PaperPullBoneController : MonoBehaviour
                     )
                 );
 
-                targetPosition +=
-                    targetCamera.transform.forward *
-                    cameraDepthClearance *
-                    depthClearanceAmount;
+            targetPosition +=
+                targetCamera.transform.forward *
+                cameraDepthClearance *
+                depthClearanceAmount *
+                (1f - rigidShapeBlend);
 
-                Vector3 currentTangent =
-                pathPreview.EvaluateBoneTangent(
-                    i,
-                    progress
-                );
+            Vector3 currentTangent =
+            pathPreview.EvaluateBoneTangent(
+                i,
+                progress
+            );
 
             if (
                 currentTangent.sqrMagnitude <
@@ -517,6 +622,58 @@ public sealed class PaperPullBoneController : MonoBehaviour
             }
 
             currentNormal.Normalize();
+            Vector3 pathNormal =
+                currentNormal;
+            Vector3 cameraCorrectedNormal =
+                currentNormal;
+
+            float cameraFacingBlend = 0f;
+            /*
+            * カメラ方向を、現在の経路接線に直交する面へ投影する。
+            * Boneの長手方向は維持したまま、
+            * 紙面だけを見えやすい方向へ寄せる。
+            */
+            if (targetCamera != null)
+            {
+                Vector3 cameraFacingNormal =
+                    Vector3.ProjectOnPlane(
+                        -targetCamera.transform.forward,
+                        currentTangent
+                    );
+
+                if (
+                    cameraFacingNormal.sqrMagnitude >
+                    0.000001f
+                )
+                {
+                    cameraFacingNormal.Normalize();
+
+                    /*
+                    * 表裏が急反転しないよう、
+                    * 現在の法線と同じ半球側へ揃える。
+                    */
+                    if (
+                        Vector3.Dot(
+                            cameraFacingNormal,
+                            currentNormal
+                        ) < 0f
+                    )
+                    {
+                        cameraFacingNormal =
+                            -cameraFacingNormal;
+                    }
+
+                    cameraFacingBlend =
+                        Mathf.Clamp01(
+                            cameraFacingBlendCurve.Evaluate(
+                                progress
+                            )
+                        );
+
+                    cameraCorrectedNormal =
+                        cameraFacingNormal;
+                }
+            }
 
             /*
             * LookRotationは、
@@ -533,22 +690,45 @@ public sealed class PaperPullBoneController : MonoBehaviour
                     initialPathNormals[i]
                 );
 
-            Quaternion currentFrame =
+            /*
+            * カメラ補正を加える前の、
+            * 経路に沿った基本フレーム。
+            */
+            Quaternion pathFrame =
                 Quaternion.LookRotation(
                     currentTangent,
-                    currentNormal
+                    pathNormal
                 );
 
-            Quaternion frameDifference =
-                currentFrame *
+            Quaternion pathFrameDifference =
+                pathFrame *
                 Quaternion.Inverse(
                     initialFrame
                 );
 
-            Quaternion fullTangentRotation =
-                frameDifference *
+            Quaternion fullPathRotation =
+                pathFrameDifference *
                 initialWorldRotations[i];
-            
+
+            /*
+            * カメラ方向へ補正した紙面法線を使ったフレーム。
+            */
+            Quaternion cameraFacingFrame =
+                Quaternion.LookRotation(
+                    currentTangent,
+                    cameraCorrectedNormal
+                );
+
+            Quaternion cameraFacingDifference =
+                cameraFacingFrame *
+                Quaternion.Inverse(
+                    initialFrame
+                );
+
+            Quaternion fullCameraFacingRotation =
+                cameraFacingDifference *
+                initialWorldRotations[i];
+
             float rotationProgress =
                 Mathf.InverseLerp(
                     tangentRotationStartProgress,
@@ -563,16 +743,52 @@ public sealed class PaperPullBoneController : MonoBehaviour
                     rotationProgress
                 );
 
-            float effectiveRotationWeight =
+            /*
+            * 接線追従の強さ。
+            * これは0でもよい。
+            */
+            float effectiveTangentWeight =
                 tangentRotationWeight *
                 rotationProgress;
 
-            Quaternion targetRotation =
+            Quaternion pathRotation =
                 Quaternion.Slerp(
                     initialWorldRotations[i],
-                    fullTangentRotation,
-                    effectiveRotationWeight
+                    fullPathRotation,
+                    effectiveTangentWeight
                 );
+
+            /*
+            * カメラ向き補正はTangent Rotation Weightとは
+            * 独立して適用する。
+            */
+
+            Quaternion visibleRotation =
+                Quaternion.Slerp(
+                    pathRotation,
+                    fullCameraFacingRotation,
+                    cameraFacingBlend
+                );
+
+            float targetBlend =
+                Mathf.Clamp01(
+                    targetRotationBlendCurve.Evaluate(
+                        progress
+                    )
+                );
+
+            /*
+            * 経路後半では、
+            * SelectedPaperCenterPointへ配置した場合の
+            * Bone姿勢へ徐々に移行する。
+            */
+            Quaternion targetRotation =
+                Quaternion.Slerp(
+                    visibleRotation,
+                    committedWorldRotations[i],
+                    targetBlend
+                );
+
             /*
             * 親から子の順にWorld Poseを確定する。
             */
@@ -582,39 +798,39 @@ public sealed class PaperPullBoneController : MonoBehaviour
                     ? localClearanceDirection.normalized
                     : Vector3.forward;
 
-                /*
-                * 初期回転から現在回転までの角度。
-                * 回転が大きいほど隣の紙と反対側へ逃がす。
-                */
-                float rotationAngle =
-                    Quaternion.Angle(
-                        initialWorldRotations[i],
-                        targetRotation
-                    );
-
-                float clearanceAmount =
-                    Mathf.Sin(
-                        rotationAngle *
-                        Mathf.Deg2Rad
-                    ) *
-                    sideClearanceOffset;
-
-                /*
-                * 初期姿勢を基準に、紙幅方向へ補正する。
-                */
-                Vector3 clearanceDirectionWorld =
-                    initialWorldRotations[i] *
-                    clearanceAxis;
-
-                Vector3 correctedPosition =
-                    targetPosition +
-                    clearanceDirectionWorld *
-                    clearanceAmount;
-
-                bone.SetPositionAndRotation(
-                    correctedPosition,
+            /*
+            * 初期回転から現在回転までの角度。
+            * 回転が大きいほど隣の紙と反対側へ逃がす。
+            */
+            float rotationAngle =
+                Quaternion.Angle(
+                    initialWorldRotations[i],
                     targetRotation
                 );
+
+            float clearanceAmount =
+                Mathf.Sin(
+                    rotationAngle *
+                    Mathf.Deg2Rad
+                ) *
+                sideClearanceOffset;
+
+            /*
+            * 初期姿勢を基準に、紙幅方向へ補正する。
+            */
+            Vector3 clearanceDirectionWorld =
+                initialWorldRotations[i] *
+                clearanceAxis;
+
+            Vector3 correctedPosition =
+                targetPosition +
+                clearanceDirectionWorld *
+                clearanceAmount;
+
+            bone.SetPositionAndRotation(
+                correctedPosition,
+                targetRotation
+            );
         }
     }
     /// <summary>
@@ -698,6 +914,12 @@ public sealed class PaperPullBoneController : MonoBehaviour
         initialPathTangents =
             new Vector3[boneCount];
         initialPathNormals =
+            new Vector3[boneCount];
+
+        committedWorldRotations =
+            new Quaternion[boneCount];
+
+        committedWorldPositions =
             new Vector3[boneCount];
 
         Transform currentBone =
