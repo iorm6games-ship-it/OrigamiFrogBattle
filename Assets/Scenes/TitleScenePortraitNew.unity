@@ -1554,8 +1554,8 @@ MonoBehaviour:
     swaySpeedMultiplier: 0.93
     bendMultiplier: 1
     fallDepthOrder: 0
-  - paper: {fileID: 349889318}
-    skinnedMeshRenderer: {fileID: 349889317}
+  - paper: {fileID: 781709362}
+    skinnedMeshRenderer: {fileID: 781709370}
     lightTarget: {fileID: 0}
     delay: 0
     startXOffset: 0
@@ -2668,7 +2668,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b389ef82c94f914da2d0ccabd3a028e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PaperPullSelectable
-  colorName: red
+  colorName: blue
   targetRenderer: {fileID: 781709370}
   lightTarget: {fileID: 1824625173}
   screenDragRatioForMax: 0.16
@@ -17091,7 +17091,7 @@ Transform:
   m_GameObject: {fileID: 2116691496}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.8, z: -3.5}
+  m_LocalPosition: {x: 0.6, y: -0.8, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
