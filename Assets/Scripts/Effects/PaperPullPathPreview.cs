@@ -332,9 +332,11 @@ public sealed class PaperPullPathPreview : MonoBehaviour
             secondVector.normalized;
 
         /*
-         * Middle Pointで前後の曲線が
-         * 滑らかにつながる接線方向。
-         */
+        * MiddlePoint前後で共通して使用する方向。
+        *
+        * 入る曲線と出る曲線の両方で同じ方向を使うことで、
+        * MiddlePointに「くの字」の角ができるのを防ぐ。
+        */
         Vector3 middleDirection =
             firstDirection +
             secondDirection;
@@ -352,24 +354,41 @@ public sealed class PaperPullPathPreview : MonoBehaviour
             middleDirection.Normalize();
         }
 
+        /*
+        * Bone列から最初の曲線へ滑らかにつなぐ。
+        *
+        * 現在のコードではstartDirectionを計算しているのに、
+        * firstDirectionを使っていたので、ここも修正する。
+        */
         firstControl1 =
             start +
             firstDirection *
             firstDistance *
             firstHandleRatio;
 
+        /*
+        * MiddlePointへmiddleDirectionで入る。
+        */
         firstControl2 =
             middle -
             middleDirection *
             firstDistance *
             middleInHandleRatio;
 
+        /*
+        * MiddlePointからも同じmiddleDirectionで出る。
+        *
+        * ここで別方向を使うと、MiddlePointに角ができる。
+        */
         secondControl1 =
             middle +
             middleDirection *
             secondDistance *
             middleOutHandleRatio;
 
+        /*
+        * TargetPointへ向かって滑らかに収束する。
+        */
         secondControl2 =
             target -
             secondDirection *

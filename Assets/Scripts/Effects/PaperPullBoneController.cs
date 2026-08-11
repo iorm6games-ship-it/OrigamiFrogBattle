@@ -162,6 +162,27 @@ public sealed class PaperPullBoneController : MonoBehaviour
             new Keyframe(0.5f, 0.35f),
             new Keyframe(1f, 1f)
         );
+    [Header("Bone Chain Stiffness")]
+
+    [Tooltip(
+        "隣接Bone間の急な折れを滑らかにする強さ。" +
+        "0で補正なし、1で強い補正"
+    )]
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float chainBendStiffness = 0.65f;
+
+    [Tooltip(
+        "滑らかさ補正の反復回数。" +
+        "3～5程度を推奨"
+    )]
+    [Range(1, 8)]
+    [SerializeField]
+    private int chainConstraintIterations = 4;
+
+    private Vector3[] constrainedBonePositions;
+    private Vector3[] constraintWorkPositions;
+    private float[] initialBoneSegmentLengths;
 
     [Header("Camera Facing Correction")]
 
@@ -178,7 +199,15 @@ public sealed class PaperPullBoneController : MonoBehaviour
             new Keyframe(0.9f, 0.75f),
             new Keyframe(1f, 1f)
         );
-
+    
+    [Tooltip(
+        "Camera Facing補正の強さ。" +
+        "0で無効、1でCurveの値をそのまま使用"
+    )]
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float cameraFacingStrength = 0.25f;
+    
     [Header("Bone Rotation Test")]
     [SerializeField]
     private float tangentRotationStartProgress = 0.18f;
@@ -262,6 +291,28 @@ public sealed class PaperPullBoneController : MonoBehaviour
         InitializeBoneChain();
     }
 
+    [ContextMenu("Set Rigid Shape Curve Preset")]
+    private void SetRigidShapeCurvePreset()
+    {
+        rigidShapeBlendCurve = new AnimationCurve(
+            new Keyframe(0.00f, 0.00f),
+            new Keyframe(0.60f, 0.00f),
+            new Keyframe(0.80f, 0.00f),
+            new Keyframe(0.90f, 0.50f),
+            new Keyframe(1.00f, 1.00f)
+        );
+    }
+    [ContextMenu("Set Target Rotation Blend Curve")]
+    private void SetTargetRotationBlendCurve()
+    {
+        targetRotationBlendCurve = new AnimationCurve(
+            new Keyframe(0f, 0f),
+            new Keyframe(0.6f, 0f),
+            new Keyframe(0.8f, 0f),
+            new Keyframe(0.9f, 0.5f),
+            new Keyframe(1f, 1f)
+        );
+    }
     [ContextMenu("Initialize Bone Chain")]
     public void InitializeBoneChain()
     {
@@ -530,7 +581,62 @@ public sealed class PaperPullBoneController : MonoBehaviour
                     progress
                 )
             );                
+        /*
+        * 第1段階：
+        * 全Boneの補正前の経路位置を先に取得する。
+        */
+        for (
+            int i = 0;
+            i < pullBones.Length;
+            i++
+        )
+        {
+            Vector3 pathPosition =
+                pathPreview.EvaluateBonePosition(
+                    i,
+                    progress
+                );
 
+            /*
+            * 経路後半では、確定地点での
+            * 平らなBone配置へ近づける。
+            */
+            pathPosition =
+                Vector3.Lerp(
+                    pathPosition,
+                    committedWorldPositions[i],
+                    rigidShapeBlend
+                );
+
+            /*
+            * 奥行き方向の逃がし。
+            */
+            if (targetCamera != null)
+            {
+                float depthClearanceAmount =
+                    Mathf.Max(
+                        0f,
+                        depthClearanceCurve.Evaluate(
+                            progress
+                        )
+                    );
+
+                pathPosition +=
+                    targetCamera.transform.forward *
+                    cameraDepthClearance *
+                    depthClearanceAmount *
+                    (1f - rigidShapeBlend);
+            }
+
+            constrainedBonePositions[i] =
+                pathPosition;
+        }
+
+        /*
+        * 第2段階：
+        * Bone列全体を見て、急な「くの字」を滑らかにする。
+        */
+        ApplyChainBendConstraints();
         for (
             int i = 0;
             i < pullBones.Length;
@@ -541,44 +647,30 @@ public sealed class PaperPullBoneController : MonoBehaviour
                 pullBones[i];
 
             Vector3 targetPosition =
-                pathPreview.EvaluateBonePosition(
-                    i,
-                    progress
-                );
-            /*
-            * 後半では、経路上へ細長く並んだBone位置から、
-            * 確定地点の平らな紙のBone配置へ戻していく。
-            */
-            targetPosition =
-                Vector3.Lerp(
-                    targetPosition,
-                    committedWorldPositions[i],
-                    rigidShapeBlend
-                );                
-            Vector3 cameraFrontDirection =
-                targetCamera != null
-                    ? targetCamera.transform.forward
-                    : Vector3.zero;
+                constrainedBonePositions[i];
 
-            float depthClearanceAmount =
-                Mathf.Max(
-                    0f,
-                    depthClearanceCurve.Evaluate(
-                        progress
-                    )
-                );
+            Vector3 currentTangent;
 
-            targetPosition +=
-                targetCamera.transform.forward *
-                cameraDepthClearance *
-                depthClearanceAmount *
-                (1f - rigidShapeBlend);
-
-            Vector3 currentTangent =
-            pathPreview.EvaluateBoneTangent(
-                i,
-                progress
-            );
+            if (i <= 0)
+            {
+                currentTangent =
+                    constrainedBonePositions[1] -
+                    constrainedBonePositions[0];
+            }
+            else if (
+                i >= pullBones.Length - 1
+            )
+            {
+                currentTangent =
+                    constrainedBonePositions[i] -
+                    constrainedBonePositions[i - 1];
+            }
+            else
+            {
+                currentTangent =
+                    constrainedBonePositions[i + 1] -
+                    constrainedBonePositions[i - 1];
+            }
 
             if (
                 currentTangent.sqrMagnitude <
@@ -667,7 +759,8 @@ public sealed class PaperPullBoneController : MonoBehaviour
                         Mathf.Clamp01(
                             cameraFacingBlendCurve.Evaluate(
                                 progress
-                            )
+                            ) *
+                            cameraFacingStrength
                         );
 
                     cameraCorrectedNormal =
@@ -833,6 +926,137 @@ public sealed class PaperPullBoneController : MonoBehaviour
             );
         }
     }
+    private void ApplyChainBendConstraints()
+    {
+        if (
+            constrainedBonePositions == null ||
+            constraintWorkPositions == null ||
+            initialBoneSegmentLengths == null ||
+            constrainedBonePositions.Length < 3
+        )
+        {
+            return;
+        }
+
+        float stiffness =
+            Mathf.Clamp01(
+                chainBendStiffness
+            );
+
+        int iterationCount =
+            Mathf.Max(
+                1,
+                chainConstraintIterations
+            );
+
+        /*
+        * stiffnessが0なら、経路上の位置を
+        * そのまま使用する。
+        */
+        if (stiffness <= 0.0001f)
+        {
+            return;
+        }
+
+        for (
+            int iteration = 0;
+            iteration < iterationCount;
+            iteration++
+        )
+        {
+            /*
+            * 同じ反復内で、すでに変更したBone位置が
+            * 後続計算へ直接影響しないようコピーする。
+            */
+            for (
+                int i = 0;
+                i < constrainedBonePositions.Length;
+                i++
+            )
+            {
+                constraintWorkPositions[i] =
+                    constrainedBonePositions[i];
+            }
+
+            /*
+            * 中間Boneを、前後Boneの中点へ近づける。
+            *
+            * これが「くの字」を丸める処理。
+            * 先頭と末尾はここでは変更しない。
+            */
+            for (
+                int i = 1;
+                i <
+                constrainedBonePositions.Length - 1;
+                i++
+            )
+            {
+                Vector3 neighborMidpoint =
+                    (
+                        constraintWorkPositions[i - 1] +
+                        constraintWorkPositions[i + 1]
+                    ) *
+                    0.5f;
+
+                constrainedBonePositions[i] =
+                    Vector3.Lerp(
+                        constraintWorkPositions[i],
+                        neighborMidpoint,
+                        stiffness
+                    );
+            }
+
+            /*
+            * 先端Boneを固定し、
+            * 先端から後ろへ向かってBone間隔を戻す。
+            *
+            * 先端が経路を進み、後続Boneが追随する構造は
+            * この処理でも維持される。
+            */
+            for (
+                int i =
+                    constrainedBonePositions.Length - 2;
+                i >= 0;
+                i--
+            )
+            {
+                Vector3 nextPosition =
+                    constrainedBonePositions[i + 1];
+
+                Vector3 direction =
+                    constrainedBonePositions[i] -
+                    nextPosition;
+
+                if (
+                    direction.sqrMagnitude <
+                    0.000001f
+                )
+                {
+                    direction =
+                        constraintWorkPositions[i] -
+                        constraintWorkPositions[i + 1];
+                }
+
+                if (
+                    direction.sqrMagnitude <
+                    0.000001f
+                )
+                {
+                    continue;
+                }
+
+                direction.Normalize();
+
+                float segmentLength =
+                    initialBoneSegmentLengths[i + 1];
+
+                constrainedBonePositions[i] =
+                    nextPosition +
+                    direction *
+                    segmentLength;
+            }
+        }
+    }    
     /// <summary>
     /// 確定時の最終Poseを保証する。
     /// 紙はすでに同じ経路で到達しているため、
@@ -922,6 +1146,23 @@ public sealed class PaperPullBoneController : MonoBehaviour
         committedWorldPositions =
             new Vector3[boneCount];
 
+        /*
+        * Bone列の位置補正に使用する配列。
+        */
+        constrainedBonePositions =
+            new Vector3[boneCount];
+
+        constraintWorkPositions =
+            new Vector3[boneCount];
+
+        /*
+        * index 1にはBone00と01の間隔、
+        * index 2にはBone01と02の間隔を保存する。
+        * index 0は使用しない。
+        */
+        initialBoneSegmentLengths =
+            new float[boneCount];
+
         Transform currentBone =
             firstBone;
 
@@ -969,7 +1210,24 @@ public sealed class PaperPullBoneController : MonoBehaviour
             currentBone =
                 currentBone.GetChild(0);
         }
-
+        /*
+        * 初期状態での隣接Bone間隔を保存する。
+        *
+        * 曲げ補正を行ったあともこの間隔へ戻すことで、
+        * 紙が縮んだり伸びたりするのを防ぐ。
+        */
+        for (
+            int i = 1;
+            i < pullBones.Length;
+            i++
+        )
+        {
+            initialBoneSegmentLengths[i] =
+                Vector3.Distance(
+                    pullBones[i - 1].position,
+                    pullBones[i].position
+                );
+        }
         return true;
     }
 

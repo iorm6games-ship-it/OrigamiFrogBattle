@@ -187,6 +187,8 @@ public class PaperSelectionController : MonoBehaviour
             selectedPaperCenterPoint,
             () =>
             {
+                selectedPaper.StartFloating();
+
                 Debug.Log(
                     $"選択された紙: "
                     + $"{selectedPaper.ColorName}",
@@ -198,20 +200,6 @@ public class PaperSelectionController : MonoBehaviour
                 );
             }
         );
-    }
-    private void HandleApearCompleted()
-    {
-        SelectedPaper = null;
-        CanSelect = false;
-
-        SetPapersInteraction(false);
-
-        if (guideCoroutine != null)
-        {
-            StopCoroutine(guideCoroutine);
-        }
-
-        guideCoroutine = StartCoroutine(ShowGuide());
     }
 
     private IEnumerator ShowGuide()
@@ -306,5 +294,4 @@ public class PaperSelectionController : MonoBehaviour
             }
         }
     }
-
 }

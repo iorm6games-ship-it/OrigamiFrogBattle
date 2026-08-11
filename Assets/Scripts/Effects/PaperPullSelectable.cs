@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using UnityEditor.Toolbars;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -102,7 +103,13 @@ public class PaperPullSelectable :
     [Min(0.1f)]
     [SerializeField]
     private float selectedMultiplier = 1.05f;
-    
+
+    [SerializeField]
+    private PaperAbsorbLightController absorbLightController;
+
+    [SerializeField]
+    private FoldLineProgressController foldLineProgressController;
+
     public string ColorName => colorName;
 
     public SkinnedMeshRenderer TargetRenderer =>
@@ -142,6 +149,25 @@ public class PaperPullSelectable :
     [Header("Bone Pull")]
     [SerializeField]
     private PaperPullBoneController bonePullController;
+
+    [Header("Selected Floating Motion")]
+
+    [Tooltip("選択確定後の上下移動量")]
+    [Min(0f)]
+    [SerializeField]
+    private float floatAmplitude = 0.04f;
+
+    [Tooltip("上下に移動する速さ")]
+    [Min(0.01f)]
+    [SerializeField]
+    private float floatFrequency = 0.7f;
+
+    [Tooltip("左右に揺れる最大角度")]
+    [Min(0f)]
+    [SerializeField]
+    private float floatRotationAngle = 1.5f;
+
+    private Coroutine floatingCoroutine;
 
     private void Awake()
     {
@@ -943,5 +969,82 @@ public class PaperPullSelectable :
         moveCoroutine = null;
 
         onCompleted?.Invoke();
+    }
+
+    public void StartFloating()
+    {
+        StopFloating();
+
+        floatingCoroutine =
+            StartCoroutine(
+                FloatingCoroutine()
+            );
+    }
+
+    public void StopFloating()
+    {
+        if (floatingCoroutine == null)
+        {
+            return;
+        }
+
+        StopCoroutine(floatingCoroutine);
+        floatingCoroutine = null;
+    }
+
+    private IEnumerator FloatingCoroutine()
+    {
+        Vector3 basePosition =
+            transform.position;
+        
+        Quaternion baseRotation =
+            transform.rotation;
+
+        float elapseTime = 0f;
+
+        while (true)
+        {
+            elapseTime += Time.deltaTime;
+
+            float wave =
+                Mathf.Sin(
+                    elapseTime *
+                    floatFrequency *
+                    Mathf.PI * 2f
+                );
+            
+            Vector3 position =
+                basePosition;
+            
+            position.y += 
+                wave *
+                floatAmplitude;
+            
+            transform.position = position;
+
+            transform.rotation =
+                baseRotation *
+                Quaternion.Euler(
+                    0f,
+                    0f,
+                    wave *
+                    floatRotationAngle
+                );
+            yield return null;
+        }
+    }
+    public IEnumerator PlayAbsorbSequence()
+    {
+        if (absorbLightController != null)
+        {
+            yield return absorbLightController.PlayAbsorb();
+        }
+
+        StopFloating();
+
+        if (foldLineProgressController != null)
+        {
+            foldLineProgressController.PlayFoldLine();
+        }
     }
 }

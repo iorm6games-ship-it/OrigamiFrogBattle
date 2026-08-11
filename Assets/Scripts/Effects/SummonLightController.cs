@@ -1,5 +1,9 @@
 using System.Collections;
+using Unity.VisualScripting;
+using UnityEditor.EditorTools;
+using UnityEditor.Toolbars;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [DisallowMultipleComponent]
 public class SummonLightController : MonoBehaviour
@@ -17,6 +21,12 @@ public class SummonLightController : MonoBehaviour
     [SerializeField]
     private SpriteRenderer lightStreakHorizontal;
 
+    [SerializeField]
+    private SpriteRenderer lightStreakSub1;
+
+    [SerializeField]
+    private SpriteRenderer lightStreakSub2;
+    
     [SerializeField]
     private SpriteRenderer lightStreakVertical;
 
@@ -75,7 +85,23 @@ public class SummonLightController : MonoBehaviour
     [SerializeField]
     private float peakIntensityMultiplier = 2.6f;
 
+    [Header("Selected Paper Light Motion")]
 
+    [Tooltip("選択された紙へ光が降りる時間")]
+    [Min(0.01f)]
+    [SerializeField]
+    private float selectedLightMoveDuration = 1.6f;
+
+    [Tooltip("降下を開始する前の短い間")]
+    [Min(0f)]
+    [SerializeField]
+    private float beforeSelectedMoveDelay = 0.35f;
+    
+    [Tooltip("選択確定後、フラッシュ開始までの間")]
+    [Min(0f)]
+    [SerializeField]
+    private float afterSelectionConfirmDelay = 0.3f;
+    
     private SpriteRenderer[] lightRenderers;
     private float[] baseIntensities;
 
@@ -85,8 +111,29 @@ public class SummonLightController : MonoBehaviour
     private Vector3 baseLocalScale;
     private Coroutine introCoroutine;
 
+    [Header("Selection Sequence")]
+    [SerializeField]
+    private PaperSelectionController paperSelectionController;
+
+    [Header("Selection Flash")]
+    [Tooltip("選択確定後の発光倍率")]
+    [Min(1f)]
+    [SerializeField]
+    private float selectionPeakIntensityMultiplier = 3.8f;
+
+    [Tooltip("選択確定後の点灯時間")]
+    [Min(0.01f)]
+    [SerializeField]
+    private float selectionFadeInDuration = 0.07f;
+
+    [Tooltip("選択確定後の最大発光維持時間")]
+    [Min(0f)]
+    [SerializeField]
+    private float selectionPeakHoldDuration = 0.08f;
+
     private void Awake()
     {
+        
         BuildRuntimeCache();
         HideImmediately();
     }
@@ -103,6 +150,8 @@ public class SummonLightController : MonoBehaviour
             lightGlow,
             lightCore,
             lightStreakHorizontal,
+            lightStreakSub1,
+            lightStreakSub2,
             lightStreakVertical
         };
 
@@ -149,6 +198,276 @@ public class SummonLightController : MonoBehaviour
             StartCoroutine(PlayIntroSequenceCoroutine());
     }
 
+    public void PlaySelectionSequence(
+        PaperPullSelectable selectedPaper
+    )
+    {
+        if (selectedPaper == null)
+        {
+            Debug.LogWarning(
+                $"{nameof(SummonLightController)}: " +
+                "Selected Paper がありません",
+                this
+            );
+            return;
+        }
+
+        if (introCoroutine != null)
+        {
+            StopCoroutine(introCoroutine);
+        }
+
+        introCoroutine =
+            StartCoroutine(
+                PlaySelectionSequenceCoroutine(
+                    selectedPaper
+                )
+            );
+        
+    }
+
+    private IEnumerator PlaySelectionSequenceCoroutine(
+        PaperPullSelectable selectedPaper
+    )
+    {
+
+        Transform target =
+            selectedPaper.LightTarget;
+        
+        yield return WaitForDuration(
+            afterSelectionConfirmDelay
+        );
+        
+        transform.position =
+            introLightPoint.position;
+        
+        transform.localScale =
+            baseLocalScale *
+            startScaleMultiplier;
+        
+        SetRenderersEnabled(true);
+
+        SetIntensityMultiplier(0f);
+
+        // ピカっと点灯
+        yield return AnimateLight(
+            fromIntensity: 0f,
+            toIntensity: selectionPeakIntensityMultiplier,
+            fromScale: startScaleMultiplier,
+            toScale: peakScaleMultiplier,
+            duration: selectionFadeInDuration
+        );
+
+        // 一瞬だけ最大光量
+        yield return HoldSelectionPeak();
+
+        yield return AnimateLight(
+            selectionPeakIntensityMultiplier,
+            0f,
+            peakScaleMultiplier,
+            peakScaleMultiplier,
+            0.08f
+        );
+        
+        lightStreakHorizontal.enabled = false;
+        lightStreakVertical.enabled = false;
+        lightStreakSub1.enabled = false;
+        lightStreakSub2.enabled = false;
+
+        
+        // ピカの後の一瞬の間
+        yield return WaitForDuration(beforeSelectedMoveDelay);
+        
+        lightCore.enabled = true;
+        lightGlow.enabled = true;
+
+        yield return FadeCoreForDescent();
+
+        // 紙の下に降りる
+        yield return MoveLightToTarget(target);
+
+        // 到達したら紙側へ吸収演出を渡す
+        yield return selectedPaper.PlayAbsorbSequence();
+
+        // SummonLight は役目終了
+        HideImmediately();
+
+        introCoroutine = null;
+    }
+
+    private IEnumerator FadeCoreForDescent()
+    {
+        float duration = 0.22f;
+        float elapsedTime = 0f;
+
+        float targetCoreIntensity = 0.6f;
+        float targetGlowIntensity = 0.25f;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += GetDeltaTime();
+
+            float t =
+                Mathf.Clamp01(
+                    elapsedTime / duration
+                );
+            
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+            
+            SetRendererIntensity(
+                lightCore,
+                targetCoreIntensity * eased
+            );
+
+            SetRendererIntensity(
+                lightGlow,
+                targetGlowIntensity * eased
+            );
+            yield return null;
+        }
+
+        SetRendererIntensity(
+            lightCore,
+            targetCoreIntensity
+        );
+        SetRendererIntensity(
+            lightGlow,
+            targetGlowIntensity
+        );
+    }
+
+    private void SetRendererIntensity(
+        SpriteRenderer renderer,
+        float multiplier
+    )
+    {
+        if (renderer == null)
+        {
+            return;
+        }
+
+        int index =
+            System.Array.IndexOf(
+                lightRenderers,
+                renderer
+            );
+        
+        if (index < 0)
+        {
+            return;
+        }
+
+        propertyBlock.Clear();
+
+        renderer.GetPropertyBlock(
+            propertyBlock
+        );
+
+        propertyBlock.SetFloat(
+            IntensityId,
+            baseIntensities[index] *
+            multiplier
+        );
+
+        renderer.SetPropertyBlock(
+            propertyBlock
+        );
+    }
+    private IEnumerator HoldSelectionPeak()
+    {
+        if (selectionPeakHoldDuration <= 0f)
+        {
+            yield break;
+        }
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < selectionPeakHoldDuration)
+        {
+            elapsedTime += GetDeltaTime();
+
+            SetIntensityMultiplier(
+                selectionPeakIntensityMultiplier
+            );
+
+            transform.localScale =
+                baseLocalScale *
+                peakScaleMultiplier;
+            yield return null;
+        }
+    }
+    private IEnumerator MoveLightToTarget(
+        Transform target
+    )
+    {
+        Vector3 startPosition =
+            transform.position;
+        
+        float elapsedTime = 0f;
+
+        while (
+            elapsedTime <
+            selectedLightMoveDuration
+        )
+        {
+            elapsedTime += GetDeltaTime();
+
+            float normalizedTime =
+                Mathf.Clamp01(
+                    elapsedTime /
+                    selectedLightMoveDuration
+                );
+            
+            float easedTime =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    normalizedTime
+                );
+            
+            Vector3 targetPosition =
+                target.position;
+
+            Vector3 position =
+                Vector3.Lerp(
+                    startPosition,
+                    targetPosition,
+                    easedTime
+                );
+            float arc =
+                Mathf.Sin(
+                    normalizedTime *
+                    Mathf.PI
+                );
+            Vector3 sideDirection =
+                Camera.main != null
+                ? Camera.main.transform.right
+                : Vector3.right;
+            position +=
+                sideDirection *
+                arc *
+                0.12f;
+            float drift =
+                Mathf.Sin(
+                    elapsedTime * 12f
+                ) * 0.015f;
+            position +=
+                sideDirection *
+                drift *
+                arc;
+            transform.position = position;
+
+            yield return null;
+        }
+        transform.position =
+            target.position;
+
+    }
     /// <summary>
     /// 再生の光を停止し、即座に非表示にする
     /// </summary>
@@ -420,5 +739,35 @@ public class SummonLightController : MonoBehaviour
             ? Time.unscaledDeltaTime
             : Time.deltaTime;
     }
+
+    private void OnEnable()
+    {
+        if (paperSelectionController != null)
+        {
+            paperSelectionController.SelectionConfirmed +=
+                HandleSelectionConfirmed;
+        }
+        
+    }
+
+    private void OnDisable()
+    {
+        if (paperSelectionController != null)
+        {
+            paperSelectionController.SelectionConfirmed -=
+                HandleSelectionConfirmed;
+        }
+        
+    }
+    private void HandleSelectionConfirmed(
+        PaperPullSelectable selectedPaper
+    )
+    {
+        PlaySelectionSequence(
+            selectedPaper
+        );
+    }
+
+
 
 }
