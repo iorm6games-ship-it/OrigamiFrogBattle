@@ -1047,7 +1047,11 @@ public class PaperPullSelectable :
     public void StopFloatingAndPlayFoldLine()
     {
         StopFloating();
-
+        Debug.Log(
+            $"[FOLD] StopFloatingAndPlayFoldLine : {name}, " +
+            $"controller={(foldLineProgressController != null ? foldLineProgressController.name : "NULL")}",
+            this
+        );
         if (foldLineProgressController != null)
         {
             foldLineProgressController.PlayFoldLine();

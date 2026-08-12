@@ -61,8 +61,18 @@ public sealed class FoldLineProgressController : MonoBehaviour
 
     public void PlayFoldLine()
     {
+        Debug.Log(
+            $"[FOLD] PlayFoldLine called : " +
+            $"enabled={enabled}, " +
+            $"material={(runtimeMaterial != null ? runtimeMaterial.name : "NULL")}",
+            this
+        );
         if (!enabled || runtimeMaterial == null)
         {
+            Debug.LogWarning(
+                "[FOLD] PlayFoldLine stopped because controller is disabled or material is null",
+                this
+            );
             return;
         }
         if (animationCoroutine != null)
@@ -93,18 +103,49 @@ public sealed class FoldLineProgressController : MonoBehaviour
     }
     private IEnumerator AnimateProgress()
     {
+        Debug.Log(
+            $"[FOLD] START " +
+            $"material={runtimeMaterial.name}, " +
+            $"materialId={runtimeMaterial.GetEntityId()}, " +
+            $"renderer={targetRenderer.name}",
+            this
+        );
+
         runtimeMaterial.SetFloat(ProgressId, 0f);
         float time = 0f;
+        int lastQuarter = -1;
 
         while (time < duration)
         {
             time += Time.deltaTime;
             float progress = Mathf.Clamp01(time / duration);
             runtimeMaterial.SetFloat(ProgressId, progress);
+            int quarter =
+                Mathf.FloorToInt(progress * 4f);
+
+            if (quarter != lastQuarter)
+            {
+                lastQuarter = quarter;
+
+                Debug.Log(
+                    $"[FOLD] Progress " +
+                    $"{progress:F3} / " +
+                    $"readBack={runtimeMaterial.GetFloat(ProgressId):F3} / " +
+                    $"materialId={runtimeMaterial.GetEntityId()}",
+                    this
+                );
+            }
             yield return null;
         }
 
         runtimeMaterial.SetFloat(ProgressId, 1f);
+        Debug.Log(
+            $"[FOLD] END " +
+            $"Progress={runtimeMaterial.GetFloat(ProgressId):F3}, " +
+            $"materialId={runtimeMaterial.GetEntityId()}",
+            this
+        );
+        
         animationCoroutine = null;
     }
 
