@@ -4,45 +4,61 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class PaperAbsorbLightController : MonoBehaviour
 {
+    private static readonly int AbsorbCenterId =
+        Shader.PropertyToID("_AbsorbCenter");
+
+    private static readonly int AbsorbProgressId =
+        Shader.PropertyToID("_AbsorbProgress");
+
+    private static readonly int AbsorbFadeId =
+        Shader.PropertyToID("_AbsorbFade");
+
+    [SerializeField]
+    private float fadeOutDuration = 0.3f;
+
     [Header("References")]
     [SerializeField]
-    private SpriteRenderer absorbGlow;
-
-    [SerializeField]
-    private Transform absorbPoint;
+    private Renderer targetRenderer;
 
     [Header("Animation")]
-    [Min(0.01f)]
     [SerializeField]
-    private float fadeInDuration = 0.08f;
-
-    [Min(0.01f)]
-    [SerializeField]
-    private float absorbDuration = 0.28f;
+    private float absorbDuration = 0.45f;
 
     [SerializeField]
-    private Vector3 startScale = new Vector3(0.12f, 0.12f, 1f);
+    private Vector2 absorbCenter =
+        new Vector2(0.5f, 0.5f);
 
     [SerializeField]
-    private Vector3 peakScale = new Vector3(0.24f, 0.24f, 1f);
+    private float startProgress = 0f;
 
     [SerializeField]
-    private Vector3 endScale = new Vector3(0.36f, 0.36f, 1f);
+    private float endProgress = 0.7f;
 
-    [Range(0f, 1f)]
-    [SerializeField]
-    private float peakAlpha = 0.85f;
-
+    private Material runtimeMaterial;
     private Coroutine playCoroutine;
 
     private void Awake()
     {
-        HideImmediately();
+        if (targetRenderer == null)
+        {
+            Debug.LogError(
+                $"{nameof(PaperAbsorbLightController)}: " +
+                "Target Renderer が未設定です",
+                this
+            );
+            enabled = false;
+            return;
+        }
+
+        runtimeMaterial = targetRenderer.material;
+
+        ResetEffect();
     }
 
     public IEnumerator PlayAbsorb()
     {
-        if (absorbGlow == null)
+
+        if (!enabled || runtimeMaterial == null)
         {
             yield break;
         }
@@ -63,78 +79,145 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             playCoroutine = null;
         }
 
-        HideImmediately();
+        if (runtimeMaterial == null)
+        {
+            return;
+        }
+
+        runtimeMaterial.SetVector(
+            AbsorbCenterId,
+            absorbCenter
+        );
+
+        runtimeMaterial.SetFloat(
+            AbsorbProgressId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            AbsorbFadeId,
+            0f
+        );
     }
 
     private IEnumerator PlayAbsorbRoutine()
     {
-        if (absorbPoint != null)
-        {
-            absorbGlow.transform.position =
-                absorbPoint.position;
-        }
+        // まず内部状態を初期化
+        runtimeMaterial.SetVector(
+            AbsorbCenterId,
+            absorbCenter
+        );
 
-        absorbGlow.enabled = true;
-        absorbGlow.transform.localScale = startScale;
-        SetAlpha(0f);
+        runtimeMaterial.SetFloat(
+            AbsorbProgressId,
+            startProgress
+        );
+
+        // 初期化してから表示開始
+        runtimeMaterial.SetFloat(
+            AbsorbFadeId,
+            1f
+        );
+
+        // -------------------------
+        // 1. 中心から外へ浸透
+        // -------------------------
 
         float time = 0f;
 
-        // 表面に現れる
-        while (time < fadeInDuration)
-        {
-            time += Time.deltaTime;
-            float t = Mathf.Clamp01(time / fadeInDuration);
-            float eased = Mathf.SmoothStep(0f, 1f, t);
-
-            absorbGlow.transform.localScale =
-                Vector3.Lerp(startScale, peakScale, eased);
-
-            SetAlpha(Mathf.Lerp(0f, peakAlpha, eased));
-
-            yield return null;
-        }
-
-        time = 0f;
-
-        // 吸い込まれるように薄れながら広がる
         while (time < absorbDuration)
         {
             time += Time.deltaTime;
-            float t = Mathf.Clamp01(time / absorbDuration);
-            float eased = Mathf.SmoothStep(0f, 1f, t);
 
-            absorbGlow.transform.localScale =
-                Vector3.Lerp(peakScale, endScale, eased);
+            float t =
+                Mathf.Clamp01(
+                    time / absorbDuration
+                );
 
-            SetAlpha(Mathf.Lerp(peakAlpha, 0f, eased));
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+
+            float progress =
+                Mathf.Lerp(
+                    startProgress,
+                    endProgress,
+                    eased
+                );
+
+            runtimeMaterial.SetFloat(
+                AbsorbProgressId,
+                progress
+            );
 
             yield return null;
         }
 
-        HideImmediately();
-    }
+        // 広がり切った状態で固定
+        runtimeMaterial.SetFloat(
+            AbsorbProgressId,
+            endProgress
+        );
 
-    private void SetAlpha(float alpha)
-    {
-        if (absorbGlow == null)
+        // -------------------------
+        // 2. 範囲は固定したまま
+        //    元の紙色へ戻す
+        // -------------------------
+
+        float fadeTime = 0f;
+
+        while (fadeTime < fadeOutDuration)
         {
-            return;
+            fadeTime += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    fadeTime /
+                    fadeOutDuration
+                );
+
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+
+            runtimeMaterial.SetFloat(
+                AbsorbFadeId,
+                Mathf.Lerp(
+                    1f,
+                    0f,
+                    eased
+                )
+            );
+
+            yield return null;
         }
 
-        Color color = absorbGlow.color;
-        color.a = alpha;
-        absorbGlow.color = color;
+        // 完全に元の色
+        runtimeMaterial.SetFloat(
+            AbsorbFadeId,
+            0f
+        );
+
+        // Fade=0なので、このリセットは画面には見えない
+        runtimeMaterial.SetFloat(
+            AbsorbProgressId,
+            startProgress
+        );
+
+        // 本当に全部終わってからnull
+        playCoroutine = null;
     }
-
-    private void HideImmediately()
+    private void OnDestroy()
     {
-        if (absorbGlow == null)
+        if (runtimeMaterial != null)
         {
-            return;
+            Destroy(runtimeMaterial);
         }
-
-        SetAlpha(0f);
-        absorbGlow.enabled = false;
     }
 }

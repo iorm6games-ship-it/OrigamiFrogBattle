@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -12,12 +13,11 @@ public sealed class FoldLineProgressController : MonoBehaviour
     [Header("Animation")]
     [Min(0.1f)]
     [SerializeField]
-    private float duration = 3f;
+    private float duration = 0.9f;
 
     [SerializeField]
-    private bool playOnStart = true;
-
-
+    private bool playOnStart = false;
+    
     private Material runtimeMaterial;
     private Coroutine animationCoroutine;
 
@@ -47,7 +47,7 @@ public sealed class FoldLineProgressController : MonoBehaviour
             return;
         }
 
-        runtimeMaterial.SetFloat(ProgressId, 0f);
+        ResetFoldLine();
     }
     
     // テスト用
@@ -69,6 +69,10 @@ public sealed class FoldLineProgressController : MonoBehaviour
         {
             StopCoroutine(animationCoroutine);
         }
+        runtimeMaterial.SetFloat(
+            ProgressId,
+            0f            
+        );
         
         animationCoroutine = StartCoroutine(AnimateProgress());
     }

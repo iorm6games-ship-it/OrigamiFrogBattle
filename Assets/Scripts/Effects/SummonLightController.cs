@@ -131,6 +131,10 @@ public class SummonLightController : MonoBehaviour
     [SerializeField]
     private float selectionPeakHoldDuration = 0.08f;
 
+    [Header("Main Camera")]
+    [SerializeField]
+    private SummonCameraController summonCameraController;
+
     private void Awake()
     {
         
@@ -160,6 +164,7 @@ public class SummonLightController : MonoBehaviour
 
         runtimeCacheReady = true;
     }
+
     /// <summary>
     /// 降下前の発光を再生し、
     /// 発行のピーク後に折り紙の降下を開始する
@@ -286,11 +291,20 @@ public class SummonLightController : MonoBehaviour
         // 紙の下に降りる
         yield return MoveLightToTarget(target);
 
-        // 到達したら紙側へ吸収演出を渡す
-        yield return selectedPaper.PlayAbsorbSequence();
-
         // SummonLight は役目終了
         HideImmediately();
+
+        // 紙の内部へ浸透
+        yield return selectedPaper.PlayAbsorbLightOnly();
+
+        // 折れ線を見せるためにカメラを少し寄せる
+        if (summonCameraController != null)
+        {
+            yield return summonCameraController.ZoomIn();    
+        }
+        
+        // 浮遊を止めて折れ線開始
+        selectedPaper.StopFloatingAndPlayFoldLine();
 
         introCoroutine = null;
     }
@@ -767,7 +781,4 @@ public class SummonLightController : MonoBehaviour
             selectedPaper
         );
     }
-
-
-
 }

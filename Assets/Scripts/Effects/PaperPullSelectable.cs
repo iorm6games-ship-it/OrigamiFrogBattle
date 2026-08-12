@@ -169,6 +169,7 @@ public class PaperPullSelectable :
 
     private Coroutine floatingCoroutine;
 
+
     private void Awake()
     {
         EnsureReferences();
@@ -1033,13 +1034,18 @@ public class PaperPullSelectable :
             yield return null;
         }
     }
-    public IEnumerator PlayAbsorbSequence()
+    public IEnumerator PlayAbsorbLightOnly()
     {
-        if (absorbLightController != null)
+        if (absorbLightController == null)
         {
-            yield return absorbLightController.PlayAbsorb();
+            yield break;
         }
 
+        yield return absorbLightController.PlayAbsorb();
+    }
+
+    public void StopFloatingAndPlayFoldLine()
+    {
         StopFloating();
 
         if (foldLineProgressController != null)
@@ -1047,4 +1053,5 @@ public class PaperPullSelectable :
             foldLineProgressController.PlayFoldLine();
         }
     }
+
 }
