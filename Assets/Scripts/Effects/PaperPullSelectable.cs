@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using UnityEditor.Toolbars;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -107,13 +106,13 @@ public class PaperPullSelectable :
     [SerializeField]
     private PaperAbsorbLightController absorbLightController;
 
-    [SerializeField]
-    private FoldLineProgressController foldLineProgressController;
-
     public string ColorName => colorName;
 
-    public SkinnedMeshRenderer TargetRenderer =>
-        targetRenderer;
+    public Renderer TargetRenderer =>
+        absorbLightController != null
+            ? absorbLightController.TargetRenderer
+            : targetRenderer;
+            
     public Transform LightTarget =>
         lightTarget;
     public Transform PaperTransform =>
@@ -1042,20 +1041,6 @@ public class PaperPullSelectable :
         }
 
         yield return absorbLightController.PlayAbsorb();
-    }
-
-    public void StopFloatingAndPlayFoldLine()
-    {
-        StopFloating();
-        Debug.Log(
-            $"[FOLD] StopFloatingAndPlayFoldLine : {name}, " +
-            $"controller={(foldLineProgressController != null ? foldLineProgressController.name : "NULL")}",
-            this
-        );
-        if (foldLineProgressController != null)
-        {
-            foldLineProgressController.PlayFoldLine();
-        }
     }
 
 }

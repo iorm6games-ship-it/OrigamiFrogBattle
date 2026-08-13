@@ -14,7 +14,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
         Shader.PropertyToID("_AbsorbFade");
 
     [SerializeField]
-    private float fadeOutDuration = 0.3f;
+    private float fadeOutDuration = 0.5f;
 
     [Header("References")]
     [SerializeField]
@@ -22,7 +22,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
 
     [Header("Animation")]
     [SerializeField]
-    private float absorbDuration = 0.45f;
+    private float absorbDuration = 1.5f;
 
     [SerializeField]
     private Vector2 absorbCenter =
@@ -32,11 +32,20 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
     private float startProgress = 0f;
 
     [SerializeField]
-    private float endProgress = 0.7f;
+    private float endProgress = 0.58f;
+
+    [SerializeField]
+    private AnimationCurve absorbCurve =
+        AnimationCurve.Linear(
+            0f, 0f,
+            1f, 1f
+        );
 
     private Material runtimeMaterial;
     private Coroutine playCoroutine;
-
+    public Renderer TargetRenderer =>
+        targetRenderer;
+    
     private void Awake()
     {
         if (targetRenderer == null)
@@ -134,12 +143,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
                     time / absorbDuration
                 );
 
-            float eased =
-                Mathf.SmoothStep(
-                    0f,
-                    1f,
-                    t
-                );
+            float eased = absorbCurve.Evaluate(t);
 
             float progress =
                 Mathf.Lerp(

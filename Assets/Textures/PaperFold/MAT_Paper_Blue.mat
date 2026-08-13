@@ -103,6 +103,12 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AbsorbEdgeIntensity: 3
+    - _AbsorbEdgeWidth: 0.05
+    - _AbsorbFade: 1
+    - _AbsorbProgress: 0
+    - _AbsorbStrength: 0.35
+    - _ActiveFoldColorStrength: 5
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
@@ -119,6 +125,9 @@ Material:
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
     - _Fade: 1
+    - _FoldActiveWidth: 0.2
+    - _FoldColorStrength: 3
+    - _FoldLineThickness: 0.002
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
@@ -139,11 +148,13 @@ Material:
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
+    - _AbsorbCenter: {r: 0, g: 0, b: 0, a: 0}
+    - _AbsorbColor: {r: 0.7, g: 0.92, b: 1, a: 1}
     - _ActiveFoldColor: {r: 1, g: 0, b: 0, a: 1}
     - _BaseColor: {r: 0.2, g: 0.2, b: 1, a: 1}
     - _Color: {r: 0.19999996, g: 0.19999996, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FoldColor: {r: 0.2, g: 0.19999993, b: 1, a: 1}
+    - _FoldColor: {r: 0.19999996, g: 0.02, b: 0.02, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

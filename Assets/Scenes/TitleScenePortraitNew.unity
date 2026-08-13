@@ -653,6 +653,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       insertIndex: -1
       addedObject: {fileID: 337071982}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 337071987}
     - targetCorrespondingSourceObject: {fileID: -4267425209909500052, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       insertIndex: -1
       addedObject: {fileID: 337071981}
@@ -1100,8 +1103,7 @@ MonoBehaviour:
   frontLiftStart: 0.3
   selectedMoveDuration: 0.8
   selectedMultiplier: 1.05
-  absorbLightController: {fileID: 0}
-  foldLineProgressController: {fileID: 0}
+  absorbLightController: {fileID: 337071987}
   unselectedFadeDuration: 0.45
   trailPrototype: {fileID: 0}
   bonePullController: {fileID: 337071981}
@@ -1210,6 +1212,48 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.047996044, y: 0, z: 0.10076356}
     m_Extent: {x: 1.3627006, y: 1, z: 1.1008846}
   m_DirtyAABB: 0
+--- !u!114 &337071987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337071980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef75756d8c60fe14a9902350759573db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PaperAbsorbLightController
+  fadeOutDuration: 0.3
+  targetRenderer: {fileID: 1294835702}
+  absorbDuration: 0.28
+  absorbCenter: {x: 0.5, y: 0.5}
+  startProgress: 0
+  endProgress: 0.7
+  absorbCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1001 &385355477
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2637,6 +2681,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       insertIndex: -1
       addedObject: {fileID: 781709368}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 781709373}
     - targetCorrespondingSourceObject: {fileID: -4267425209909500052, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       insertIndex: -1
       addedObject: {fileID: 781709367}
@@ -3084,8 +3131,7 @@ MonoBehaviour:
   frontLiftStart: 0.3
   selectedMoveDuration: 0.8
   selectedMultiplier: 1.05
-  absorbLightController: {fileID: 0}
-  foldLineProgressController: {fileID: 0}
+  absorbLightController: {fileID: 781709373}
   unselectedFadeDuration: 0.45
   trailPrototype: {fileID: 0}
   bonePullController: {fileID: 781709367}
@@ -3194,6 +3240,48 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.047996044, y: 0, z: 0.10076356}
     m_Extent: {x: 1.3627006, y: 1, z: 1.1008846}
   m_DirtyAABB: 0
+--- !u!114 &781709373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 781709366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef75756d8c60fe14a9902350759573db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PaperAbsorbLightController
+  fadeOutDuration: 0.3
+  targetRenderer: {fileID: 2087022595}
+  absorbDuration: 0.28
+  absorbCenter: {x: 0.5, y: 0.5}
+  startProgress: 0
+  endProgress: 0.7
+  absorbCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &838492832
 GameObject:
   m_ObjectHideFlags: 0
@@ -3475,6 +3563,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       insertIndex: -1
       addedObject: {fileID: 909455291}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 909455295}
     - targetCorrespondingSourceObject: {fileID: -4267425209909500052, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1127052782}
@@ -3571,8 +3662,7 @@ MonoBehaviour:
   frontLiftStart: 0.3
   selectedMoveDuration: 0.8
   selectedMultiplier: 1.05
-  absorbLightController: {fileID: 0}
-  foldLineProgressController: {fileID: 0}
+  absorbLightController: {fileID: 909455295}
   unselectedFadeDuration: 0.45
   trailPrototype: {fileID: 0}
   bonePullController: {fileID: 1127052782}
@@ -3681,6 +3771,48 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.047996044, y: 0, z: 0.10076356}
     m_Extent: {x: 1.3627006, y: 1, z: 1.1008846}
   m_DirtyAABB: 0
+--- !u!114 &909455295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 909455289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef75756d8c60fe14a9902350759573db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PaperAbsorbLightController
+  fadeOutDuration: 0.3
+  targetRenderer: {fileID: 973475907}
+  absorbDuration: 0.28
+  absorbCenter: {x: 0.5, y: 0.5}
+  startProgress: 0
+  endProgress: 0.7
+  absorbCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &926690342
 GameObject:
   m_ObjectHideFlags: 0
@@ -4028,7 +4160,6 @@ MonoBehaviour:
   selectedMoveDuration: 0.8
   selectedMultiplier: 1.05
   absorbLightController: {fileID: 961148259}
-  foldLineProgressController: {fileID: 1069706070}
   unselectedFadeDuration: 0.45
   trailPrototype: {fileID: 0}
   bonePullController: {fileID: 961148254}
@@ -4496,6 +4627,35 @@ MonoBehaviour:
   absorbCenter: {x: 0.5, y: 0.5}
   startProgress: 0
   endProgress: 0.7
+  absorbCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!137 &973475907 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -1323743223009653715, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+  m_PrefabInstance: {fileID: 909455287}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &989893821
 GameObject:
   m_ObjectHideFlags: 0
@@ -4756,9 +4916,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9566deb09aed385478943e14a0c11cda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FoldLineProgressController
-  targetRenderer: {fileID: 961148256}
   duration: 1.2
-  playOnStart: 0
 --- !u!1 &1075492036 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 0b1b58657c66d714f9b8bbff83c96aee, type: 3}
@@ -5688,6 +5846,7 @@ MonoBehaviour:
   selectionPeakIntensityMultiplier: 3.8
   selectionFadeInDuration: 0.07
   selectionPeakHoldDuration: 0.08
+  foldLineProgressController: {fileID: 1069706070}
   summonCameraController: {fileID: 2107679581}
 --- !u!1 &1239388578
 GameObject:
@@ -5720,6 +5879,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 909455288}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!137 &1294835702 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -1323743223009653715, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+  m_PrefabInstance: {fileID: 337071975}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1302445275
 GameObject:
   m_ObjectHideFlags: 0
@@ -6982,6 +7146,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1696808933}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1696808938}
     - targetCorrespondingSourceObject: {fileID: -4267425209909500052, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1696808932}
@@ -7438,8 +7605,7 @@ MonoBehaviour:
   frontLiftStart: 0.3
   selectedMoveDuration: 0.8
   selectedMultiplier: 1.05
-  absorbLightController: {fileID: 0}
-  foldLineProgressController: {fileID: 0}
+  absorbLightController: {fileID: 1696808938}
   unselectedFadeDuration: 0.45
   trailPrototype: {fileID: 0}
   bonePullController: {fileID: 1696808932}
@@ -7548,6 +7714,48 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.047996044, y: 0, z: 0.10076356}
     m_Extent: {x: 1.3627006, y: 1, z: 1.1008846}
   m_DirtyAABB: 0
+--- !u!114 &1696808938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1696808931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef75756d8c60fe14a9902350759573db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PaperAbsorbLightController
+  fadeOutDuration: 0.3
+  targetRenderer: {fileID: 2032367446}
+  absorbDuration: 0.28
+  absorbCenter: {x: 0.5, y: 0.5}
+  startProgress: 0
+  endProgress: 0.7
+  absorbCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1697816822
 GameObject:
   m_ObjectHideFlags: 0
@@ -13526,6 +13734,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 1c50f5108701b8e4099befec1d42ae31, type: 3}
   m_PrefabInstance: {fileID: 2009890910}
   m_PrefabAsset: {fileID: 0}
+--- !u!137 &2032367446 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -1323743223009653715, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+  m_PrefabInstance: {fileID: 1696808926}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2057932843
 GameObject:
   m_ObjectHideFlags: 0
@@ -18530,6 +18743,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 781709363}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!137 &2087022595 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -1323743223009653715, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+  m_PrefabInstance: {fileID: 781709361}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2107460218
 GameObject:
   m_ObjectHideFlags: 0

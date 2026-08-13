@@ -1,9 +1,5 @@
 using System.Collections;
-using Unity.VisualScripting;
-using UnityEditor.EditorTools;
-using UnityEditor.Toolbars;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [DisallowMultipleComponent]
 public class SummonLightController : MonoBehaviour
@@ -92,6 +88,21 @@ public class SummonLightController : MonoBehaviour
     [SerializeField]
     private float selectedLightMoveDuration = 1.6f;
 
+    [Tooltip("紙へ完全に接触する前に停止する距離")]
+    [Min(0f)]
+    [SerializeField]
+    private float preContactDistance = 0.22f;
+
+    [Tooltip("接触手前まで移動する時間")]
+    [Min(0.01f)]
+    [SerializeField]
+    private float approachDuration = 1.3f;
+
+    [Tooltip("接触手前で止まる時間")]
+    [Min(0f)]
+    [SerializeField]
+    private float preContactHoldDuration = 1.2f;
+
     [Tooltip("降下を開始する前の短い間")]
     [Min(0f)]
     [SerializeField]
@@ -130,6 +141,9 @@ public class SummonLightController : MonoBehaviour
     [Min(0f)]
     [SerializeField]
     private float selectionPeakHoldDuration = 0.08f;
+
+    [SerializeField]
+    private FoldLineProgressController foldLineProgressController;
 
     [Header("Main Camera")]
     [SerializeField]
@@ -239,6 +253,12 @@ public class SummonLightController : MonoBehaviour
         Transform target =
             selectedPaper.LightTarget;
         
+        if (foldLineProgressController != null)
+        {
+            foldLineProgressController.ResetFoldLine(
+                selectedPaper.TargetRenderer
+            );
+        }
         yield return WaitForDuration(
             afterSelectionConfirmDelay
         );
@@ -288,8 +308,11 @@ public class SummonLightController : MonoBehaviour
 
         yield return FadeCoreForDescent();
 
-        // 紙の下に降りる
-        yield return MoveLightToTarget(target);
+        // 紙の直前まで下りる
+        yield return MoveLightNearTarget(target);
+
+        // 降りたら少し停止してフワフワ浮遊する
+        yield return HoverBeforeContact();
 
         // SummonLight は役目終了
         HideImmediately();
@@ -303,8 +326,16 @@ public class SummonLightController : MonoBehaviour
             yield return summonCameraController.ZoomIn();    
         }
         
-        // 浮遊を止めて折れ線開始
-        selectedPaper.StopFloatingAndPlayFoldLine();
+        // 浮遊を止める
+       selectedPaper.StopFloating();
+
+       // 選択した紙に折れ線を走らせる
+       if (foldLineProgressController != null)
+        {
+            yield return foldLineProgressController.PlayFoldLine(
+                selectedPaper.TargetRenderer
+            );
+        }
 
         introCoroutine = null;
     }
@@ -415,73 +446,130 @@ public class SummonLightController : MonoBehaviour
             yield return null;
         }
     }
-    private IEnumerator MoveLightToTarget(
+    private IEnumerator MoveLightNearTarget(
         Transform target
     )
     {
         Vector3 startPosition =
             transform.position;
-        
+
+        Vector3 direction =
+            (startPosition - target.position).normalized;
+
+        Vector3 nearPosition =
+            target.position +
+            direction * preContactDistance;
+
         float elapsedTime = 0f;
 
-        while (
-            elapsedTime <
-            selectedLightMoveDuration
-        )
+        while (elapsedTime < approachDuration)
         {
             elapsedTime += GetDeltaTime();
 
             float normalizedTime =
                 Mathf.Clamp01(
-                    elapsedTime /
-                    selectedLightMoveDuration
+                    elapsedTime / approachDuration
                 );
-            
+
             float easedTime =
                 Mathf.SmoothStep(
                     0f,
                     1f,
                     normalizedTime
                 );
-            
-            Vector3 targetPosition =
-                target.position;
 
             Vector3 position =
                 Vector3.Lerp(
                     startPosition,
-                    targetPosition,
+                    nearPosition,
                     easedTime
                 );
+
             float arc =
                 Mathf.Sin(
                     normalizedTime *
                     Mathf.PI
                 );
+
             Vector3 sideDirection =
                 Camera.main != null
-                ? Camera.main.transform.right
-                : Vector3.right;
+                    ? Camera.main.transform.right
+                    : Vector3.right;
+
             position +=
                 sideDirection *
                 arc *
                 0.12f;
+
             float drift =
                 Mathf.Sin(
                     elapsedTime * 12f
                 ) * 0.015f;
+
             position +=
                 sideDirection *
                 drift *
                 arc;
+
             transform.position = position;
 
             yield return null;
         }
-        transform.position =
-            target.position;
 
+        transform.position = nearPosition;
     }
+
+    /// <summary>
+    /// 折り紙の直前で停止したら
+    /// その位置で浮遊する
+    /// </summary>
+    private IEnumerator HoverBeforeContact()
+    {
+        if (preContactHoldDuration <= 0f)
+        {
+            yield break;
+        }
+
+        Vector3 centerPosition =
+            transform.position;
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < preContactHoldDuration)
+        {
+            elapsedTime += GetDeltaTime();
+
+            float wave =
+                Mathf.Sin(
+                    elapsedTime * 6f
+                );
+
+            float sideWave =
+                Mathf.Sin(
+                    elapsedTime * 4.5f
+                );
+
+            Vector3 upDirection =
+                Camera.main != null
+                    ? Camera.main.transform.up
+                    : Vector3.up;
+
+            Vector3 sideDirection =
+                Camera.main != null
+                    ? Camera.main.transform.right
+                    : Vector3.right;
+
+            transform.position =
+                centerPosition
+                + upDirection * wave * 0.012f
+                + sideDirection * sideWave * 0.006f;
+
+            yield return null;
+        }
+
+        transform.position = centerPosition;
+    }
+
     /// <summary>
     /// 再生の光を停止し、即座に非表示にする
     /// </summary>
