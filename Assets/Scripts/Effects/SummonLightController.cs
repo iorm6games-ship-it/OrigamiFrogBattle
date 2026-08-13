@@ -113,6 +113,22 @@ public class SummonLightController : MonoBehaviour
     [SerializeField]
     private float afterSelectionConfirmDelay = 0.3f;
     
+    [Header("Paper Penetration")]
+
+    [Tooltip("光が折り紙の中に入っていく時間")]
+    [Min(0.01f)]
+    [SerializeField]
+    private float penetrateDuration = 0.8f;
+
+    [Tooltip("紙へ浸透するときの光の大きさ最大値")]
+    [Min(1f)]
+    [SerializeField]
+    private float penetrateScaleMultiplier = 1.25f;
+
+    [Header("Paper Reflection Glow")]
+    [SerializeField]
+    private SpriteRenderer paperReflectionGlow;
+
     private SpriteRenderer[] lightRenderers;
     private float[] baseIntensities;
 
@@ -154,6 +170,10 @@ public class SummonLightController : MonoBehaviour
         
         BuildRuntimeCache();
         HideImmediately();
+        if (paperReflectionGlow != null)
+        {
+            paperReflectionGlow.enabled = false;
+        }
     }
 
     private void BuildRuntimeCache()
@@ -245,6 +265,54 @@ public class SummonLightController : MonoBehaviour
         
     }
 
+    private IEnumerator PenetrateIntoPaper (
+        Transform target
+    )
+    {
+        Vector3 startPosition = transform.position;
+        Vector3 startScale = transform.localScale;
+
+        Vector3 endScale = baseLocalScale * penetrateScaleMultiplier;
+
+        float elapsedTime = 0;
+
+        while (elapsedTime < penetrateDuration)
+        {
+            elapsedTime += GetDeltaTime();
+
+            float t = 
+                Mathf.Clamp01(
+                    elapsedTime /
+                    penetrateDuration
+                );
+
+            // 最初はゆっくり、徐々に紙に吸い込まれていく
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+            
+            transform.position =
+                Vector3.Lerp(
+                    startPosition,
+                    target.position,
+                    eased
+                );
+            
+            transform.localScale =
+                Vector3.Lerp(
+                    startScale,
+                    endScale,
+                    eased
+                );
+            yield return null;
+        }
+
+        transform.position = target.position;
+        transform.localScale = endScale;
+    }
     private IEnumerator PlaySelectionSequenceCoroutine(
         PaperPullSelectable selectedPaper
     )
@@ -311,20 +379,24 @@ public class SummonLightController : MonoBehaviour
         // 紙の直前まで下りる
         yield return MoveLightNearTarget(target);
 
-        // 降りたら少し停止してフワフワ浮遊する
-        yield return HoverBeforeContact();
-
-        // SummonLight は役目終了
-        HideImmediately();
-
-        // 紙の内部へ浸透
-        yield return selectedPaper.PlayAbsorbLightOnly();
-
-        // 折れ線を見せるためにカメラを少し寄せる
+       // 折れ線を見せるためにカメラを少し寄せる
         if (summonCameraController != null)
         {
             yield return summonCameraController.ZoomIn();    
         }
+
+        // 降りたら少し停止してフワフワ浮遊する
+        yield return HoverBeforeContact(target);
+
+        // 浸透開始
+        yield return PenetrateIntoPaper(target);
+
+        // SummonLight は役目終了
+        // HideImmediately();
+
+        // 紙の内部へ浸透
+        // yield return selectedPaper.PlayAbsorbLightOnly();
+
         
         // 浮遊を止める
        selectedPaper.StopFloating();
@@ -523,31 +595,79 @@ public class SummonLightController : MonoBehaviour
     /// 折り紙の直前で停止したら
     /// その位置で浮遊する
     /// </summary>
-    private IEnumerator HoverBeforeContact()
+    private IEnumerator HoverBeforeContact(
+        Transform target
+    )
     {
         if (preContactHoldDuration <= 0f)
         {
             yield break;
         }
+        Vector3 cameraDirection =
+            Camera.main != null
+                ? -Camera.main.transform.forward
+                : Vector3.back;
+        paperReflectionGlow.transform.position =
+            target.position +
+            cameraDirection * 0.01f;
+            
+        if (paperReflectionGlow != null)
+        {
+            paperReflectionGlow.transform.position =
+                target.position;
 
+            paperReflectionGlow.enabled = true;
+        }
+
+        Vector3 reflectionBaseScale =
+            paperReflectionGlow != null
+                ? paperReflectionGlow.transform.localScale
+                : Vector3.one;
         Vector3 centerPosition =
             transform.position;
+        Vector3 hoverBaseScale =
+            transform.localScale;
 
         float elapsedTime = 0f;
 
         while (elapsedTime < preContactHoldDuration)
         {
             elapsedTime += GetDeltaTime();
+            float scaleWave =
+                Mathf.Sin(
+                    elapsedTime * 5f
+                ) * 0.05f;
+
+            transform.localScale =
+                hoverBaseScale *
+                (1f + scaleWave);
 
             float wave =
                 Mathf.Sin(
-                    elapsedTime * 6f
+                    elapsedTime * 4.5f
                 );
 
             float sideWave =
                 Mathf.Sin(
                     elapsedTime * 4.5f
                 );
+            if (paperReflectionGlow != null)
+            {
+                // 魂が下に来た時ほど、反射を少し強く・小さく見せる
+                float proximity =
+                    (1f - wave) * 0.5f;
+
+                float reflectionScale =
+                    Mathf.Lerp(
+                        1.12f,
+                        0.92f,
+                        proximity
+                    );
+
+                paperReflectionGlow.transform.localScale =
+                    reflectionBaseScale *
+                    reflectionScale;
+            }
 
             Vector3 upDirection =
                 Camera.main != null
@@ -561,13 +681,18 @@ public class SummonLightController : MonoBehaviour
 
             transform.position =
                 centerPosition
-                + upDirection * wave * 0.012f
+                + upDirection * wave * 0.018f
                 + sideDirection * sideWave * 0.006f;
 
             yield return null;
         }
-
+        if (paperReflectionGlow != null)
+        {
+            paperReflectionGlow.transform.localScale =
+                reflectionBaseScale;
+        }    
         transform.position = centerPosition;
+        transform.localScale = hoverBaseScale;
     }
 
     /// <summary>

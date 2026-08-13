@@ -9,7 +9,7 @@ public sealed class SummonCameraController : MonoBehaviour
 
     [Header("Zoom")]
     [SerializeField]
-    private float zoomDuration = 0.35f;
+    private float zoomDuration = 0.6f;
 
     [SerializeField]
     private float zoomFov = 42f;
