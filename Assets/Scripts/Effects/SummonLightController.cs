@@ -112,7 +112,23 @@ public class SummonLightController : MonoBehaviour
     [Min(0f)]
     [SerializeField]
     private float afterSelectionConfirmDelay = 0.3f;
-    
+    [Header("Paper Absorb Timing")]
+
+    [Tooltip("浸透開始から魂が完全に吸収されるまで")]
+    [Min(0.01f)]
+    [SerializeField]
+    private float soulAbsorbDuration = 0.5f;
+
+    [Tooltip("魂消失後、紙全体へ浸透し終わるまで")]
+    [Min(0.01f)]
+    [SerializeField]
+    private float remainingAbsorbDuration = 1.8f;
+
+    [Tooltip("紙の浸透の何割で魂を消すか")]
+    [Range(0.05f, 0.95f)]
+    [SerializeField]
+    private float soulAbsorbEndProgress = 0.33f;    
+
     [Header("Paper Penetration")]
 
     [Tooltip("光が折り紙の中に入っていく時間")]
@@ -128,6 +144,12 @@ public class SummonLightController : MonoBehaviour
     [Header("Paper Reflection Glow")]
     [SerializeField]
     private SpriteRenderer paperReflectionGlow;
+
+    [SerializeField]
+    private float reflectionFadeStart = 0.4f;
+
+    [SerializeField]
+    private float reflectionMaxAlpha = 0.25f;
 
     private SpriteRenderer[] lightRenderers;
     private float[] baseIntensities;
@@ -389,7 +411,10 @@ public class SummonLightController : MonoBehaviour
         yield return HoverBeforeContact(target);
 
         // 浸透開始
-        yield return PenetrateIntoPaper(target);
+        yield return PlayPenetrationAndAbsorb(
+            selectedPaper,
+            target
+        );
 
         // SummonLight は役目終了
         // HideImmediately();
@@ -412,6 +437,294 @@ public class SummonLightController : MonoBehaviour
         introCoroutine = null;
     }
 
+    private IEnumerator PlayPenetrationAndAbsorb(
+        PaperPullSelectable selectedPaper,
+        Transform target
+    )
+    {
+        float absorbProgress = 0f;
+        bool absorbFinished = false;
+
+        Vector3 startPosition =
+            transform.position;
+
+        Vector3 startScale =
+            transform.localScale;
+
+        // 紙に入る直前に少し膨らむ最大サイズ
+        Vector3 peakScale =
+            baseLocalScale *
+            penetrateScaleMultiplier;
+
+        // 完全に吸い込まれた時のサイズ
+        Vector3 absorbedScale =
+            baseLocalScale *
+            0.08f;
+
+        // Reflection Glow の現在の明るさを保持
+        float reflectionStartAlpha = 0f;
+
+        if (paperReflectionGlow != null)
+        {
+            reflectionStartAlpha =
+                paperReflectionGlow.color.a;
+        }
+
+        // --------------------------
+        // 紙の浸透を開始
+        // --------------------------
+
+        StartCoroutine(
+            RunAbsorbAndWait(
+                selectedPaper,
+                soulAbsorbDuration,
+                remainingAbsorbDuration,
+                soulAbsorbEndProgress,
+                progress =>
+                {
+                    absorbProgress = progress;
+                },
+                () =>
+                {
+                    absorbFinished = true;
+                }
+            )
+        );
+
+        // --------------------------
+        // 紙の浸透が約1/3進むまでに
+        // 魂を完全に吸収する
+        // --------------------------
+
+        float soulAbsorbEnd =
+            soulAbsorbEndProgress;
+
+        // 魂側の進行の60%地点から
+        // 急速に縮み始める
+        const float shrinkStart = 0.60f;
+
+        while (
+            absorbProgress < soulAbsorbEnd &&
+            !absorbFinished
+        )
+        {
+            // 紙の浸透 0 ～ 0.33 を
+            // 魂側の 0 ～ 1 に変換
+            float soulT =
+                Mathf.InverseLerp(
+                    0f,
+                    soulAbsorbEnd,
+                    absorbProgress
+                );
+
+            // --------------------------
+            // 位置
+            // 紙の中心へ吸い込まれる
+            // --------------------------
+
+            float moveT =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    soulT
+                );
+
+            transform.position =
+                Vector3.Lerp(
+                    startPosition,
+                    target.position,
+                    moveT
+                );
+
+            // --------------------------
+            // サイズ
+            //
+            // 前半：
+            // 少し膨らむ
+            //
+            // 後半：
+            // 急速に縮んで吸い込まれる
+            // --------------------------
+
+            if (soulT < shrinkStart)
+            {
+                float growT =
+                    Mathf.InverseLerp(
+                        0f,
+                        shrinkStart,
+                        soulT
+                    );
+
+                growT =
+                    Mathf.SmoothStep(
+                        0f,
+                        1f,
+                        growT
+                    );
+
+                transform.localScale =
+                    Vector3.Lerp(
+                        startScale,
+                        peakScale,
+                        growT
+                    );
+            }
+            else
+            {
+                float shrinkT =
+                    Mathf.InverseLerp(
+                        shrinkStart,
+                        1f,
+                        soulT
+                    );
+
+                shrinkT =
+                    Mathf.SmoothStep(
+                        0f,
+                        1f,
+                        shrinkT
+                    );
+
+                transform.localScale =
+                    Vector3.Lerp(
+                        peakScale,
+                        absorbedScale,
+                        shrinkT
+                    );
+            }
+
+            // --------------------------
+            // 吸収後半で光を消す
+            // --------------------------
+
+            float fadeT =
+                Mathf.InverseLerp(
+                    shrinkStart,
+                    1f,
+                    soulT
+                );
+
+            fadeT =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    fadeT
+                );
+
+            float visibility =
+                1f - fadeT;
+
+            SetRendererIntensity(
+                lightCore,
+                0.6f * visibility
+            );
+
+            SetRendererIntensity(
+                lightGlow,
+                0.25f * visibility
+            );
+
+            // --------------------------
+            // Reflection Glow も
+            // 魂が吸収される後半で消す
+            // --------------------------
+
+            if (paperReflectionGlow != null)
+            {
+                Color color =
+                    paperReflectionGlow.color;
+
+                color.a =
+                    Mathf.Lerp(
+                        reflectionStartAlpha,
+                        0f,
+                        fadeT
+                    );
+
+                paperReflectionGlow.color =
+                    color;
+            }
+
+            yield return null;
+        }
+
+        // --------------------------
+        // 魂の吸収完了
+        // --------------------------
+
+        transform.position =
+            target.position;
+
+        transform.localScale =
+            absorbedScale;
+
+        SetRendererIntensity(
+            lightCore,
+            0f
+        );
+
+        SetRendererIntensity(
+            lightGlow,
+            0f
+        );
+
+        if (lightCore != null)
+        {
+            lightCore.enabled = false;
+        }
+
+        if (lightGlow != null)
+        {
+            lightGlow.enabled = false;
+        }
+
+        // Reflection Glow も終了
+        if (paperReflectionGlow != null)
+        {
+            Color color =
+                paperReflectionGlow.color;
+
+            color.a = 0f;
+
+            paperReflectionGlow.color =
+                color;
+
+            paperReflectionGlow.enabled =
+                false;
+        }
+
+        // 非表示になったので
+        // 次回のために Scale は戻しておく
+        transform.localScale =
+            baseLocalScale;
+
+        // --------------------------
+        // 残りの浸透が終わるまで待つ
+        // --------------------------
+
+        while (!absorbFinished)
+        {
+            yield return null;
+        }
+    }
+
+    private IEnumerator RunAbsorbAndWait(
+        PaperPullSelectable selectedPaper,
+        float firstPhaseDuration,
+        float secondPhaseDuration,
+        float firstPhaseEndProgress,
+        System.Action<float> onProgress,
+        System.Action onFinished
+    )
+    {
+        yield return selectedPaper.PlayAbsorbLightOnly(
+            onProgress,
+            firstPhaseDuration,
+            secondPhaseDuration,
+            firstPhaseEndProgress
+        );
+        onFinished?.Invoke();
+    }
     private IEnumerator FadeCoreForDescent()
     {
         float duration = 0.22f;
@@ -532,6 +845,26 @@ public class SummonLightController : MonoBehaviour
             target.position +
             direction * preContactDistance;
 
+        if (paperReflectionGlow != null)
+        {
+            Vector3 cameraDirection =
+                Camera.main != null
+                    ? -Camera.main.transform.forward
+                    : Vector3.back;
+
+            paperReflectionGlow.transform.position =
+                target.position +
+                cameraDirection * 0.01f;
+
+            Color color =
+                paperReflectionGlow.color;
+
+            color.a = 0f;
+
+            paperReflectionGlow.color = color;
+            paperReflectionGlow.enabled = true;
+        }
+
         float elapsedTime = 0f;
 
         while (elapsedTime < approachDuration)
@@ -573,6 +906,39 @@ public class SummonLightController : MonoBehaviour
                 arc *
                 0.12f;
 
+            if (paperReflectionGlow != null)
+            {
+                Vector3 cameraDirection =
+                    Camera.main != null
+                        ? -Camera.main.transform.forward
+                        : Vector3.back;
+                paperReflectionGlow.transform.position =
+                    target.position +
+                    cameraDirection * 0.01f;
+                float reflectionT =
+                    Mathf.InverseLerp(
+                        reflectionFadeStart,
+                        1f,
+                        normalizedTime
+                    );
+                reflectionT =
+                    Mathf.SmoothStep(
+                        0f,
+                        1f,
+                        reflectionT
+                    );
+                reflectionT *= reflectionT;
+
+                Color color =
+                    paperReflectionGlow.color;
+                color.a =
+                    reflectionMaxAlpha *
+                    reflectionT;
+                
+                paperReflectionGlow.color = color;
+            }
+
+            
             float drift =
                 Mathf.Sin(
                     elapsedTime * 12f
@@ -610,14 +976,6 @@ public class SummonLightController : MonoBehaviour
         paperReflectionGlow.transform.position =
             target.position +
             cameraDirection * 0.01f;
-            
-        if (paperReflectionGlow != null)
-        {
-            paperReflectionGlow.transform.position =
-                target.position;
-
-            paperReflectionGlow.enabled = true;
-        }
 
         Vector3 reflectionBaseScale =
             paperReflectionGlow != null
@@ -657,12 +1015,23 @@ public class SummonLightController : MonoBehaviour
                 float proximity =
                     (1f - wave) * 0.5f;
 
+                float alphaMultiplier =
+                    Mathf.Lerp(
+                        0.75f,
+                        1f,
+                        proximity
+                    );
+                Color color = paperReflectionGlow.color;
+                color.a = reflectionMaxAlpha * alphaMultiplier;
+                paperReflectionGlow.color = color;
+
                 float reflectionScale =
                     Mathf.Lerp(
                         1.12f,
                         0.92f,
                         proximity
                     );
+
 
                 paperReflectionGlow.transform.localScale =
                     reflectionBaseScale *

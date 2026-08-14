@@ -1033,14 +1033,24 @@ public class PaperPullSelectable :
             yield return null;
         }
     }
-    public IEnumerator PlayAbsorbLightOnly()
+    public IEnumerator PlayAbsorbLightOnly(
+        Action<float> onProgress,
+        float firstPhaseDuration,
+        float secondPhaseDuration,
+        float firstPhaseEndProgress
+    )
     {
         if (absorbLightController == null)
         {
             yield break;
         }
 
-        yield return absorbLightController.PlayAbsorb();
+        yield return absorbLightController.PlayAbsorb(
+            onProgress,
+            firstPhaseDuration,
+            secondPhaseDuration,
+            firstPhaseEndProgress
+        );
     }
 
 }

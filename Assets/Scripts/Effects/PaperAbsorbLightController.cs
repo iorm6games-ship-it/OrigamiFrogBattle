@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -22,9 +24,6 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
 
     [Header("Animation")]
     [SerializeField]
-    private float absorbDuration = 1.5f;
-
-    [SerializeField]
     private Vector2 absorbCenter =
         new Vector2(0.5f, 0.5f);
 
@@ -32,17 +31,9 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
     private float startProgress = 0f;
 
     [SerializeField]
-    private float endProgress = 0.58f;
-
-    [SerializeField]
-    private AnimationCurve absorbCurve =
-        AnimationCurve.Linear(
-            0f, 0f,
-            1f, 1f
-        );
+    private float endProgress = 0.8f;
 
     private Material runtimeMaterial;
-    private Coroutine playCoroutine;
     public Renderer TargetRenderer =>
         targetRenderer;
     
@@ -64,7 +55,12 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
         ResetEffect();
     }
 
-    public IEnumerator PlayAbsorb()
+    public IEnumerator PlayAbsorb(
+        Action<float> onProgress,
+        float firstPhaseDuration,
+        float secondPhaseDuration,
+        float firstPhaseEndProgress
+    )
     {
 
         if (!enabled || runtimeMaterial == null)
@@ -72,22 +68,17 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             yield break;
         }
 
-        if (playCoroutine != null)
-        {
-            StopCoroutine(playCoroutine);
-        }
-
-        yield return PlayAbsorbRoutine();
+        yield return PlayAbsorbRoutine(
+            onProgress,
+            firstPhaseDuration,
+            secondPhaseDuration,
+            firstPhaseEndProgress
+        );
     }
 
     public void ResetEffect()
     {
-        if (playCoroutine != null)
-        {
-            StopCoroutine(playCoroutine);
-            playCoroutine = null;
-        }
-
+        
         if (runtimeMaterial == null)
         {
             return;
@@ -109,8 +100,31 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
         );
     }
 
-    private IEnumerator PlayAbsorbRoutine()
+    private IEnumerator PlayAbsorbRoutine(
+        Action<float> onProgress,
+        float firstPhaseDuration,
+        float secondPhaseDuration,
+        float firstPhaseEndProgress
+    )
     {
+        
+        firstPhaseDuration =
+            Mathf.Max(
+                0.01f,
+                firstPhaseDuration
+            );
+        
+        secondPhaseDuration =
+            Mathf.Max(
+                0.01f,
+                secondPhaseDuration
+            );
+
+        firstPhaseEndProgress =
+            Mathf.Clamp01(
+                firstPhaseEndProgress
+            );
+        
         // まず内部状態を初期化
         runtimeMaterial.SetVector(
             AbsorbCenterId,
@@ -133,44 +147,123 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
         // -------------------------
 
         float time = 0f;
+        
+        onProgress?.Invoke(0f);
 
-        while (time < absorbDuration)
+        while (time < firstPhaseDuration)
         {
             time += Time.deltaTime;
 
             float t =
                 Mathf.Clamp01(
-                    time / absorbDuration
+                    time / firstPhaseDuration
                 );
 
-            float eased = absorbCurve.Evaluate(t);
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+            float normalizedProgress =
+                Mathf.Lerp(
+                    0f,
+                    firstPhaseEndProgress,
+                    eased
+                );
 
-            float progress =
+            float shaderProgress =
                 Mathf.Lerp(
                     startProgress,
                     endProgress,
-                    eased
+                    normalizedProgress
                 );
 
             runtimeMaterial.SetFloat(
                 AbsorbProgressId,
-                progress
+                shaderProgress
+            );
+
+            onProgress?.Invoke(
+                normalizedProgress
             );
 
             yield return null;
         }
 
-        // 広がり切った状態で固定
+        // 境界を正確に固定
+        float phase1ShaderProgress =
+            Mathf.Lerp(
+                startProgress,
+                endProgress,
+                firstPhaseEndProgress
+            );
+        
+        runtimeMaterial.SetFloat(
+            AbsorbProgressId,
+            phase1ShaderProgress
+        );
+
+        onProgress?.Invoke(
+            firstPhaseEndProgress
+        );
+
+        // -------------------------
+        // 2. 33% → 100％
+        //    魂が消えた後、ゆっくり紙全体へ広がる
+        // -------------------------
+
+        time = 0f;
+
+        while (time < secondPhaseDuration)
+        {
+            time += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    time /
+                    secondPhaseDuration
+                );
+
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+            float normalizedProgress =
+                Mathf.Lerp(
+                    firstPhaseEndProgress,
+                    1f,
+                    eased
+                );
+            
+            float shaderProgress =
+                Mathf.Lerp(
+                    startProgress,
+                    endProgress,
+                    normalizedProgress
+                );
+
+            runtimeMaterial.SetFloat(
+                AbsorbProgressId,
+                shaderProgress
+            );
+
+            onProgress?.Invoke(normalizedProgress);
+
+            yield return null;
+        }
+
+        // 完全に元の色
         runtimeMaterial.SetFloat(
             AbsorbProgressId,
             endProgress
         );
+        onProgress?.Invoke(1f);
 
-        // -------------------------
-        // 2. 範囲は固定したまま
-        //    元の紙色へ戻す
-        // -------------------------
-
+        // 浸透範囲を固定したまま
+        // 元の紙色へ戻す
         float fadeTime = 0f;
 
         while (fadeTime < fadeOutDuration)
@@ -182,7 +275,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
                     fadeTime /
                     fadeOutDuration
                 );
-
+            
             float eased =
                 Mathf.SmoothStep(
                     0f,
@@ -198,24 +291,19 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
                     eased
                 )
             );
-
             yield return null;
         }
-
-        // 完全に元の色
+        Debug.Log($"Absorb finished. endProgress={endProgress}");
         runtimeMaterial.SetFloat(
             AbsorbFadeId,
             0f
         );
 
-        // Fade=0なので、このリセットは画面には見えない
         runtimeMaterial.SetFloat(
             AbsorbProgressId,
             startProgress
         );
 
-        // 本当に全部終わってからnull
-        playCoroutine = null;
     }
     private void OnDestroy()
     {

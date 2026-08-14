@@ -1317,34 +1317,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PaperAbsorbLightController
   fadeOutDuration: 0.3
   targetRenderer: {fileID: 1294835702}
-  absorbDuration: 0.28
   absorbCenter: {x: 0.5, y: 0.5}
   startProgress: 0
   endProgress: 0.7
-  absorbCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 1
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 1
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1001 &385355477
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3345,34 +3320,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PaperAbsorbLightController
   fadeOutDuration: 0.3
   targetRenderer: {fileID: 2087022595}
-  absorbDuration: 0.28
   absorbCenter: {x: 0.5, y: 0.5}
   startProgress: 0
   endProgress: 0.7
-  absorbCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 1
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 1
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1 &838492832
 GameObject:
   m_ObjectHideFlags: 0
@@ -3876,34 +3826,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PaperAbsorbLightController
   fadeOutDuration: 0.3
   targetRenderer: {fileID: 973475907}
-  absorbDuration: 0.28
   absorbCenter: {x: 0.5, y: 0.5}
   startProgress: 0
-  endProgress: 0.7
-  absorbCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 1
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 1
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  endProgress: 0.8
 --- !u!1 &926690342
 GameObject:
   m_ObjectHideFlags: 0
@@ -4714,34 +4639,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PaperAbsorbLightController
   fadeOutDuration: 0.3
   targetRenderer: {fileID: 1531278094}
-  absorbDuration: 0.28
   absorbCenter: {x: 0.5, y: 0.5}
   startProgress: 0
   endProgress: 0.7
-  absorbCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 1
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 1
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!137 &973475907 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: -1323743223009653715, guid: dfb1958f229adca49975306dc64b5378, type: 3}
@@ -5937,9 +5837,14 @@ MonoBehaviour:
   preContactHoldDuration: 1.2
   beforeSelectedMoveDelay: 0.35
   afterSelectionConfirmDelay: 0.5
+  soulAbsorbDuration: 0.5
+  remainingAbsorbDuration: 1.8
+  soulAbsorbEndProgress: 0.33
   penetrateDuration: 0.8
   penetrateScaleMultiplier: 1.25
   paperReflectionGlow: {fileID: 280401255}
+  reflectionFadeStart: 0.4
+  reflectionMaxAlpha: 0.25
   paperSelectionController: {fileID: 686168159}
   selectionPeakIntensityMultiplier: 3.8
   selectionFadeInDuration: 0.07
@@ -7826,34 +7731,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PaperAbsorbLightController
   fadeOutDuration: 0.3
   targetRenderer: {fileID: 2032367446}
-  absorbDuration: 0.28
   absorbCenter: {x: 0.5, y: 0.5}
   startProgress: 0
   endProgress: 0.7
-  absorbCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 1
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 1
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1 &1697816822
 GameObject:
   m_ObjectHideFlags: 0
