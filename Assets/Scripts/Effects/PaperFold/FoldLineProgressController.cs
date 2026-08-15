@@ -114,7 +114,7 @@ public sealed class FoldLineProgressController : MonoBehaviour
 
         SetProgress(
             targetRenderer,
-            1f
+            1.25f
         );
 
         animationCoroutine = null;

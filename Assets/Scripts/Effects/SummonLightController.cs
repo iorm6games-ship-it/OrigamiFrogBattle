@@ -117,12 +117,12 @@ public class SummonLightController : MonoBehaviour
     [Tooltip("浸透開始から魂が完全に吸収されるまで")]
     [Min(0.01f)]
     [SerializeField]
-    private float soulAbsorbDuration = 0.5f;
+    private float soulAbsorbDuration = 2f;
 
     [Tooltip("魂消失後、紙全体へ浸透し終わるまで")]
     [Min(0.01f)]
     [SerializeField]
-    private float remainingAbsorbDuration = 1.8f;
+    private float remainingAbsorbDuration = 5f;
 
     [Tooltip("紙の浸透の何割で魂を消すか")]
     [Range(0.05f, 0.95f)]
@@ -416,16 +416,6 @@ public class SummonLightController : MonoBehaviour
             target
         );
 
-        // SummonLight は役目終了
-        // HideImmediately();
-
-        // 紙の内部へ浸透
-        // yield return selectedPaper.PlayAbsorbLightOnly();
-
-        
-        // 浮遊を止める
-       selectedPaper.StopFloating();
-
        // 選択した紙に折れ線を走らせる
        if (foldLineProgressController != null)
         {
@@ -433,6 +423,9 @@ public class SummonLightController : MonoBehaviour
                 selectedPaper.TargetRenderer
             );
         }
+
+        // 浮遊を止める
+       selectedPaper.StopFloating();
 
         introCoroutine = null;
     }

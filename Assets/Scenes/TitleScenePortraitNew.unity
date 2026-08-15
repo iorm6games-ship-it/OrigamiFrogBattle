@@ -4908,7 +4908,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9566deb09aed385478943e14a0c11cda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FoldLineProgressController
-  duration: 1.2
+  duration: 2
 --- !u!1 &1075492036 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 0b1b58657c66d714f9b8bbff83c96aee, type: 3}
@@ -5837,10 +5837,10 @@ MonoBehaviour:
   preContactHoldDuration: 1.2
   beforeSelectedMoveDelay: 0.35
   afterSelectionConfirmDelay: 0.5
-  soulAbsorbDuration: 0.5
-  remainingAbsorbDuration: 1.8
+  soulAbsorbDuration: 2
+  remainingAbsorbDuration: 3
   soulAbsorbEndProgress: 0.33
-  penetrateDuration: 0.8
+  penetrateDuration: 1
   penetrateScaleMultiplier: 1.25
   paperReflectionGlow: {fileID: 280401255}
   reflectionFadeStart: 0.4

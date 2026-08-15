@@ -103,8 +103,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AbsorbEdgeIntensity: 1
+    - _AbsorbEdgeWidth: 0.1
     - _AbsorbFade: 1
+    - _AbsorbNoiseScale: 7
+    - _AbsorbNoiseStrength: 0.2
     - _AbsorbProgress: 0
+    - _AbsorbSoftness: 0.08
+    - _AbsorbStrength: 0.55
+    - _ActiveFoldColorStrength: 5
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
@@ -121,7 +128,8 @@ Material:
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
     - _Fade: 1
-    - _FoldActiveWidth: 0.15
+    - _FoldActiveWidth: 0.2
+    - _FoldColorStrength: 3
     - _FoldLineThickness: 0.003
     - _GlossMapScale: 0
     - _Glossiness: 0
