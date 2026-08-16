@@ -187,6 +187,40 @@ public class SummonLightController : MonoBehaviour
     [SerializeField]
     private SummonCameraController summonCameraController;
 
+    [Header("Pre Fold Lift")]
+
+    [Tooltip("折れ線完成後も浮遊を見せる時間")]
+    [Min(0f)]
+    [SerializeField]
+    private float afterFoldLineFloatDuration = 0.4f;
+
+    [Tooltip("折り畳み直前に紙を浮き上がらせる距離")]
+    [Min(0f)]
+    [SerializeField]
+    private float preFoldLiftDistance = 0.12f;
+
+    [Tooltip("折り畳み直前の浮き上がり時間")]
+    [Min(0.01f)]
+    [SerializeField]
+    private float preFoldLiftDuration = 0.45f;
+
+    [Header("Pre Fold Flash")]
+
+    [Tooltip("折り始める直前の発光時間")]
+    [Min(0.01f)]
+    [SerializeField]
+    private float preFoldFlashDuration = 0.22f;
+
+    [Tooltip("紙本体の最大発光量")]
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float preFoldFlashStrength = 0.7f;
+
+    [Tooltip("発光時のReflection Glowの最大Alpha")]
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float preFoldReflectionAlpha = 0.3f;
+    
     private void Awake()
     {
         
@@ -416,16 +450,47 @@ public class SummonLightController : MonoBehaviour
             target
         );
 
-       // 選択した紙に折れ線を走らせる
-       if (foldLineProgressController != null)
+        // 選択した紙に折れ線を走らせる
+        if (foldLineProgressController != null)
         {
             yield return foldLineProgressController.PlayFoldLine(
                 selectedPaper.TargetRenderer
             );
         }
 
-        // 浮遊を止める
-       selectedPaper.StopFloating();
+        // 折れ線完成後も少し浮遊したまま見せる
+        yield return WaitForDuration(
+            afterFoldLineFloatDuration
+        );
+
+        // 浮上と同時に、折り畳み用カメラへ移動開始
+        if (summonCameraController != null)
+        {
+            StartCoroutine(
+                summonCameraController.MoveForFold()
+            );
+        }
+        // 今の浮遊位置から少し上へ
+        yield return selectedPaper.PlayPreFoldLift(
+            preFoldLiftDistance,
+            preFoldLiftDuration
+        );
+
+        // 折り始める直前に一瞬発光
+        yield return PlayPreFoldFlash(
+            selectedPaper
+        );
+
+        // 変形後の見た目の中心を追従開始
+        if (summonCameraController != null)
+        {
+            summonCameraController.StartFoldCenterTracking(
+                selectedPaper.TargetRenderer
+            );
+        }
+
+        // 折り畳み開始
+        selectedPaper.PlayFoldAnimation();
 
         introCoroutine = null;
     }
@@ -1355,5 +1420,121 @@ public class SummonLightController : MonoBehaviour
         PlaySelectionSequence(
             selectedPaper
         );
+    }
+    private IEnumerator PlayPreFoldFlash(
+        PaperPullSelectable selectedPaper
+    )
+    {
+        if (selectedPaper == null)
+        {
+            yield break;
+        }
+
+        Transform target =
+            selectedPaper.LightTarget;
+
+        if (paperReflectionGlow != null)
+        {
+            paperReflectionGlow.enabled =
+                true;
+
+            Color color =
+                paperReflectionGlow.color;
+
+            color.a = 0f;
+
+            paperReflectionGlow.color =
+                color;
+        }
+
+        float elapsedTime = 0f;
+
+        while (
+            elapsedTime <
+            preFoldFlashDuration
+        )
+        {
+            elapsedTime +=
+                GetDeltaTime();
+
+            float t =
+                Mathf.Clamp01(
+                    elapsedTime /
+                    preFoldFlashDuration
+                );
+
+            // 前半で光り、
+            // 後半で元へ戻る
+            float pulse;
+
+            if (t < 0.5f)
+            {
+                pulse =
+                    Mathf.SmoothStep(
+                        0f,
+                        1f,
+                        t * 2f
+                    );
+            }
+            else
+            {
+                pulse =
+                    Mathf.SmoothStep(
+                        1f,
+                        0f,
+                        (t - 0.5f) * 2f
+                    );
+            }
+
+            selectedPaper.SetPreFoldFlash(
+                preFoldFlashStrength *
+                pulse
+            );
+
+            if (paperReflectionGlow != null)
+            {
+                // 紙はまだ浮遊中なので
+                // Reflectionも紙を追従させる
+                if (target != null)
+                {
+                    Vector3 cameraDirection =
+                        Camera.main != null
+                            ? -Camera.main.transform.forward
+                            : Vector3.back;
+
+                    paperReflectionGlow.transform.position =
+                        target.position +
+                        cameraDirection * 0.01f;
+                }
+
+                Color color =
+                    paperReflectionGlow.color;
+
+                color.a =
+                    preFoldReflectionAlpha *
+                    pulse;
+
+                paperReflectionGlow.color =
+                    color;
+            }
+
+            yield return null;
+        }
+
+        selectedPaper.ClearPreFoldFlash();
+
+        if (paperReflectionGlow != null)
+        {
+            Color color =
+                paperReflectionGlow.color;
+
+            color.a = 0f;
+
+            paperReflectionGlow.color =
+                color;
+
+            paperReflectionGlow.enabled =
+                false;
+        }
     }
 }

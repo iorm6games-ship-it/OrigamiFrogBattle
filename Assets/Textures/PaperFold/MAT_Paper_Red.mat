@@ -110,7 +110,7 @@ Material:
     - _AbsorbNoiseStrength: 0.2
     - _AbsorbProgress: 0
     - _AbsorbSoftness: 0.08
-    - _AbsorbStrength: 0.55
+    - _AbsorbStrength: 0.9
     - _ActiveFoldColorStrength: 5
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0

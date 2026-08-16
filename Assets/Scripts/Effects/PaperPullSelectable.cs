@@ -166,8 +166,27 @@ public class PaperPullSelectable :
     [SerializeField]
     private float floatRotationAngle = 1.5f;
 
-    private Coroutine floatingCoroutine;
+    [Header("Fold Animation")]
+    [SerializeField]
+    private Animator foldAnimator;
 
+    [SerializeField]
+    private float foldFinalScaleMultiplier = 1.4f;
+
+    [SerializeField]
+    private float foldScaleDelay = 1.8f;
+
+    [SerializeField]
+    private float foldScaleDuration = 1.5f;
+    
+    private float foldCenterOffset;
+
+    private Coroutine floatingCoroutine;
+    private Vector3 floatingBasePosition;
+    private Quaternion floatingBaseRotation;
+    private float floatingElapsedTime;
+    private float floatingLiftOffset;
+    private bool hasFloatingBasePose;
 
     private void Awake()
     {
@@ -195,6 +214,24 @@ public class PaperPullSelectable :
                 FadeOutAsUnselectedCoroutine()
             );
 
+    }
+
+    public void PlayFoldAnimation()
+    {
+        if (foldAnimator == null)
+        {
+            Debug.LogWarning(
+                $"{nameof(PaperPullSelectable)}: Fold Animator が未設定です",
+                this
+            );
+            return;
+        }
+
+        foldAnimator.Play(
+            "Fold",
+            0,
+            0f
+        );
     }
 
     private IEnumerator FadeOutAsUnselectedCoroutine()
@@ -297,7 +334,7 @@ public class PaperPullSelectable :
             dragging = false;
         }
     }
-
+    
     public void OnPointerDown(
         PointerEventData eventData
     )
@@ -975,12 +1012,20 @@ public class PaperPullSelectable :
     {
         StopFloating();
 
+        floatingBasePosition =
+            transform.position;
+
+        floatingBaseRotation =
+            transform.rotation;
+
+        floatingElapsedTime = 0f;
+        floatingLiftOffset = 0f;
+
         floatingCoroutine =
             StartCoroutine(
                 FloatingCoroutine()
             );
     }
-
     public void StopFloating()
     {
         if (floatingCoroutine == null)
@@ -994,45 +1039,113 @@ public class PaperPullSelectable :
 
     private IEnumerator FloatingCoroutine()
     {
-        Vector3 basePosition =
-            transform.position;
-        
-        Quaternion baseRotation =
-            transform.rotation;
-
-        float elapseTime = 0f;
-
         while (true)
         {
-            elapseTime += Time.deltaTime;
+            floatingElapsedTime +=
+                Time.deltaTime;
 
             float wave =
                 Mathf.Sin(
-                    elapseTime *
+                    floatingElapsedTime *
                     floatFrequency *
                     Mathf.PI * 2f
                 );
-            
+
             Vector3 position =
-                basePosition;
-            
-            position.y += 
+                floatingBasePosition;
+
+            // 通常の浮遊
+            position.y +=
                 wave *
                 floatAmplitude;
+
+            // 浮遊の中心自体を上昇させる
+            position.y +=
+                floatingLiftOffset;
             
-            transform.position = position;
+            // 折り畳み中の中央補正
+            Vector3 rightDirection =
+                targetCamera != null
+                    ? targetCamera.transform.right
+                    : Vector3.right;
+
+            position +=
+                rightDirection *
+                foldCenterOffset;
+            
+            transform.position =
+                position;
 
             transform.rotation =
-                baseRotation *
+                floatingBaseRotation *
                 Quaternion.Euler(
                     0f,
                     0f,
                     wave *
                     floatRotationAngle
                 );
+
             yield return null;
         }
     }
+    
+    public IEnumerator PlayPreFoldLift(
+        float liftDistance,
+        float duration
+    )
+    {
+        duration =
+            Mathf.Max(
+                0.01f,
+                duration
+            );
+
+        // 念のため浮遊していなければ開始
+        if (floatingCoroutine == null)
+        {
+            StartFloating();
+        }
+
+        float startOffset =
+            floatingLiftOffset;
+
+        float targetOffset =
+            liftDistance;
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime +=
+                Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    elapsedTime /
+                    duration
+                );
+
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+
+            floatingLiftOffset =
+                Mathf.Lerp(
+                    startOffset,
+                    targetOffset,
+                    eased
+                );
+
+            yield return null;
+        }
+
+        floatingLiftOffset =
+            targetOffset;
+    }
+
     public IEnumerator PlayAbsorbLightOnly(
         Action<float> onProgress,
         float firstPhaseDuration,
@@ -1052,5 +1165,119 @@ public class PaperPullSelectable :
             firstPhaseEndProgress
         );
     }
+    public void SetPreFoldFlash(
+        float amount
+    )
+    {
+        if (absorbLightController == null)
+        {
+            return;
+        }
 
+        absorbLightController.SetPreFoldFlash(
+            amount
+        );
+    }
+
+    public void ClearPreFoldFlash()
+    {
+        if (absorbLightController == null)
+        {
+            return;
+        }
+
+        absorbLightController.ClearPreFoldFlash();
+    }
+    public IEnumerator ScaleDuringLateFold()
+    {
+        Vector3 startScale =
+            transform.localScale;
+
+        Vector3 endScale =
+            startScale *
+            foldFinalScaleMultiplier;
+
+        float elapsed = 0f;
+
+        while (elapsed < foldScaleDelay)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        elapsed = 0f;
+
+        while (elapsed < foldScaleDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    elapsed / foldScaleDuration
+                );
+
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+
+            transform.localScale =
+                Vector3.Lerp(
+                    startScale,
+                    endScale,
+                    eased
+                );
+
+            yield return null;
+        }
+
+        transform.localScale =
+            endScale;
+    }
+    public void FlashFoldLine()
+    {
+        StartCoroutine(
+            FlashFoldLineCoroutine()
+        );
+    }
+
+    private IEnumerator FlashFoldLineCoroutine()
+    {
+        const float duration = 0.18f;
+
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    elapsed / duration
+                );
+
+            float pulse =
+                t < 0.35f
+                    ? Mathf.SmoothStep(
+                        0f,
+                        1f,
+                        t / 0.35f
+                    )
+                    : Mathf.SmoothStep(
+                        1f,
+                        0f,
+                        (t - 0.35f) / 0.65f
+                    );
+
+            SetPreFoldFlash(
+                pulse
+            );
+
+            yield return null;
+        }
+
+        ClearPreFoldFlash();
+    }
 }

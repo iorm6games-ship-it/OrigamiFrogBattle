@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -36,7 +35,10 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
     private Material runtimeMaterial;
     public Renderer TargetRenderer =>
         targetRenderer;
-    
+
+    private static readonly int PreFoldFlashId =
+        Shader.PropertyToID("_PreFoldFlash");
+
     private void Awake()
     {
         if (targetRenderer == null)
@@ -76,6 +78,34 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
         );
     }
 
+    public void SetPreFoldFlash(
+        float amount
+    )
+    {
+        if (runtimeMaterial == null)
+        {
+            return;
+        }
+
+        runtimeMaterial.SetFloat(
+            PreFoldFlashId,
+            Mathf.Clamp01(amount)
+        );
+    }
+
+    public void ClearPreFoldFlash()
+    {
+        if (runtimeMaterial == null)
+        {
+            return;
+        }
+
+        runtimeMaterial.SetFloat(
+            PreFoldFlashId,
+            0f
+        );
+    }
+
     public void ResetEffect()
     {
         
@@ -91,11 +121,16 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
 
         runtimeMaterial.SetFloat(
             AbsorbProgressId,
-            0f
+            startProgress
         );
 
         runtimeMaterial.SetFloat(
             AbsorbFadeId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            PreFoldFlashId,
             0f
         );
     }

@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public sealed class SummonCameraController : MonoBehaviour
@@ -14,8 +15,39 @@ public sealed class SummonCameraController : MonoBehaviour
     [SerializeField]
     private float zoomFov = 42f;
 
+    [Header("Fold Zoom")]
+    [SerializeField]
+    private float foldZoomFov = 35f;
+
+    [SerializeField]
+    private float foldDuration = 0.5f;
+
+    [SerializeField]
+    private Transform foldCameraPoint;
+    [SerializeField]
+    private float foldZoomDuration = 0.5f;
+
+    [Header("Late Fold Zoom")]
+    [SerializeField]
+    private float lateFoldZoomDelay = 2.0f;
+
+    [SerializeField]
+    private float lateFoldZoomDuration = 1.2f;
+
+    [SerializeField]
+    private float lateFoldZoomFov = 21f;
+
+    [Header("Fold Center Tracking")]
+    [SerializeField]
+    private float foldCenterSmoothTime = 0.35f;
+
+    private SkinnedMeshRenderer foldFocusSkinnedRenderer;
+    private Mesh bakedFoldMesh;
+
+    private Renderer foldFocusRenderer;
+    private bool trackFoldCenter;
+    private Vector3 foldCenterVelocity;
     private float defaultFov;
-    private Coroutine zoomCoroutine;
 
     private void Awake()
     {
@@ -29,26 +61,106 @@ public sealed class SummonCameraController : MonoBehaviour
             defaultFov = targetCamera.fieldOfView;
         }
     }
+    private IEnumerator ZoomTo(
+        float targetFov,
+        float duration
+    )
+    {
+        if (targetCamera == null)
+        {
+            yield break;
+        }
 
+        float startFov =
+            targetCamera.fieldOfView;
+
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    elapsed / duration
+                );
+
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+
+            targetCamera.fieldOfView =
+                Mathf.Lerp(
+                    startFov,
+                    targetFov,
+                    eased
+                );
+
+            yield return null;
+        }
+
+        targetCamera.fieldOfView =
+            targetFov;
+    }    
     public IEnumerator ZoomIn()
     {
-        if (targetCamera == null)
+        yield return ZoomTo(
+            zoomFov,
+            zoomDuration
+        );
+    }
+
+    public IEnumerator ZoomForFold()
+    {
+        Debug.Log(
+            $"ZoomForFold start: {targetCamera.fieldOfView} -> {foldZoomFov}"
+        );
+        yield return ZoomTo(
+            foldZoomFov,
+            foldDuration
+        );
+    }
+    
+    public IEnumerator ZoomOut()
+    {
+       yield return ZoomTo(
+            defaultFov,
+            zoomDuration
+       );
+    }
+
+    public IEnumerator MoveForFold()
+    {
+        if (targetCamera == null ||
+            foldCameraPoint == null)
         {
             yield break;
         }
+
+        Transform cameraTransform =
+            targetCamera.transform;
+
+        Vector3 startPosition =
+            cameraTransform.position;
+
+        Quaternion startRotation =
+            cameraTransform.rotation;
 
         float startFov =
             targetCamera.fieldOfView;
 
         float elapsed = 0f;
 
-        while (elapsed < zoomDuration)
+        while (elapsed < foldZoomDuration)
         {
             elapsed += Time.deltaTime;
 
             float t =
                 Mathf.Clamp01(
-                    elapsed / zoomDuration
+                    elapsed / foldZoomDuration
                 );
 
             float eased =
@@ -58,59 +170,225 @@ public sealed class SummonCameraController : MonoBehaviour
                     t
                 );
 
+            cameraTransform.position =
+                Vector3.Lerp(
+                    startPosition,
+                    foldCameraPoint.position,
+                    eased
+                );
+
+            cameraTransform.rotation =
+                Quaternion.Slerp(
+                    startRotation,
+                    foldCameraPoint.rotation,
+                    eased
+                );
+
             targetCamera.fieldOfView =
                 Mathf.Lerp(
                     startFov,
-                    zoomFov,
+                    foldZoomFov,
                     eased
                 );
 
             yield return null;
         }
 
-        targetCamera.fieldOfView =
-            zoomFov;
-    }
+        cameraTransform.position =
+            foldCameraPoint.position;
 
-    public IEnumerator ZoomOut()
+        cameraTransform.rotation =
+            foldCameraPoint.rotation;
+
+        targetCamera.fieldOfView =
+            foldZoomFov;
+    }
+    public IEnumerator ZoomLateFold()
     {
         if (targetCamera == null)
         {
             yield break;
         }
 
-        float startFov =
-            targetCamera.fieldOfView;
-
         float elapsed = 0f;
 
-        while (elapsed < zoomDuration)
+        // 折り畳み前半は今の画角を維持
+        while (elapsed < lateFoldZoomDelay)
         {
             elapsed += Time.deltaTime;
-
-            float t =
-                Mathf.Clamp01(
-                    elapsed / zoomDuration
-                );
-
-            float eased =
-                Mathf.SmoothStep(
-                    0f,
-                    1f,
-                    t
-                );
-
-            targetCamera.fieldOfView =
-                Mathf.Lerp(
-                    startFov,
-                    defaultFov,
-                    eased
-                );
-
             yield return null;
         }
 
-        targetCamera.fieldOfView =
-            defaultFov;
+        // 後半だけ、完成するカエルへ寄る
+        yield return ZoomTo(
+            lateFoldZoomFov,
+            lateFoldZoomDuration
+        );
+    }
+    public void StartFoldCenterTracking(
+        Renderer targetRenderer
+    )
+    {
+        foldFocusRenderer =
+            targetRenderer;
+
+        foldFocusSkinnedRenderer =
+            targetRenderer as SkinnedMeshRenderer;
+
+        trackFoldCenter =
+            foldFocusSkinnedRenderer != null;
+
+        foldCenterVelocity =
+            Vector3.zero;
+
+        if (bakedFoldMesh == null)
+        {
+            bakedFoldMesh =
+                new Mesh();
+        }
+    }
+
+    public void StopFoldCenterTracking()
+    {
+        trackFoldCenter = false;
+        foldFocusRenderer = null;
+        foldCenterVelocity = Vector3.zero;
+    }
+    private void LateUpdate()
+    {
+        if (!trackFoldCenter ||
+            foldFocusSkinnedRenderer == null ||
+            targetCamera == null)
+        {
+            return;
+        }
+
+        // 現在のBlendShape変形結果を取得
+        foldFocusSkinnedRenderer.BakeMesh(
+            bakedFoldMesh
+        );
+
+        Vector3[] vertices =
+            bakedFoldMesh.vertices;
+
+        if (vertices == null ||
+            vertices.Length == 0)
+        {
+            return;
+        }
+
+        float minX =
+            float.PositiveInfinity;
+
+        float maxX =
+            float.NegativeInfinity;
+
+        Transform meshTransform =
+            foldFocusSkinnedRenderer.transform;
+
+        // -------------------------
+        // ここは頂点を調べるループ
+        // -------------------------
+        for (int i = 0;
+            i < vertices.Length;
+            i++)
+        {
+            Vector3 worldPosition =
+                meshTransform.TransformPoint(
+                    vertices[i]
+                );
+
+            Vector3 viewport =
+                targetCamera.WorldToViewportPoint(
+                    worldPosition
+                );
+
+            if (viewport.z <= 0f)
+            {
+                continue;
+            }
+
+            minX =
+                Mathf.Min(
+                    minX,
+                    viewport.x
+                );
+
+            maxX =
+                Mathf.Max(
+                    maxX,
+                    viewport.x
+                );
+        }
+
+        if (float.IsInfinity(minX) ||
+            float.IsInfinity(maxX))
+        {
+            return;
+        }
+
+        // -------------------------
+        // forループの外
+        // 見た目の左右中心を求める
+        // -------------------------
+        float visualCenterX =
+            (minX + maxX) * 0.5f;
+
+        // 画面中央0.5からどれだけズレているか
+        float viewportError =
+            visualCenterX - 0.5f;
+
+        // 対象までの奥行き
+        float depth =
+            Vector3.Dot(
+                foldFocusSkinnedRenderer.bounds.center -
+                targetCamera.transform.position,
+                targetCamera.transform.forward
+            );
+
+        if (depth <= 0f)
+        {
+            return;
+        }
+
+        // Viewport上のズレを
+        // World座標の距離へ変換
+        float halfHeight =
+            Mathf.Tan(
+                targetCamera.fieldOfView *
+                0.5f *
+                Mathf.Deg2Rad
+            ) *
+            depth;
+
+        float halfWidth =
+            halfHeight *
+            targetCamera.aspect;
+
+        float worldOffset =
+            viewportError *
+            2f *
+            halfWidth;
+
+        Transform cameraTransform =
+            targetCamera.transform;
+
+        Vector3 desiredPosition =
+            cameraTransform.position +
+            cameraTransform.right *
+            worldOffset;
+
+        cameraTransform.position =
+            Vector3.SmoothDamp(
+                cameraTransform.position,
+                desiredPosition,
+                ref foldCenterVelocity,
+                foldCenterSmoothTime
+            );
+
+        Debug.Log(
+            $"Visual center={visualCenterX:F4}, " +
+            $"error={viewportError:F4}"
+        );
     }
 }
