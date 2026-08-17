@@ -1203,6 +1203,9 @@ MonoBehaviour:
   floatFrequency: 0.7
   floatRotationAngle: 1.5
   foldAnimator: {fileID: 0}
+  foldFinalScaleMultiplier: 1.4
+  foldScaleDelay: 1.8
+  foldScaleDuration: 1.5
 --- !u!65 &337071983
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3207,6 +3210,9 @@ MonoBehaviour:
   floatFrequency: 0.7
   floatRotationAngle: 1.5
   foldAnimator: {fileID: 0}
+  foldFinalScaleMultiplier: 1.4
+  foldScaleDelay: 1.8
+  foldScaleDuration: 1.5
 --- !u!65 &781709369
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3758,6 +3764,9 @@ MonoBehaviour:
   floatFrequency: 0.7
   floatRotationAngle: 1.5
   foldAnimator: {fileID: 909455296}
+  foldFinalScaleMultiplier: 1.4
+  foldScaleDelay: 1.8
+  foldScaleDuration: 1.5
 --- !u!65 &909455292
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4215,6 +4224,9 @@ MonoBehaviour:
   floatFrequency: 0.7
   floatRotationAngle: 1.5
   foldAnimator: {fileID: 0}
+  foldFinalScaleMultiplier: 1.4
+  foldScaleDelay: 1.8
+  foldScaleDuration: 1.5
 --- !u!114 &961148254
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7687,6 +7699,9 @@ MonoBehaviour:
   floatFrequency: 0.7
   floatRotationAngle: 1.5
   foldAnimator: {fileID: 0}
+  foldFinalScaleMultiplier: 1.4
+  foldScaleDelay: 1.8
+  foldScaleDuration: 1.5
 --- !u!65 &1696808934
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -18997,15 +19012,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SummonCameraController
   targetCamera: {fileID: 2107679577}
-  zoomDuration: 0.8
+  zoomDuration: 1
   zoomFov: 38
   foldZoomFov: 28
-  foldDuration: 0.5
+  foldDuration: 0.8
   foldCameraPoint: {fileID: 1226845974}
-  foldZoomDuration: 0.5
+  foldZoomDuration: 0.8
   lateFoldZoomDelay: 2
-  lateFoldZoomDuration: 1.2
+  lateFoldZoomDuration: 0.8
   lateFoldZoomFov: 21
+  foldCenterSmoothTime: 0.35
 --- !u!1 &2114838468
 GameObject:
   m_ObjectHideFlags: 0
