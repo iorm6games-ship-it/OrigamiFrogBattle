@@ -179,6 +179,12 @@ public class PaperPullSelectable :
     [SerializeField]
     private float foldScaleDuration = 1.5f;
     
+    [Header("Fold Step Flash")]
+    [SerializeField]
+    private float foldStepFlashDuration = 0.18f;
+
+    private Coroutine foldStepFlashCoroutine;
+
     private float foldCenterOffset;
 
     private Coroutine floatingCoroutine;
@@ -1280,4 +1286,100 @@ public class PaperPullSelectable :
 
         ClearPreFoldFlash();
     }
+    public void FlashFoldLine(
+        int step
+    )
+    {
+        if (absorbLightController == null)
+        {
+            return;
+        }
+
+        if (step < 2 || step > 9)
+        {
+            Debug.LogWarning(
+                $"FlashFoldLine: step={step} は範囲外です",
+                this
+            );
+            return;
+        }
+
+        if (foldStepFlashCoroutine != null)
+        {
+            StopCoroutine(
+                foldStepFlashCoroutine
+            );
+        }
+
+        foldStepFlashCoroutine =
+            StartCoroutine(
+                FlashFoldLineCoroutine(step)
+            );
+    }
+    private IEnumerator FlashFoldLineCoroutine(
+        int step
+    )
+    {
+        // FoldStepMask側と同じ値
+        //
+        // step 2 → 0.12
+        // step 3 → 0.24
+        // ...
+        // step 9 → 0.96
+        float stepValue =
+            0.12f * (step - 1);
+
+        float duration =
+            Mathf.Max(
+                0.01f,
+                foldStepFlashDuration
+            );
+
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    elapsed / duration
+                );
+
+            float intensity;
+
+            // 最初の30%で素早く発光
+            if (t < 0.3f)
+            {
+                intensity =
+                    Mathf.SmoothStep(
+                        0f,
+                        1f,
+                        t / 0.3f
+                    );
+            }
+            else
+            {
+                // 残り70%でゆっくり消える
+                intensity =
+                    Mathf.SmoothStep(
+                        1f,
+                        0f,
+                        (t - 0.3f) / 0.7f
+                    );
+            }
+
+            absorbLightController.SetFoldStepFlash(
+                stepValue,
+                intensity
+            );
+
+            yield return null;
+        }
+
+        absorbLightController.ClearFoldStepFlash();
+
+        foldStepFlashCoroutine = null;
+    }
+
 }

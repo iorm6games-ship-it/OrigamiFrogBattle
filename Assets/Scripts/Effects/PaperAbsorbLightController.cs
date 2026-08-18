@@ -14,6 +14,12 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
     private static readonly int AbsorbFadeId =
         Shader.PropertyToID("_AbsorbFade");
 
+    private static readonly int FlashStepId =
+    Shader.PropertyToID("_FlashStep");
+
+    private static readonly int FoldStepFlashId =
+        Shader.PropertyToID("_FoldStepFlash");
+
     [SerializeField]
     private float fadeOutDuration = 0.5f;
 
@@ -93,6 +99,40 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
         );
     }
 
+    public void SetFoldStepFlash(
+        float stepValue,
+        float amount
+    )
+    {
+        if (runtimeMaterial == null)
+        {
+            return;
+        }
+
+        runtimeMaterial.SetFloat(
+            FlashStepId,
+            Mathf.Clamp01(stepValue)
+        );
+
+        runtimeMaterial.SetFloat(
+            FoldStepFlashId,
+            Mathf.Clamp01(amount)
+        );
+    }
+
+    public void ClearFoldStepFlash()
+    {
+        if (runtimeMaterial == null)
+        {
+            return;
+        }
+
+        runtimeMaterial.SetFloat(
+            FoldStepFlashId,
+            0f
+        );
+    }
+
     public void ClearPreFoldFlash()
     {
         if (runtimeMaterial == null)
@@ -133,6 +173,15 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             PreFoldFlashId,
             0f
         );
+        runtimeMaterial.SetFloat(
+            FlashStepId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            FoldStepFlashId,
+            0f
+        );        
     }
 
     private IEnumerator PlayAbsorbRoutine(
