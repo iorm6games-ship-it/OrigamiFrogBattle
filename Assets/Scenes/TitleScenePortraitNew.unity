@@ -1206,6 +1206,7 @@ MonoBehaviour:
   foldFinalScaleMultiplier: 1.4
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
+  foldStepFlashDuration: 0.18
 --- !u!65 &337071983
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3213,6 +3214,7 @@ MonoBehaviour:
   foldFinalScaleMultiplier: 1.4
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
+  foldStepFlashDuration: 0.18
 --- !u!65 &781709369
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3767,6 +3769,7 @@ MonoBehaviour:
   foldFinalScaleMultiplier: 1.4
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
+  foldStepFlashDuration: 0.8
 --- !u!65 &909455292
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4227,6 +4230,7 @@ MonoBehaviour:
   foldFinalScaleMultiplier: 1.4
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
+  foldStepFlashDuration: 0.18
 --- !u!114 &961148254
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7702,6 +7706,7 @@ MonoBehaviour:
   foldFinalScaleMultiplier: 1.4
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
+  foldStepFlashDuration: 0.18
 --- !u!65 &1696808934
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -449,6 +449,15 @@ public class SummonLightController : MonoBehaviour
             selectedPaper,
             target
         );
+        // 浮上と同時に、折り畳み用カメラへ移動開始
+        if (summonCameraController != null)
+        {
+            StartCoroutine(
+                summonCameraController.MoveForFold()
+            );
+        }
+        // 一瞬停止させる予定（仮でWaitForDurationを入れている）
+        yield return WaitForDuration(0.5f);
 
         // 選択した紙に折れ線を走らせる
         if (foldLineProgressController != null)
@@ -463,13 +472,6 @@ public class SummonLightController : MonoBehaviour
             afterFoldLineFloatDuration
         );
 
-        // 浮上と同時に、折り畳み用カメラへ移動開始
-        if (summonCameraController != null)
-        {
-            StartCoroutine(
-                summonCameraController.MoveForFold()
-            );
-        }
         // 今の浮遊位置から少し上へ
         yield return selectedPaper.PlayPreFoldLift(
             preFoldLiftDistance,

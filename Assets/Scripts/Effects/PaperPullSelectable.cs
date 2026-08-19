@@ -1244,6 +1244,7 @@ public class PaperPullSelectable :
     }
     public void FlashFoldLine()
     {
+        Debug.Log("[FoldFlash] ALL", this);
         StartCoroutine(
             FlashFoldLineCoroutine()
         );
@@ -1286,10 +1287,11 @@ public class PaperPullSelectable :
 
         ClearPreFoldFlash();
     }
-    public void FlashFoldLine(
+    public void FlashFoldStepLine(
         int step
     )
     {
+        Debug.Log($"[FoldFlash] STEP {step}", this);
         if (absorbLightController == null)
         {
             return;
