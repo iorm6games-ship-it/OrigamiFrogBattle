@@ -688,6 +688,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 9762208a1fa4d5f45901e9752d68c726, type: 2}
     - target: {fileID: 8215254895220840298, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       propertyPath: m_Layer
       value: 3
@@ -1202,7 +1206,11 @@ MonoBehaviour:
   floatAmplitude: 0.04
   floatFrequency: 0.7
   floatRotationAngle: 1.5
-  foldAnimator: {fileID: 0}
+  foldAnimator: {fileID: 2200000001}
+  foldFlipDelay: 0.1
+  foldFlipDuration: 0.45
+  foldFlipLocalAxis: {x: 1, y: 0, z: 0}
+  foldFlipAngle: 220
   foldFinalScaleMultiplier: 1.4
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
@@ -1495,7 +1503,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 15.5, y: 7, z: 9}
-  m_LocalScale: {x: 4, y: 4, z: 0}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1086169711}
@@ -2696,6 +2704,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 9762208a1fa4d5f45901e9752d68c726, type: 2}
     - target: {fileID: 8215254895220840298, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       propertyPath: m_Layer
       value: 3
@@ -3210,7 +3222,11 @@ MonoBehaviour:
   floatAmplitude: 0.04
   floatFrequency: 0.7
   floatRotationAngle: 1.5
-  foldAnimator: {fileID: 0}
+  foldAnimator: {fileID: 2200000002}
+  foldFlipDelay: 0.1
+  foldFlipDuration: 0.45
+  foldFlipLocalAxis: {x: 1, y: 0, z: 0}
+  foldFlipAngle: 220
   foldFinalScaleMultiplier: 1.4
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
@@ -3766,10 +3782,14 @@ MonoBehaviour:
   floatFrequency: 0.7
   floatRotationAngle: 1.5
   foldAnimator: {fileID: 909455296}
+  foldFlipDelay: 0.1
+  foldFlipDuration: 0.45
+  foldFlipLocalAxis: {x: 1, y: 0, z: 0}
+  foldFlipAngle: 220
   foldFinalScaleMultiplier: 1.4
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
-  foldStepFlashDuration: 0.8
+  foldStepFlashDuration: 0.18
 --- !u!65 &909455292
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4053,6 +4073,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 9762208a1fa4d5f45901e9752d68c726, type: 2}
     - target: {fileID: 8215254895220840298, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       propertyPath: m_Layer
       value: 3
@@ -4226,7 +4250,11 @@ MonoBehaviour:
   floatAmplitude: 0.04
   floatFrequency: 0.7
   floatRotationAngle: 1.5
-  foldAnimator: {fileID: 0}
+  foldAnimator: {fileID: 2200000003}
+  foldFlipDelay: 0.1
+  foldFlipDuration: 0.45
+  foldFlipLocalAxis: {x: 1, y: 0, z: 0}
+  foldFlipAngle: 220
   foldFinalScaleMultiplier: 1.4
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
@@ -4958,6 +4986,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FoldLineProgressController
   duration: 2
+  fadeOutDuration: 0.65
+  completedCreaseVisibility: 0.22
 --- !u!1 &1075492036 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 0b1b58657c66d714f9b8bbff83c96aee, type: 3}
@@ -5936,7 +5966,7 @@ MonoBehaviour:
   preFoldLiftDuration: 2.5
   preFoldFlashDuration: 0.22
   preFoldFlashStrength: 0.7
-  preFoldReflectionAlpha: 0.3
+  preFoldReflectionAlpha: 0.461
 --- !u!1 &1239388578
 GameObject:
   m_ObjectHideFlags: 0
@@ -7179,6 +7209,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 9762208a1fa4d5f45901e9752d68c726, type: 2}
     - target: {fileID: 8215254895220840298, guid: dfb1958f229adca49975306dc64b5378, type: 3}
       propertyPath: m_Layer
       value: 3
@@ -7702,7 +7736,11 @@ MonoBehaviour:
   floatAmplitude: 0.04
   floatFrequency: 0.7
   floatRotationAngle: 1.5
-  foldAnimator: {fileID: 0}
+  foldAnimator: {fileID: 2200000004}
+  foldFlipDelay: 0.1
+  foldFlipDuration: 0.45
+  foldFlipLocalAxis: {x: 1, y: 0, z: 0}
+  foldFlipAngle: 220
   foldFinalScaleMultiplier: 1.4
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
@@ -7922,7 +7960,7 @@ MeshRenderer:
   m_GameObject: {fileID: 1706374230}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
@@ -19023,9 +19061,9 @@ MonoBehaviour:
   foldDuration: 0.8
   foldCameraPoint: {fileID: 1226845974}
   foldZoomDuration: 0.8
-  lateFoldZoomDelay: 2
-  lateFoldZoomDuration: 0.8
-  lateFoldZoomFov: 21
+  lateFoldZoomDelay: 0.8
+  lateFoldZoomDuration: 2.767
+  lateFoldZoomFov: 12
   foldCenterSmoothTime: 0.35
 --- !u!1 &2114838468
 GameObject:
@@ -19332,6 +19370,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2142820649}
   m_CullTransparentMesh: 1
+--- !u!95 &2200000001 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+  m_PrefabInstance: {fileID: 337071975}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &2200000002 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+  m_PrefabInstance: {fileID: 781709361}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &2200000003 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+  m_PrefabInstance: {fileID: 961148247}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &2200000004 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: dfb1958f229adca49975306dc64b5378, type: 3}
+  m_PrefabInstance: {fileID: 1696808926}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

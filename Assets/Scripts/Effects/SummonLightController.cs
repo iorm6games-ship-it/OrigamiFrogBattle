@@ -494,6 +494,24 @@ public class SummonLightController : MonoBehaviour
         // 折り畳み開始
         selectedPaper.PlayFoldAnimation();
 
+        // STEP03付近からSTEP09完了までズーム
+        if (summonCameraController != null)
+        {
+            StartCoroutine(
+                summonCameraController.ZoomLateFold()
+            );
+        }
+
+        yield return selectedPaper.WaitForFoldAnimation();
+
+        // 折り終えたら、Shader Graph の折れ線を滑らかに消す
+        if (foldLineProgressController != null)
+        {
+            yield return foldLineProgressController.FadeOutFoldLine(
+                selectedPaper.TargetRenderer
+            );
+        }
+
         introCoroutine = null;
     }
 

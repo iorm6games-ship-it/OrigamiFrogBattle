@@ -48,6 +48,7 @@ public sealed class SummonCameraController : MonoBehaviour
     private bool trackFoldCenter;
     private Vector3 foldCenterVelocity;
     private float defaultFov;
+    private Vector3 foldTrackingStartRendererPosition;
 
     private void Awake()
     {
@@ -241,6 +242,12 @@ public sealed class SummonCameraController : MonoBehaviour
         foldCenterVelocity =
             Vector3.zero;
 
+        if (foldFocusSkinnedRenderer != null)
+        {
+            foldTrackingStartRendererPosition =
+                foldFocusSkinnedRenderer.transform.position;
+        }
+
         if (bakedFoldMesh == null)
         {
             bakedFoldMesh =
@@ -283,12 +290,22 @@ public sealed class SummonCameraController : MonoBehaviour
         float maxX =
             float.NegativeInfinity;
 
+        float minY =
+            float.PositiveInfinity;
+
+        float maxY =
+            float.NegativeInfinity;
+
         Transform meshTransform =
             foldFocusSkinnedRenderer.transform;
 
-        // -------------------------
-        // ここは頂点を調べるループ
-        // -------------------------
+        // 折り開始後のRenderer全体の移動量。
+        // これを頂点から差し引くことで、
+        // 浮遊には追従せず、折りによる形状変化だけを追う。
+        Vector3 floatingOffset =
+            meshTransform.position -
+            foldTrackingStartRendererPosition;
+
         for (int i = 0;
             i < vertices.Length;
             i++)
@@ -297,6 +314,9 @@ public sealed class SummonCameraController : MonoBehaviour
                 meshTransform.TransformPoint(
                     vertices[i]
                 );
+
+            // Renderer全体の浮遊移動は追わない
+            worldPosition -= floatingOffset;
 
             Vector3 viewport =
                 targetCamera.WorldToViewportPoint(
@@ -319,29 +339,49 @@ public sealed class SummonCameraController : MonoBehaviour
                     maxX,
                     viewport.x
                 );
+
+            minY =
+                Mathf.Min(
+                    minY,
+                    viewport.y
+                );
+
+            maxY =
+                Mathf.Max(
+                    maxY,
+                    viewport.y
+                );
         }
 
         if (float.IsInfinity(minX) ||
-            float.IsInfinity(maxX))
+            float.IsInfinity(maxX) ||
+            float.IsInfinity(minY) ||
+            float.IsInfinity(maxY))
         {
             return;
         }
 
-        // -------------------------
-        // forループの外
-        // 見た目の左右中心を求める
-        // -------------------------
+        // 変形後メッシュの、画面上の見た目の中心
         float visualCenterX =
             (minX + maxX) * 0.5f;
 
-        // 画面中央0.5からどれだけズレているか
-        float viewportError =
+        float visualCenterY =
+            (minY + maxY) * 0.5f;
+
+        float viewportErrorX =
             visualCenterX - 0.5f;
 
+        float viewportErrorY =
+            visualCenterY - 0.5f;
+
         // 対象までの奥行き
+        Vector3 trackingBoundsCenter =
+            foldFocusSkinnedRenderer.bounds.center -
+            floatingOffset;
+
         float depth =
             Vector3.Dot(
-                foldFocusSkinnedRenderer.bounds.center -
+                trackingBoundsCenter -
                 targetCamera.transform.position,
                 targetCamera.transform.forward
             );
@@ -365,10 +405,15 @@ public sealed class SummonCameraController : MonoBehaviour
             halfHeight *
             targetCamera.aspect;
 
-        float worldOffset =
-            viewportError *
+        float worldOffsetX =
+            viewportErrorX *
             2f *
             halfWidth;
+
+        float worldOffsetY =
+            viewportErrorY *
+            2f *
+            halfHeight;
 
         Transform cameraTransform =
             targetCamera.transform;
@@ -376,7 +421,9 @@ public sealed class SummonCameraController : MonoBehaviour
         Vector3 desiredPosition =
             cameraTransform.position +
             cameraTransform.right *
-            worldOffset;
+            worldOffsetX +
+            cameraTransform.up *
+            worldOffsetY;
 
         cameraTransform.position =
             Vector3.SmoothDamp(
@@ -385,10 +432,5 @@ public sealed class SummonCameraController : MonoBehaviour
                 ref foldCenterVelocity,
                 foldCenterSmoothTime
             );
-
-        Debug.Log(
-            $"Visual center={visualCenterX:F4}, " +
-            $"error={viewportError:F4}"
-        );
     }
 }

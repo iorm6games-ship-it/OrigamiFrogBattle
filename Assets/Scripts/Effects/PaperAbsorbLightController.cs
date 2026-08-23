@@ -118,6 +118,21 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             FoldStepFlashId,
             Mathf.Clamp01(amount)
         );
+
+        // 一時的な確認ログ
+        if (amount >= 0.9f)
+        {
+            Debug.Log(
+                $"[FoldFlashValue] " +
+                $"renderer={targetRenderer.name}, " +
+                $"sameMaterial={runtimeMaterial == targetRenderer.sharedMaterial}, " +
+                $"hasStep={runtimeMaterial.HasProperty(FlashStepId)}, " +
+                $"hasFlash={runtimeMaterial.HasProperty(FoldStepFlashId)}, " +
+                $"step={runtimeMaterial.GetFloat(FlashStepId):F3}, " +
+                $"amount={runtimeMaterial.GetFloat(FoldStepFlashId):F3}",
+                this
+            );
+        }
     }
 
     public void ClearFoldStepFlash()

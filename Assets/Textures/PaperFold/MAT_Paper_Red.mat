@@ -132,12 +132,14 @@ Material:
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
     - _Fade: 1
-    - _FlashStep: 0.1215686
-    - _FlashStepWidth: 0.05
+    - _FlashStep: 0
+    - _FlashStepWidth: 0.1
     - _FoldActiveWidth: 0.2
     - _FoldColorStrength: 3
+    - _FoldLineFade: 1
     - _FoldLineThickness: 0.002
-    - _FoldStepFlash: 1
+    - _FoldStepFlash: 0
+    - _FoldStepFlashStrength: 5
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
@@ -165,8 +167,8 @@ Material:
     - _BaseColor: {r: 0.65882355, g: 0.19607843, b: 0.23137255, a: 1}
     - _Color: {r: 1, g: 0.2196078, b: 0.2196078, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FoldColor: {r: 0.2, g: 0.019607844, b: 0.019607844, a: 1}
-    - _PreFoldFlashColor: {r: 0.45, g: 0.75, b: 1, a: 1}
+    - _FoldColor: {r: 0.23, g: 0.07, b: 0.08, a: 1}
+    - _PreFoldFlashColor: {r: 1.8, g: 3, b: 4, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -6,10 +6,22 @@ public sealed class FoldLineProgressController : MonoBehaviour
     private static readonly int ProgressId =
         Shader.PropertyToID("_Progress");
 
+    private static readonly int FoldLineFadeId =
+        Shader.PropertyToID("_FoldLineFade");
+
     [Header("Animation")]
     [Min(0.1f)]
     [SerializeField]
     private float duration = 0.9f;
+
+    [Min(0.1f)]
+    [SerializeField]
+    private float fadeOutDuration = 0.65f;
+
+    [Tooltip("折り畳み完了後に残す、紙の折り目の濃さ")]
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float completedCreaseVisibility = 0.22f;
 
     private Coroutine animationCoroutine;
     private Renderer currentRenderer;
@@ -39,6 +51,11 @@ public sealed class FoldLineProgressController : MonoBehaviour
         SetProgress(
             targetRenderer,
             0f
+        );
+
+        SetFoldLineFade(
+            targetRenderer,
+            1f
         );
     }
 
@@ -84,6 +101,76 @@ public sealed class FoldLineProgressController : MonoBehaviour
         currentRenderer = null;
     }
 
+    public IEnumerator FadeOutFoldLine(
+        Renderer targetRenderer
+    )
+    {
+        if (targetRenderer == null)
+        {
+            yield break;
+        }
+
+        if (!HasProperty(
+                targetRenderer,
+                FoldLineFadeId
+            ))
+        {
+            Debug.LogError(
+                $"{nameof(FoldLineProgressController)}: " +
+                $"{targetRenderer.name} のShaderに " +
+                "_FoldLineFade がありません",
+                targetRenderer
+            );
+
+            yield break;
+        }
+
+        float elapsedTime = 0f;
+        float safeDuration =
+            Mathf.Max(
+                0.01f,
+                fadeOutDuration
+            );
+
+        SetFoldLineFade(
+            targetRenderer,
+            1f
+        );
+
+        while (elapsedTime < safeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+
+            float progress =
+                Mathf.Clamp01(
+                    elapsedTime / safeDuration
+                );
+
+            float easedProgress =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    progress
+                );
+
+            SetFoldLineFade(
+                targetRenderer,
+                Mathf.Lerp(
+                    1f,
+                    completedCreaseVisibility,
+                    easedProgress
+                )
+            );
+
+            yield return null;
+        }
+
+        SetFoldLineFade(
+            targetRenderer,
+            completedCreaseVisibility
+        );
+    }
+
     private IEnumerator AnimateProgress(
         Renderer targetRenderer
     )
@@ -125,13 +212,38 @@ public sealed class FoldLineProgressController : MonoBehaviour
         float progress
     )
     {
+        SetFloat(
+            targetRenderer,
+            ProgressId,
+            progress
+        );
+    }
+
+    private void SetFoldLineFade(
+        Renderer targetRenderer,
+        float fade
+    )
+    {
+        SetFloat(
+            targetRenderer,
+            FoldLineFadeId,
+            fade
+        );
+    }
+
+    private void SetFloat(
+        Renderer targetRenderer,
+        int propertyId,
+        float value
+    )
+    {
         targetRenderer.GetPropertyBlock(
             propertyBlock
         );
 
         propertyBlock.SetFloat(
-            ProgressId,
-            progress
+            propertyId,
+            value
         );
 
         targetRenderer.SetPropertyBlock(
@@ -143,11 +255,22 @@ public sealed class FoldLineProgressController : MonoBehaviour
         Renderer targetRenderer
     )
     {
+        return HasProperty(
+            targetRenderer,
+            ProgressId
+        );
+    }
+
+    private bool HasProperty(
+        Renderer targetRenderer,
+        int propertyId
+    )
+    {
         Material material =
             targetRenderer.sharedMaterial;
 
         return
             material != null &&
-            material.HasProperty(ProgressId);
+            material.HasProperty(propertyId);
     }
 }

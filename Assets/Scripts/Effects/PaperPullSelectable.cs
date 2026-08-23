@@ -170,6 +170,27 @@ public class PaperPullSelectable :
     [SerializeField]
     private Animator foldAnimator;
 
+    [Header("Fold Completion Flip")]
+
+    [Tooltip("折り完了後、裏返しを始めるまでの間")]
+    [Min(0f)]
+    [SerializeField]
+    private float foldFlipDelay = 0.1f;
+
+    [Tooltip("完成したカエルを裏返す時間")]
+    [Min(0.01f)]
+    [SerializeField]
+    private float foldFlipDuration = 0.45f;
+
+    [Tooltip("裏返しに使うローカル軸")]
+    [SerializeField]
+    private Vector3 foldFlipLocalAxis =
+        Vector3.right;
+
+    [Tooltip("裏返しの回転角度。回転方向を反転する場合は負の値にする")]
+    [SerializeField]
+    private float foldFlipAngle = 220f;
+
     [SerializeField]
     private float foldFinalScaleMultiplier = 1.4f;
 
@@ -184,6 +205,7 @@ public class PaperPullSelectable :
     private float foldStepFlashDuration = 0.18f;
 
     private Coroutine foldStepFlashCoroutine;
+    private Coroutine foldAnimationCoroutine;
 
     private float foldCenterOffset;
 
@@ -233,11 +255,147 @@ public class PaperPullSelectable :
             return;
         }
 
+        if (foldAnimationCoroutine != null)
+        {
+            StopCoroutine(
+                foldAnimationCoroutine
+            );
+        }
+
+        foldAnimationCoroutine =
+            StartCoroutine(
+                PlayFoldAnimationCoroutine()
+            );
+    }
+
+    public IEnumerator WaitForFoldAnimation()
+    {
+        while (foldAnimationCoroutine != null)
+        {
+            yield return null;
+        }
+    }
+
+    private IEnumerator PlayFoldAnimationCoroutine()
+    {
         foldAnimator.Play(
             "Fold",
             0,
             0f
         );
+
+        // AnimatorがFoldステートを反映するまで1フレーム待つ
+        yield return null;
+
+        bool enteredFoldState = false;
+
+        while (true)
+        {
+            AnimatorStateInfo stateInfo =
+                foldAnimator.GetCurrentAnimatorStateInfo(0);
+
+            if (stateInfo.IsName("Fold"))
+            {
+                enteredFoldState = true;
+
+                if (stateInfo.normalizedTime >= 1f &&
+                    !foldAnimator.IsInTransition(0))
+                {
+                    break;
+                }
+            }
+            else if (enteredFoldState)
+            {
+                // Fold完了後に別ステートへ遷移した場合
+                break;
+            }
+
+            yield return null;
+        }
+
+        if (foldFlipDelay > 0f)
+        {
+            yield return new WaitForSeconds(
+                foldFlipDelay
+            );
+        }
+
+        yield return FlipCompletedFrogCoroutine();
+
+        foldAnimationCoroutine = null;
+    }
+
+    private IEnumerator FlipCompletedFrogCoroutine()
+    {
+        float duration =
+            Mathf.Max(
+                0.01f,
+                foldFlipDuration
+            );
+
+        Vector3 localAxis =
+            foldFlipLocalAxis.sqrMagnitude > 0.0001f
+                ? foldFlipLocalAxis.normalized
+                : Vector3.right;
+
+        Quaternion startRotation =
+            floatingCoroutine != null
+                ? floatingBaseRotation
+                : transform.rotation;
+
+        Quaternion endRotation =
+            startRotation *
+            Quaternion.AngleAxis(
+                foldFlipAngle,
+                localAxis
+            );
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+
+            float normalizedTime =
+                Mathf.Clamp01(
+                    elapsedTime / duration
+                );
+
+            float easedTime =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    normalizedTime
+                );
+
+            Quaternion currentRotation =
+                Quaternion.Slerp(
+                    startRotation,
+                    endRotation,
+                    easedTime
+                );
+
+            // 浮遊はこの基準回転を元に継続される
+            floatingBaseRotation =
+                currentRotation;
+
+            if (floatingCoroutine == null)
+            {
+                transform.rotation =
+                    currentRotation;
+            }
+
+            yield return null;
+        }
+
+        floatingBaseRotation =
+            endRotation;
+
+        if (floatingCoroutine == null)
+        {
+            transform.rotation =
+                endRotation;
+        }
     }
 
     private IEnumerator FadeOutAsUnselectedCoroutine()
@@ -1337,6 +1495,16 @@ public class PaperPullSelectable :
                 foldStepFlashDuration
             );
 
+        // Step 3は折り畳み中に見失いやすいため、
+        // ほかのStepより少し長く表示する。
+        if (step == 3)
+        {
+            duration = Mathf.Max(
+                duration,
+                0.32f
+            );
+        }
+
         float elapsed = 0f;
 
         while (elapsed < duration)
@@ -1350,8 +1518,29 @@ public class PaperPullSelectable :
 
             float intensity;
 
-            // 最初の30%で素早く発光
-            if (t < 0.3f)
+            if (step == 3 && t < 0.2f)
+            {
+                intensity =
+                    Mathf.SmoothStep(
+                        0f,
+                        1f,
+                        t / 0.2f
+                    );
+            }
+            else if (step == 3 && t < 0.55f)
+            {
+                intensity = 1f;
+            }
+            else if (step == 3)
+            {
+                intensity =
+                    Mathf.SmoothStep(
+                        1f,
+                        0f,
+                        (t - 0.55f) / 0.45f
+                    );
+            }
+            else if (t < 0.3f)
             {
                 intensity =
                     Mathf.SmoothStep(
@@ -1362,7 +1551,6 @@ public class PaperPullSelectable :
             }
             else
             {
-                // 残り70%でゆっくり消える
                 intensity =
                     Mathf.SmoothStep(
                         1f,
