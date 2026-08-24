@@ -202,7 +202,7 @@ public class PaperPullSelectable :
     
     [Header("Fold Step Flash")]
     [SerializeField]
-    private float foldStepFlashDuration = 0.18f;
+    private float foldStepFlashDuration = 0.3f;
 
     private Coroutine foldStepFlashCoroutine;
     private Coroutine foldAnimationCoroutine;

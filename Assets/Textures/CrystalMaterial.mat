@@ -51,11 +51,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 0.2
-    - _EmissionStrength: 0.3
+    - _Alpha: 0.08
+    - _EdgeStrength: 1.4
+    - _EmissionStrength: 0
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
-    - _BaseColor: {r: 0.7, g: 0.88, b: 1, a: 1}
+    - _BaseColor: {r: 0.94, g: 0.98, b: 1, a: 1}
+    - _EdgeColor: {r: 3.6, g: 3.84, b: 4, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
