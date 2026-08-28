@@ -111,7 +111,7 @@ Material:
     - _AbsorbEdgeWidth: 0.1
     - _AbsorbFade: 1
     - _AbsorbNoiseScale: 7
-    - _AbsorbNoiseStrength: 0.2
+    - _AbsorbNoiseStrength: 0.698
     - _AbsorbProgress: 0
     - _AbsorbSoftness: 0.08
     - _AbsorbStrength: 0.9
