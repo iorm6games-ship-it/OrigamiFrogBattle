@@ -107,14 +107,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AbsorbDetailNoiseStrength: 0.12
     - _AbsorbEdgeIntensity: 0.15
     - _AbsorbEdgeWidth: 0.1
     - _AbsorbFade: 1
     - _AbsorbNoiseScale: 7
-    - _AbsorbNoiseStrength: 0.698
+    - _AbsorbNoiseStrength: 0.28
     - _AbsorbProgress: 0
     - _AbsorbSoftness: 0.08
-    - _AbsorbStrength: 0.9
+    - _AbsorbStrength: 0.45
     - _ActiveFoldColorStrength: 5
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
