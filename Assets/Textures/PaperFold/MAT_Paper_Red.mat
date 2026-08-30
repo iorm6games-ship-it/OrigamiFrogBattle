@@ -107,11 +107,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AbsorbBranchSpread: 1
-    - _AbsorbBranchStrength: 0.1
+    - _AbsorbBranchSpread: 0
+    - _AbsorbBranchStrength: 0
     - _AbsorbDetailNoiseStrength: 0.12
     - _AbsorbEdgeIntensity: 0.15
-    - _AbsorbEdgeWidth: 0.05
+    - _AbsorbEdgeWidth: 0.1
     - _AbsorbFade: 1
     - _AbsorbNoiseScale: 7
     - _AbsorbNoiseStrength: 0.28

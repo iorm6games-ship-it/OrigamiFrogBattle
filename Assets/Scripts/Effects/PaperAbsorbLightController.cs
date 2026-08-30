@@ -45,6 +45,19 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
     private static readonly int PreFoldFlashId =
         Shader.PropertyToID("_PreFoldFlash");
 
+    private static readonly int AbsorbBranchStrengthId =
+        Shader.PropertyToID("_AbsorbBranchStrength");
+    private static readonly int AbsorbBranchSpreadId =
+        Shader.PropertyToID("_AbsorbBranchSpread");
+    
+    [Header("Branch")]
+    [SerializeField, Range(0f, 1f)]
+    private float branchStartNormalizedProgress = 0.33f;
+    [SerializeField, Range(0f, 1f)]
+    private float branchEndNormalizedProgress = 0.9f;
+    [SerializeField, Range(0f, 1f)]
+    private float branchMaxStrength = 0.1f;
+
     private void Awake()
     {
         if (targetRenderer == null)
@@ -196,7 +209,16 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
         runtimeMaterial.SetFloat(
             FoldStepFlashId,
             0f
-        );        
+        );
+
+        runtimeMaterial.SetFloat(
+            AbsorbBranchSpreadId,
+            0f
+        );
+        runtimeMaterial.SetFloat(
+            AbsorbBranchStrengthId,
+            0f
+        );
     }
 
     private IEnumerator PlayAbsorbRoutine(
@@ -223,6 +245,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             Mathf.Clamp01(
                 firstPhaseEndProgress
             );
+        UpdateBranch(0f);
         
         // まず内部状態を初期化
         runtimeMaterial.SetVector(
@@ -270,6 +293,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
                     firstPhaseEndProgress,
                     eased
                 );
+            UpdateBranch(normalizedProgress);
 
             float shaderProgress =
                 Mathf.Lerp(
@@ -289,7 +313,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
 
             yield return null;
         }
-
+        UpdateBranch(firstPhaseEndProgress);
         // 境界を正確に固定
         float phase1ShaderProgress =
             Mathf.Lerp(
@@ -336,7 +360,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
                     1f,
                     eased
                 );
-            
+            UpdateBranch(normalizedProgress);
             float shaderProgress =
                 Mathf.Lerp(
                     startProgress,
@@ -402,6 +426,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             AbsorbProgressId,
             startProgress
         );
+        UpdateBranch(1f);
 
     }
     private void OnDestroy()
@@ -410,5 +435,56 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
         {
             Destroy(runtimeMaterial);
         }
+    }
+
+    private void UpdateBranch(
+        float normalizedProgress
+    )
+    {
+        float start =
+            Mathf.Clamp(
+                branchStartNormalizedProgress,
+                0f,
+                0.99f
+            );
+        
+        float end =
+            Mathf.Clamp(
+                branchEndNormalizedProgress,
+                start + 0.01f,
+                1f
+            );
+        float t =
+            Mathf.InverseLerp(
+                start,
+                end,
+                Mathf.Clamp01(normalizedProgress)
+            );
+        float spread =
+            Mathf.SmoothStep(
+                0f,
+                1f,
+                t
+            );
+        
+        // 移動が始まる頃には光が見えるように
+        // Strength は Spread より早く最大へ到達させる
+        float strengthT =
+            Mathf.SmoothStep(
+                0f,
+                1f,
+                Mathf.Clamp01(t * 2f)
+            );
+        
+        runtimeMaterial.SetFloat(
+            AbsorbBranchSpreadId,
+            spread
+        );
+
+        runtimeMaterial.SetFloat(
+            AbsorbBranchStrengthId,
+            branchMaxStrength * strengthT
+        );
+
     }
 }
