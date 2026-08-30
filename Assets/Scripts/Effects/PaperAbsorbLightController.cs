@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -57,6 +58,10 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
     private float branchEndNormalizedProgress = 0.9f;
     [SerializeField, Range(0f, 1f)]
     private float branchMaxStrength = 0.1f;
+    private static readonly int AbsorbTrailFadeId =
+        Shader.PropertyToID("_AbsorbTrailFade");
+    [SerializeField]
+    private float trailFadeDuration = 0.35f;
 
     private void Awake()
     {
@@ -217,6 +222,10 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
         );
         runtimeMaterial.SetFloat(
             AbsorbBranchStrengthId,
+            0f
+        );
+        runtimeMaterial.SetFloat(
+            AbsorbTrailFadeId,
             0f
         );
     }
@@ -384,7 +393,10 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             endProgress
         );
         onProgress?.Invoke(1f);
-
+        
+        // 尾を中心から四隅へ向けて消す
+        yield return PlayTrailFadeRoutine();
+        
         // 浸透範囲を固定したまま
         // 元の紙色へ戻す
         float fadeTime = 0f;
@@ -486,5 +498,46 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             branchMaxStrength * strengthT
         );
 
+    }
+
+    private IEnumerator PlayTrailFadeRoutine()
+    {
+        float duration =
+            Mathf.Max(
+                0.01f,
+                trailFadeDuration
+            );
+        float time = 0f;
+
+        runtimeMaterial.SetFloat(
+            AbsorbTrailFadeId,
+            0f
+        );
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            float t =
+                Mathf.Clamp01(
+                    time / duration
+                );
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+            runtimeMaterial.SetFloat(
+                AbsorbTrailFadeId,
+                eased
+            );
+
+            yield return null;
+        }
+
+        runtimeMaterial.SetFloat(
+            AbsorbTrailFadeId,
+            1f
+        );
     }
 }

@@ -98,6 +98,9 @@
         },
         {
             "m_Id": "36a9c51992e644c4b98bea2aa0969886"
+        },
+        {
+            "m_Id": "242891b5ed0d4833bf50511b70a0a33e"
         }
     ],
     "m_Keywords": [],
@@ -602,6 +605,9 @@
         },
         {
             "m_Id": "58a7c36c761d4542ad2ac15617884bf7"
+        },
+        {
+            "m_Id": "febf6ab83ae84ce19be542a64567e835"
         }
     ],
     "m_GroupDatas": [],
@@ -3424,6 +3430,62 @@
         {
             "m_OutputSlot": {
                 "m_Node": {
+                    "m_Id": "febf6ab83ae84ce19be542a64567e835"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "8b859bce843945c4a2be08b4dba79710"
+                },
+                "m_SlotId": 860359649
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "febf6ab83ae84ce19be542a64567e835"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "cfdf7ca462f34806908af3ae6482c21f"
+                },
+                "m_SlotId": 860359649
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "febf6ab83ae84ce19be542a64567e835"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "e754fa9de1f94737a783f1f49efdbaa6"
+                },
+                "m_SlotId": 860359649
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "febf6ab83ae84ce19be542a64567e835"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "f608ae3a0a7742da9d67b22ca1bdbc5a"
+                },
+                "m_SlotId": 860359649
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
                     "m_Id": "fede5bd78aad49558e7c15ea011eef91"
                 },
                 "m_SlotId": 0
@@ -6201,6 +6263,50 @@
 }
 
 {
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
+    "m_ObjectId": "242891b5ed0d4833bf50511b70a0a33e",
+    "m_Guid": {
+        "m_GuidSerialized": "c04e34a5-9c44-455e-89ee-135352b718fe"
+    },
+    "promotedFromAssetID": "",
+    "promotedFromCategoryName": "",
+    "promotedOrdering": -1,
+    "m_Name": "AbsorbTrailFade",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "AbsorbTrailFade",
+    "m_DefaultReferenceName": "_AbsorbTrailFade",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_PerRendererData": false,
+    "m_customAttributes": [],
+    "m_Value": 0.0,
+    "m_FloatType": 1,
+    "m_LiteralFloatMode": false,
+    "m_RangeValues": {
+        "x": 0.0,
+        "y": 1.0
+    },
+    "m_SliderType": 0,
+    "m_SliderPower": 3.0,
+    "m_EnumType": 0,
+    "m_CSharpEnumString": "",
+    "m_EnumNames": [
+        "Default"
+    ],
+    "m_EnumValues": [
+        0
+    ]
+}
+
+{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DynamicValueMaterialSlot",
     "m_ObjectId": "24a5a7c9f7664d60a9b9a3ce3219e473",
@@ -7006,6 +7112,9 @@
         },
         {
             "m_Id": "36a9c51992e644c4b98bea2aa0969886"
+        },
+        {
+            "m_Id": "242891b5ed0d4833bf50511b70a0a33e"
         }
     ]
 }
@@ -8897,6 +9006,22 @@
         "e32": 0.0,
         "e33": 1.0
     }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "479df145f721486098c67b5463da53f6",
+    "m_Id": 860359649,
+    "m_DisplayName": "TrailFade",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "_TrailFade",
+    "m_StageCapability": 3,
+    "m_Value": 0.0,
+    "m_DefaultValue": 0.0,
+    "m_Labels": [],
+    "m_LiteralMode": false
 }
 
 {
@@ -14453,6 +14578,9 @@
             "m_Id": "8365ffc4d9a44b788cefabd89e284a22"
         },
         {
+            "m_Id": "f17464c69d014f6381d11a92faf52ec9"
+        },
+        {
             "m_Id": "b063a0720b0243a1a10ce67b0d52cc91"
         }
     ],
@@ -14470,14 +14598,16 @@
         "16d6c817-8fc7-4ca5-8b04-1d1ed6f3122f",
         "224972ea-e666-4a7d-ba8b-ebf3cd7a1f0a",
         "15a80084-ca95-4026-a9e9-f1e1e2d0fcfd",
-        "2519cf4c-4105-4d91-b791-935df20cff50"
+        "2519cf4c-4105-4d91-b791-935df20cff50",
+        "c98ee33a-f593-4735-b66e-b760fe7344dd"
     ],
     "m_PropertyIds": [
         2104324651,
         1803333773,
         -1849661957,
         1233384282,
-        1709445900
+        1709445900,
+        860359649
     ],
     "m_Dropdowns": [],
     "m_DropdownSelectedEntries": []
@@ -14677,6 +14807,22 @@
         "m_SerializableColors": []
     },
     "m_HashType": 0
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "8e932328f11a49649258bc515a394cd4",
+    "m_Id": 0,
+    "m_DisplayName": "AbsorbTrailFade",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_Value": 0.0,
+    "m_DefaultValue": 0.0,
+    "m_Labels": [],
+    "m_LiteralMode": false
 }
 
 {
@@ -19980,6 +20126,9 @@
             "m_Id": "1e7f6fefb24d4b1dabadf0e8c8295829"
         },
         {
+            "m_Id": "e35e897870114ced8741e487b3368203"
+        },
+        {
             "m_Id": "be2e673d78a54a958a8f7518ffda41e2"
         }
     ],
@@ -19997,14 +20146,16 @@
         "16d6c817-8fc7-4ca5-8b04-1d1ed6f3122f",
         "224972ea-e666-4a7d-ba8b-ebf3cd7a1f0a",
         "15a80084-ca95-4026-a9e9-f1e1e2d0fcfd",
-        "2519cf4c-4105-4d91-b791-935df20cff50"
+        "2519cf4c-4105-4d91-b791-935df20cff50",
+        "c98ee33a-f593-4735-b66e-b760fe7344dd"
     ],
     "m_PropertyIds": [
         2104324651,
         1803333773,
         -1849661957,
         1233384282,
-        1709445900
+        1709445900,
+        860359649
     ],
     "m_Dropdowns": [],
     "m_DropdownSelectedEntries": []
@@ -20411,6 +20562,22 @@
         "z": 0.0,
         "w": 0.0
     },
+    "m_LiteralMode": false
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "d34b0e4d8c234296a5fabd01ad4b8272",
+    "m_Id": 860359649,
+    "m_DisplayName": "TrailFade",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "_TrailFade",
+    "m_StageCapability": 3,
+    "m_Value": 0.0,
+    "m_DefaultValue": 0.0,
+    "m_Labels": [],
     "m_LiteralMode": false
 }
 
@@ -21956,6 +22123,22 @@
 {
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "e35e897870114ced8741e487b3368203",
+    "m_Id": 860359649,
+    "m_DisplayName": "TrailFade",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "_TrailFade",
+    "m_StageCapability": 3,
+    "m_Value": 0.0,
+    "m_DefaultValue": 0.0,
+    "m_Labels": [],
+    "m_LiteralMode": false
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "e44711ca31da4592a9b3811f4a9041f9",
     "m_Id": 6,
     "m_DisplayName": "B",
@@ -22182,6 +22365,9 @@
             "m_Id": "c2e09bd3d6544d8994952365a98a3388"
         },
         {
+            "m_Id": "d34b0e4d8c234296a5fabd01ad4b8272"
+        },
+        {
             "m_Id": "5252013c16c04afb9456c55e39995e58"
         }
     ],
@@ -22199,14 +22385,16 @@
         "16d6c817-8fc7-4ca5-8b04-1d1ed6f3122f",
         "224972ea-e666-4a7d-ba8b-ebf3cd7a1f0a",
         "15a80084-ca95-4026-a9e9-f1e1e2d0fcfd",
-        "2519cf4c-4105-4d91-b791-935df20cff50"
+        "2519cf4c-4105-4d91-b791-935df20cff50",
+        "c98ee33a-f593-4735-b66e-b760fe7344dd"
     ],
     "m_PropertyIds": [
         2104324651,
         1803333773,
         -1849661957,
         1233384282,
-        1709445900
+        1709445900,
+        860359649
     ],
     "m_Dropdowns": [],
     "m_DropdownSelectedEntries": []
@@ -22824,6 +23012,22 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "f17464c69d014f6381d11a92faf52ec9",
+    "m_Id": 860359649,
+    "m_DisplayName": "TrailFade",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "_TrailFade",
+    "m_StageCapability": 3,
+    "m_Value": 0.0,
+    "m_DefaultValue": 0.0,
+    "m_Labels": [],
+    "m_LiteralMode": false
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.SaturateNode",
     "m_ObjectId": "f181d998c87247dd914591841630bc5c",
     "m_Group": {
@@ -23188,6 +23392,9 @@
             "m_Id": "25e0077256b9403e819cdecd4e4d3c20"
         },
         {
+            "m_Id": "479df145f721486098c67b5463da53f6"
+        },
+        {
             "m_Id": "00a2e5384cf545449192677a92262269"
         }
     ],
@@ -23205,14 +23412,16 @@
         "16d6c817-8fc7-4ca5-8b04-1d1ed6f3122f",
         "224972ea-e666-4a7d-ba8b-ebf3cd7a1f0a",
         "15a80084-ca95-4026-a9e9-f1e1e2d0fcfd",
-        "2519cf4c-4105-4d91-b791-935df20cff50"
+        "2519cf4c-4105-4d91-b791-935df20cff50",
+        "c98ee33a-f593-4735-b66e-b760fe7344dd"
     ],
     "m_PropertyIds": [
         2104324651,
         1803333773,
         -1849661957,
         1233384282,
-        1709445900
+        1709445900,
+        860359649
     ],
     "m_Dropdowns": [],
     "m_DropdownSelectedEntries": []
@@ -23766,6 +23975,42 @@
     },
     "m_Property": {
         "m_Id": "f0231cba0ed94e858d3212770bdddf70"
+    }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
+    "m_ObjectId": "febf6ab83ae84ce19be542a64567e835",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "Property",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": 188.2843017578125,
+            "y": -2367.6748046875,
+            "width": 0.0,
+            "height": 0.0
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "8e932328f11a49649258bc515a394cd4"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_Property": {
+        "m_Id": "242891b5ed0d4833bf50511b70a0a33e"
     }
 }
 
