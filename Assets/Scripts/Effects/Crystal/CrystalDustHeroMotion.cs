@@ -1,8 +1,15 @@
 using System;
 using UnityEngine;
 
-public sealed class CrystalDustHeroMotion: MonoBehaviour
+public sealed class CrystalDustHeroMotion : MonoBehaviour
 {
+    private enum Phase
+    {
+        Idle,
+        Burst,
+        Drift
+    }
+
     [Header("Burst")]
     [SerializeField]
     private float burstDuration = 0.35f;
@@ -10,14 +17,31 @@ public sealed class CrystalDustHeroMotion: MonoBehaviour
     [SerializeField]
     private float burstDistance = 0.8f;
 
+    [Header("Drift")]
+    [SerializeField]
+    private float driftDuration = 1.2f;
+
+    [SerializeField]
+    private float driftAmplitude = 0.18f;
+
+    [SerializeField]
+    private float driftFrequency = 2.2f;
+
+    [SerializeField]
+    private float driftVerticalSpeed = 0.08f;
+
     [Header("Rotation")]
     [SerializeField]
     private Vector3 rotationSpeed = new Vector3(35f, 70f, 25f);
 
+    private Phase phase = Phase.Idle;
+
     private Vector3 startPosition;
     private Vector3 burstDirection;
+    private Vector3 driftStartPosition;
+
     private float elapsedTime;
-    private bool isPlaying;
+    private float randomPhase;
 
     public void Play(Vector3 origin, Vector3 direction)
     {
@@ -27,36 +51,98 @@ public sealed class CrystalDustHeroMotion: MonoBehaviour
         transform.position = origin;
 
         elapsedTime = 0f;
-        isPlaying = true;
+        randomPhase = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+
+        phase = Phase.Burst;
 
     }
 
     private void Update()
     {
-        if (!isPlaying)
+
+        if (phase == Phase.Idle)
         {
             return;
         }
-
-        elapsedTime += Time.deltaTime;
 
         transform.Rotate(
             rotationSpeed * Time.deltaTime,
             Space.Self
         );
 
+        switch (phase)
+        {
+            case Phase.Burst:
+                UpdateBurst();
+                break;
+            case Phase.Drift:
+                UpdateDrift();
+                break;
+        }
+    }
+
+    private void UpdateBurst()
+    {
+        elapsedTime += Time.deltaTime;
+
         float t = Mathf.Clamp01(elapsedTime / burstDuration);
 
-        // 最初は勢いよく終盤で柔らかく減速
-        float easedT = 1f - Mathf.Pow(1f -t, 3f);
+        // 強く飛び出して、終盤で減速
+        float easedT = 1f - Mathf.Pow(1f - t, 3f);
 
         transform.position =
             startPosition +
             burstDirection * burstDistance * easedT;
-        
+
         if (t >= 1f)
         {
-            isPlaying = false;
+            driftStartPosition = transform.position;
+            elapsedTime = 0f;
+            phase = Phase.Drift;
+        }        
+    }
+    private void UpdateDrift()
+    {
+        elapsedTime += Time.deltaTime;
+
+        float t = elapsedTime;
+
+        float noiseX =
+            Mathf.PerlinNoise(
+                randomPhase,
+                t * driftFrequency) * 2f -1f;
+        
+        float noiseY =
+            Mathf.PerlinNoise(
+                randomPhase + 10f,
+                t * driftFrequency * 0.8f) * 2f -1f;
+        
+        float noiseZ =
+            Mathf.PerlinNoise(
+                randomPhase + 20f,
+                t * driftFrequency * 0.9f) * 2f - 1f;
+        
+        Vector3 driftOffset = new Vector3(
+            noiseX,
+            noiseY * 0.6f,
+            noiseZ * 0.8f);
+        driftOffset *= driftAmplitude;
+
+        // ごく弱い移動成分
+        // 一定上昇背にはせずに、漂いながら少しだけ空間を流れる
+        Vector3 slowFlow = new Vector3(
+            0.04f,
+            driftVerticalSpeed,
+            0.02f) * t;
+            
+        transform.position =
+            driftStartPosition +
+            driftOffset +
+            slowFlow;
+
+        if (elapsedTime >= driftDuration)
+        {
+            phase = Phase.Idle;
         }
     }
 }

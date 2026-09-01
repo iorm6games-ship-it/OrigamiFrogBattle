@@ -1786,7 +1786,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &433708250
 Transform:
   m_ObjectHideFlags: 0
@@ -1875,6 +1875,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 486310107}
+  - component: {fileID: 486310108}
   m_Layer: 0
   m_Name: CrystalEffectRoot
   m_TagString: Untagged
@@ -1904,6 +1905,21 @@ Transform:
   - {fileID: 433708250}
   m_Father: {fileID: 1025863796}
   m_LocalEulerAnglesHint: {x: 0, y: -20, z: 0}
+--- !u!114 &486310108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 486310106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5de0a09406f537b4e95dbd2ea57f7a66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrystalEffectController
+  heroPrefab: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+  testSpawnPoint: {fileID: 2144802466}
+  testBurstDirection: {x: 1, y: 0.4, z: 0}
 --- !u!1 &541102414
 GameObject:
   m_ObjectHideFlags: 0
@@ -2430,7 +2446,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &675227756
 Transform:
   m_ObjectHideFlags: 0
@@ -9082,7 +9098,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1908560209
 Transform:
   m_ObjectHideFlags: 0
@@ -14451,7 +14467,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2036214075
 Transform:
   m_ObjectHideFlags: 0
@@ -20011,7 +20027,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2144802466
 Transform:
   m_ObjectHideFlags: 0
@@ -20116,6 +20132,30 @@ PrefabInstance:
     - target: {fileID: 754142826207319649, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_Name
       value: CrystalDustHero
+      objectReference: {fileID: 0}
+    - target: {fileID: 754142826207319649, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: burstDistance
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: driftDuration
+      value: 1.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: driftAmplitude
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: driftFrequency
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: driftVerticalSpeed
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 3342090603888790070, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_LocalPosition.x

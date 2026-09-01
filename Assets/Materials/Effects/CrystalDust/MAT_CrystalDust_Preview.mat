@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MAT_CrystalDust_Preview
-  m_Shader: {fileID: -6465566751694194690, guid: b66ffad305720f9439fa6aca968cc66d, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 81a0905dec78fc44588905098586bc84, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -52,17 +52,22 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 0.2
-    - _EdgeStrength: 0.7
+    - _EdgeStrength: 0
     - _EmissionStrength: 0
     - _FaceHighlightStrength: 0.15
     - _InnerStrength: 0.02
     - _QueueControl: 0
     - _QueueOffset: 0
     - _RefractionStrength: 0.02
+    - _SparkleScale: 12
+    - _SparkleSpeed: 0.25
+    - _SparkleStrength: 0.08
+    - _SparkleThresHold: 0.92
     m_Colors:
-    - _BaseColor: {r: 0.88235295, g: 0.93333334, b: 0.9607843, a: 1}
+    - _BaseColor: {r: 0.55, g: 0.72, b: 0.9, a: 0.6509804}
     - _EdgeColor: {r: 3.4764395, g: 4.8795805, b: 5.3403134, a: 1}
-    - _FaceHighlightColor: {r: 200, g: 235, b: 255, a: 1}
+    - _FaceHighlightColor: {r: 4.858033, g: 7.012466, b: 9.08241, a: 0.7058824}
     - _InnerColor: {r: 0.45, g: 0.7, b: 0.95, a: 1}
+    - _SparkleColor: {r: 0.9411765, g: 1.254902, b: 1.72549, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
