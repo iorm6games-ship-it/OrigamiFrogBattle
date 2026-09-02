@@ -20192,13 +20192,41 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 486310107}
     m_Modifications:
+    - target: {fileID: 197069481760359895, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: randomRange.x
+      value: 0.06
+      objectReference: {fileID: 0}
+    - target: {fileID: 197069481760359895, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: randomRange.y
+      value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 197069481760359895, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: randomRange.z
+      value: 0.02
+      objectReference: {fileID: 0}
     - target: {fileID: 754142826207319649, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_Name
       value: CrystalDustHero
       objectReference: {fileID: 0}
     - target: {fileID: 754142826207319649, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 876279972879519805, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1367126405533923577, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: randomRange.x
+      value: 0.06
+      objectReference: {fileID: 0}
+    - target: {fileID: 1367126405533923577, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: randomRange.y
+      value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 1367126405533923577, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: randomRange.z
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: burstDistance
@@ -20259,6 +20287,26 @@ PrefabInstance:
     - target: {fileID: 3342090603888790070, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6358294729919388741, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6629124488979603470, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6998124857027179868, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: randomRange.x
+      value: 0.06
+      objectReference: {fileID: 0}
+    - target: {fileID: 6998124857027179868, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: randomRange.y
+      value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 6998124857027179868, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: randomRange.z
+      value: 0.02
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
