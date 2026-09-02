@@ -110,31 +110,48 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
         float noiseX =
             Mathf.PerlinNoise(
                 randomPhase,
-                t * driftFrequency) * 2f -1f;
-        
+                t * driftFrequency) * 2f - 1f;
+
         float noiseY =
             Mathf.PerlinNoise(
-                randomPhase + 10f,
-                t * driftFrequency * 0.8f) * 2f -1f;
-        
+                randomPhase + 13.7f,
+                t * driftFrequency * 0.57f) * 2f - 1f;
+
         float noiseZ =
             Mathf.PerlinNoise(
-                randomPhase + 20f,
-                t * driftFrequency * 0.9f) * 2f - 1f;
-        
+                randomPhase + 29.3f,
+                t * driftFrequency * 1.31f) * 2f - 1f;
+
         Vector3 driftOffset = new Vector3(
             noiseX,
-            noiseY * 0.6f,
-            noiseZ * 0.8f);
+            noiseY * 0.55f,
+            noiseZ * 0.75f
+        );
+
         driftOffset *= driftAmplitude;
 
-        // ごく弱い移動成分
-        // 一定上昇背にはせずに、漂いながら少しだけ空間を流れる
+        // 一方向へ流し続けず、ゆっくり変化する流れにする
+        float flowX =
+            Mathf.PerlinNoise(
+                randomPhase + 41.2f,
+                t * 0.35f) * 2f - 1f;
+
+        float flowY =
+            Mathf.PerlinNoise(
+                randomPhase + 57.8f,
+                t * 0.28f) * 2f - 1f;
+
+        float flowZ =
+            Mathf.PerlinNoise(
+                randomPhase + 73.4f,
+                t * 0.31f) * 2f - 1f;
+
         Vector3 slowFlow = new Vector3(
-            0.04f,
-            driftVerticalSpeed,
-            0.02f) * t;
-            
+            flowX * 0.05f,
+            flowY * driftVerticalSpeed,
+            flowZ * 0.04f
+        );
+
         transform.position =
             driftStartPosition +
             driftOffset +
