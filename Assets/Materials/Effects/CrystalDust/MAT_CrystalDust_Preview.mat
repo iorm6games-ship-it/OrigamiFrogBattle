@@ -51,30 +51,30 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 0.2
-    - _EdgeStrength: 0.01
-    - _EmissionStrength: 0.03
-    - _FaceHighlightStrength: 0.15
+    - _Alpha: 0.03
+    - _EdgeStrength: 0.03
+    - _EmissionStrength: 0.02
+    - _FaceHighlightStrength: 0.08
     - _InnerSparkleRadius: 0.001
     - _InnerSparkleRadius1: 0.0007
     - _InnerSparkleRadius2: 0.001
     - _InnerSparkleStrength: 3
-    - _InnerSparkleStrength1: 3
+    - _InnerSparkleStrength1: 0
     - _InnerSparkleStrength2: 0
-    - _InnerStrength: 0.06
+    - _InnerStrength: 0.01
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _RefractionStrength: 0.02
+    - _RefractionStrength: 0.05
     - _SparkleBlinkThreshold: 0.88
     - _SparkleScale: 12
     - _SparkleSpeed: 0.25
     - _SparkleStrength: 0.08
     - _SparkleThresHold: 0.92
     m_Colors:
-    - _BaseColor: {r: 0.55, g: 0.72, b: 0.9, a: 0.6509804}
+    - _BaseColor: {r: 3.4743454, g: 3.2837696, b: 3.2984293, a: 0.2}
     - _EdgeColor: {r: 3.4764395, g: 4.8795805, b: 5.3403134, a: 1}
     - _FaceHighlightColor: {r: 4.858033, g: 7.012466, b: 9.08241, a: 0.7058824}
-    - _InnerColor: {r: 0.45, g: 0.7, b: 0.95, a: 1}
+    - _InnerColor: {r: 1.882353, g: 1.882353, b: 2, a: 1}
     - _InnerSparkleColor: {r: 1, g: 0.82, b: 0.45, a: 1}
     - _InnerSparkleColor1: {r: 0.75, g: 0.88, b: 1, a: 1}
     - _InnerSparkleColor2: {r: 1, g: 0.85, b: 0.45, a: 1}

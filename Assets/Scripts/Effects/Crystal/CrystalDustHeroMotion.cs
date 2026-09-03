@@ -32,7 +32,7 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
 
     [Header("Rotation")]
     [SerializeField]
-    private Vector3 rotationSpeed = new Vector3(35f, 70f, 25f);
+    private Vector3 rotationSpeed = new Vector3(6f, 10f, 4f);
 
     private Phase phase = Phase.Idle;
 
@@ -157,9 +157,9 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
             driftOffset +
             slowFlow;
 
-        if (elapsedTime >= driftDuration)
-        {
-            phase = Phase.Idle;
-        }
+        // if (elapsedTime >= driftDuration)
+        // {
+        //     phase = Phase.Idle;
+        // }
     }
 }
