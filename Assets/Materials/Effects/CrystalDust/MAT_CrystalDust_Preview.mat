@@ -52,16 +52,16 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 0.03
-    - _EdgeStrength: 0.03
-    - _EmissionStrength: 0.02
-    - _FaceHighlightStrength: 0.08
+    - _EdgeStrength: 0.5
+    - _EmissionStrength: 0.003
+    - _FaceHighlightStrength: 0.15
     - _InnerSparkleRadius: 0.001
     - _InnerSparkleRadius1: 0.0007
     - _InnerSparkleRadius2: 0.001
     - _InnerSparkleStrength: 3
     - _InnerSparkleStrength1: 0
     - _InnerSparkleStrength2: 0
-    - _InnerStrength: 0.01
+    - _InnerStrength: 0.008
     - _QueueControl: 0
     - _QueueOffset: 0
     - _RefractionStrength: 0.05
