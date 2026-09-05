@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public sealed class CrystalDustHeroMotion : MonoBehaviour
@@ -26,11 +25,9 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
 
     [SerializeField]
     private float burstDistance = 0.8f;
+    private float currentBurstDistance;
 
     [Header("Drift")]
-    [SerializeField]
-    private float driftDuration = 1.2f;
-
     [SerializeField]
     private float driftAmplitude = 0.18f;
 
@@ -61,16 +58,27 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
         baseScale = transform.localScale;
     }
 
-    public void Play(Vector3 origin, Vector3 direction)
+    public void Play(
+        Vector3 origin,
+        Vector3 direction,
+        float burstDistanceMultiplier = 1f)
     {
         startPosition = origin;
         burstDirection = direction.normalized;
+        
+        currentBurstDistance =
+            burstDistance *
+            Mathf.Max(0f, burstDistanceMultiplier);
+        randomPhase =
+            UnityEngine.Random.Range(
+                0f,
+                100f);
 
         transform.position = origin;
         transform.localScale = baseScale * birthStartScale;
 
         elapsedTime = 0f;
-        randomPhase = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+
         birthVisual?.BeginBirth();
         phase = Phase.Birth;
 
@@ -107,12 +115,11 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
         elapsedTime += Time.deltaTime;
         float t = Mathf.Clamp01(elapsedTime / birthDuration);
         birthVisual?.UpdateBirthVisual(t);
-        float settleStart = 0.78f;
+
+        const float settleStart = 0.78f;
 
         // 最初はゆっくり凝縮し、
         // 終盤で少しだけ膨らんで結晶化した感触を出す
-        float easedT =
-            1f - Mathf.Pow(1f - t, 3f);
         float scaleMultiplier;
 
         if (t < settleStart)
@@ -164,7 +171,7 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
 
         transform.position =
             startPosition +
-            burstDirection * burstDistance * easedT;
+            burstDirection * currentBurstDistance * easedT;
 
         if (t >= 1f)
         {

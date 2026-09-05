@@ -1,48 +1,62 @@
-using System;
+using System.Collections;
 using UnityEngine;
 
 public sealed class CrystalEffectController : MonoBehaviour
 {
-    [Header("Reference")]
+    [Header("Formation")]
     [SerializeField]
-    private CrystalDustHeroMotion heroPrefab;
+    private CrystalFormationController centerFormation;
 
     [SerializeField]
-    private Transform testSpawnPoint;
+    private CrystalFormationController[] cornerFormations;
 
-    [Header("Test")]
+    [Header("Timing")]
+    [Min(0f)]
     [SerializeField]
-    private Vector3 testBurstDirection = new Vector3(1f, 1f, 0f);
+    private float cornerFormationDelay = 0.14f;
 
-    [ContextMenu("Play Test Hero")]
-    private void PlayTestHero()
-    {
-        if (heroPrefab == null || testSpawnPoint == null)
-        {
-            Debug.LogWarning("HeroPrefab または TestSpawnPoint が未設定");
-            return;
-        }
-
-        CrystalDustHeroMotion hero =
-            Instantiate(
-                heroPrefab,
-                testSpawnPoint.position,
-                Quaternion.identity,
-                transform
-            );
-        
-        hero.Play(
-            testSpawnPoint.position,
-            testBurstDirection
-        );
-    }
+    private Coroutine sequenceCoroutine;
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            PlayTestHero();
+            PlayTestSequence();
         }
     }
 
+    private void PlayTestSequence()
+    {
+        if (sequenceCoroutine != null)
+        {
+            StopCoroutine(sequenceCoroutine);
+        }
+
+        sequenceCoroutine =
+            StartCoroutine(
+                PlayCrystalFormationSequence());
+    }
+
+    private IEnumerator PlayCrystalFormationSequence()
+    {
+        // まず中央
+        centerFormation?.Play();
+
+        // わずかに時間差
+        yield return new WaitForSeconds(
+            cornerFormationDelay);
+
+        // その後、四隅
+        if (cornerFormations != null)
+        {
+            foreach (
+                CrystalFormationController formation
+                in cornerFormations)
+            {
+                formation?.Play();
+            }
+        }
+
+        sequenceCoroutine = null;
+    }
 }

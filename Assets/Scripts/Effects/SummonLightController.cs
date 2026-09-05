@@ -220,7 +220,11 @@ public class SummonLightController : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField]
     private float preFoldReflectionAlpha = 0.3f;
-    
+
+    [Header("Crystal Formation")]
+    [SerializeField]
+    private CrystalEffectController crystalEffectController;
+
     private void Awake()
     {
         
@@ -457,7 +461,7 @@ public class SummonLightController : MonoBehaviour
             );
         }
         // 一瞬停止させる予定（仮でWaitForDurationを入れている）
-        yield return WaitForDuration(0.5f);
+        yield return WaitForDuration(0.3f);
 
         // 選択した紙に折れ線を走らせる
         if (foldLineProgressController != null)
