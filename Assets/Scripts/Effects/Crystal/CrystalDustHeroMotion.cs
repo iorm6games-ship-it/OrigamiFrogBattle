@@ -6,9 +6,19 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
     private enum Phase
     {
         Idle,
+        Birth,
         Burst,
         Drift
     }
+    [Header("Birth")]
+    [SerializeField]
+    private float birthDuration = 0.2f;
+    [SerializeField]
+    private float birthStartScale = 0.08f;
+    [SerializeField]
+    private float birthOverShoot = 1.12f;
+
+    private Vector3 baseScale;
 
     [Header("Burst")]
     [SerializeField]
@@ -43,17 +53,26 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
     private float elapsedTime;
     private float randomPhase;
 
+    [SerializeField]
+    private CrystalDustBirthVisualController birthVisual;
+
+    private void Awake()
+    {
+        baseScale = transform.localScale;
+    }
+
     public void Play(Vector3 origin, Vector3 direction)
     {
         startPosition = origin;
         burstDirection = direction.normalized;
 
         transform.position = origin;
+        transform.localScale = baseScale * birthStartScale;
 
         elapsedTime = 0f;
         randomPhase = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
-
-        phase = Phase.Burst;
+        birthVisual?.BeginBirth();
+        phase = Phase.Birth;
 
     }
 
@@ -72,6 +91,9 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
 
         switch (phase)
         {
+            case Phase.Birth:
+                UpdateBirth();
+                break;
             case Phase.Burst:
                 UpdateBurst();
                 break;
@@ -80,7 +102,57 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
                 break;
         }
     }
+    private void UpdateBirth()
+    {
+        elapsedTime += Time.deltaTime;
+        float t = Mathf.Clamp01(elapsedTime / birthDuration);
+        birthVisual?.UpdateBirthVisual(t);
+        float settleStart = 0.78f;
 
+        // 最初はゆっくり凝縮し、
+        // 終盤で少しだけ膨らんで結晶化した感触を出す
+        float easedT =
+            1f - Mathf.Pow(1f - t, 3f);
+        float scaleMultiplier;
+
+        if (t < settleStart)
+        {
+            float growT = t / settleStart;
+            scaleMultiplier =
+                Mathf.Lerp(
+                    birthStartScale,
+                    birthOverShoot,
+                    growT
+                );
+        }
+        else
+        {
+            float settleT = (t - settleStart) / (1f - settleStart);
+
+            settleT =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    settleT);
+
+            scaleMultiplier =
+                Mathf.Lerp(
+                    birthOverShoot,
+                    1f,
+                    settleT
+                );
+        }
+
+        transform.localScale = baseScale * scaleMultiplier;
+
+        if (t >= 1f)
+        {
+            transform.localScale = baseScale;
+            birthVisual?.CompleteBirth();
+            elapsedTime = 0f;
+            phase = Phase.Burst;
+        }
+    }
     private void UpdateBurst()
     {
         elapsedTime += Time.deltaTime;

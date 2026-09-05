@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3342090603888790070}
   - component: {fileID: 2637266463136519812}
   - component: {fileID: 577178152485152759}
+  - component: {fileID: 1497501819958369431}
   m_Layer: 0
   m_Name: CrystalDustHero
   m_TagString: Untagged
@@ -51,6 +52,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32016e4e28a487047b7f15dd2650baa2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrystalDustHeroMotion
+  birthDuration: 0.22
+  birthStartScale: 0.08
+  birthOverShoot: 1.12
   burstDuration: 0.35
   burstDistance: 0.8
   driftDuration: 1.2
@@ -58,6 +62,7 @@ MonoBehaviour:
   driftFrequency: 2.2
   driftVerticalSpeed: 0.08
   rotationSpeed: {x: 6, y: 10, z: 4}
+  birthVisual: {fileID: 1497501819958369431}
 --- !u!114 &577178152485152759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -78,6 +83,35 @@ MonoBehaviour:
   holdDuration: 0.04
   fadeOutDuration: 0.18
   strengthRange: {x: 1.5, y: 3}
+--- !u!114 &1497501819958369431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 754142826207319649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02c5da46ab192ac47b3fc16d9462c895, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrystalDustBirthVisualController
+  crystalRenderer: {fileID: 7032959011739565904}
+  glowRenderer: {fileID: 781037042568035974}
+  glowTransform: {fileID: 7173681720032252105}
+  revealStart: 0.12
+  revealEnd: 0.62
+  birthEmissionPeak: 0.12
+  emissionPeakTime: 0.68
+  glowStartAlpha: 0.06
+  glowPeakAlpha: 0.22
+  glowStartScale: 0.45
+  glowPeakScale: 1.15
+  outerSparkles:
+  - {fileID: 6358294729919388741}
+  - {fileID: 876279972879519805}
+  - {fileID: 6629124488979603470}
+  outerSparkleStart: 0.52
+  outerSparkleInterval: 0.08
 --- !u!1 &876279972879519805
 GameObject:
   m_ObjectHideFlags: 0
