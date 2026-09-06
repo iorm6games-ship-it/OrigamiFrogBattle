@@ -453,15 +453,17 @@ public class SummonLightController : MonoBehaviour
             selectedPaper,
             target
         );
-        // 浮上と同時に、折り畳み用カメラへ移動開始
-        if (summonCameraController != null)
+        if (crystalEffectController != null)
         {
-            StartCoroutine(
-                summonCameraController.MoveForFold()
-            );
+            yield return crystalEffectController.PlaySequence();
         }
-        // 一瞬停止させる予定（仮でWaitForDurationを入れている）
-        yield return WaitForDuration(0.3f);
+        // // 浮上と同時に、折り畳み用カメラへ移動開始
+        // if (summonCameraController != null)
+        // {
+        //     StartCoroutine(
+        //         summonCameraController.MoveForFold()
+        //     );
+        // }
 
         // 選択した紙に折れ線を走らせる
         if (foldLineProgressController != null)
@@ -487,24 +489,21 @@ public class SummonLightController : MonoBehaviour
             selectedPaper
         );
 
-        // 変形後の見た目の中心を追従開始
-        if (summonCameraController != null)
+        // 5本のCrystal演出の中心を基準に
+        // 折られていく紙の見た目中心を維持する
+        if (crystalEffectController != null)
         {
-            summonCameraController.StartFoldCenterTracking(
-                selectedPaper.TargetRenderer
+            selectedPaper.StartFoldCenterAlignment(
+                crystalEffectController.CenterBirthPoint
             );
         }
 
         // 折り畳み開始
         selectedPaper.PlayFoldAnimation();
 
-        // STEP03付近からSTEP09完了までズーム
-        if (summonCameraController != null)
-        {
-            StartCoroutine(
-                summonCameraController.ZoomLateFold()
-            );
-        }
+        // STEP03付近からSTEP09完了まで折り紙、カエルをズーム
+        StartCoroutine(
+            selectedPaper.ScaleDuringLateFold());
 
         yield return selectedPaper.WaitForFoldAnimation();
 

@@ -14,6 +14,8 @@ public sealed class CrystalFormationController : MonoBehaviour
     [SerializeField]
     private Camera targetCamera;
 
+    public Transform BirthPoint => birthPoint;
+    
     [Header("Spawn")]
     [Min(1)]
     [SerializeField]
@@ -30,11 +32,18 @@ public sealed class CrystalFormationController : MonoBehaviour
     [SerializeField]
     private float lastDistanceMultiplier = 1.55f;
 
+    public bool IsPlaying { get; private set; }
+
     private readonly List<CrystalDustHeroMotion> spawnedDust =
         new List<CrystalDustHeroMotion>();
 
     public void Play()
     {
+        if (IsPlaying)
+        {
+            return;
+        }
+    
         if (birthPoint == null ||
             targetCamera == null ||
             dustPrefab == null)
@@ -43,6 +52,8 @@ public sealed class CrystalFormationController : MonoBehaviour
                 $"{name}: Formationの参照が未設定です。");
             return;
         }
+
+        IsPlaying = true;
 
         StartCoroutine(PlayFormation());
     }
@@ -87,5 +98,6 @@ public sealed class CrystalFormationController : MonoBehaviour
                     spawnInterval);
             }
         }
+        IsPlaying = false;
     }
 }

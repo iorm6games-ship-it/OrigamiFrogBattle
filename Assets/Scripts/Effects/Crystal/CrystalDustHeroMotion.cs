@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public sealed class CrystalDustHeroMotion : MonoBehaviour
@@ -49,6 +50,7 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
 
     private float elapsedTime;
     private float randomPhase;
+    public bool IsBurstComplete { get; private set; }
 
     [SerializeField]
     private CrystalDustBirthVisualController birthVisual;
@@ -63,6 +65,8 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
         Vector3 direction,
         float burstDistanceMultiplier = 1f)
     {
+        IsBurstComplete = false;
+
         startPosition = origin;
         burstDirection = direction.normalized;
         
@@ -176,6 +180,7 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
         if (t >= 1f)
         {
             driftStartPosition = transform.position;
+            IsBurstComplete = true;
             elapsedTime = 0f;
             phase = Phase.Drift;
         }        

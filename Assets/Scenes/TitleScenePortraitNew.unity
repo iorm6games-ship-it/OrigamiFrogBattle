@@ -1645,6 +1645,11 @@ MonoBehaviour:
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
   foldStepFlashDuration: 0.18
+  foldCenterSmoothTime: 0.16
+  foldCenterMaxCorrection: 1.5
+  foldCenterVertexIndex: -1
+  foldCenterProbeTarget: {fileID: 0}
+  foldCenterVertexDistance: 0
 --- !u!65 &337071983
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2078,6 +2083,7 @@ Transform:
   - {fileID: 1167202059}
   - {fileID: 1358116063}
   - {fileID: 1992122447}
+  - {fileID: 1617352884}
   m_Father: {fileID: 1025863796}
   m_LocalEulerAnglesHint: {x: 0, y: -20, z: 0}
 --- !u!114 &486310109
@@ -2092,9 +2098,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5de0a09406f537b4e95dbd2ea57f7a66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrystalEffectController
-  centerFormation: {fileID: 0}
-  cornerFormations: []
-  cornerFormationDelay: 0.14
+  centerFormation: {fileID: 25872699}
+  cornerFormations:
+  - {fileID: 2074507097}
+  - {fileID: 778740026}
+  - {fileID: 525140417}
+  - {fileID: 917086191}
+  cornerFormationDelay: 0.22
 --- !u!1 &487469769
 GameObject:
   m_ObjectHideFlags: 0
@@ -4005,6 +4015,11 @@ MonoBehaviour:
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
   foldStepFlashDuration: 0.18
+  foldCenterSmoothTime: 0.16
+  foldCenterMaxCorrection: 1.5
+  foldCenterVertexIndex: -1
+  foldCenterProbeTarget: {fileID: 0}
+  foldCenterVertexDistance: 0
 --- !u!65 &781709369
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4627,10 +4642,15 @@ MonoBehaviour:
   foldFlipDuration: 0.45
   foldFlipLocalAxis: {x: 1, y: 0, z: 0}
   foldFlipAngle: 220
-  foldFinalScaleMultiplier: 1.4
+  foldFinalScaleMultiplier: 2.3
   foldScaleDelay: 1.8
-  foldScaleDuration: 1.5
+  foldScaleDuration: 3
   foldStepFlashDuration: 0.3
+  foldCenterSmoothTime: 0.16
+  foldCenterMaxCorrection: 1.5
+  foldCenterVertexIndex: 60
+  foldCenterProbeTarget: {fileID: 1617352884}
+  foldCenterVertexDistance: 0
 --- !u!65 &909455292
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5159,6 +5179,11 @@ MonoBehaviour:
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
   foldStepFlashDuration: 0.18
+  foldCenterSmoothTime: 0.16
+  foldCenterMaxCorrection: 1.5
+  foldCenterVertexIndex: -1
+  foldCenterProbeTarget: {fileID: 0}
+  foldCenterVertexDistance: 0
 --- !u!114 &961148254
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6616,7 +6641,7 @@ MonoBehaviour:
   - {fileID: 778740026}
   - {fileID: 525140417}
   - {fileID: 917086191}
-  cornerFormationDelay: 0.14
+  cornerFormationDelay: 0.22
 --- !u!1 &1176528980
 GameObject:
   m_ObjectHideFlags: 0
@@ -6923,6 +6948,7 @@ MonoBehaviour:
   preFoldFlashDuration: 0.22
   preFoldFlashStrength: 0.7
   preFoldReflectionAlpha: 0.461
+  crystalEffectController: {fileID: 486310109}
 --- !u!1 &1239388578
 GameObject:
   m_ObjectHideFlags: 0
@@ -7944,6 +7970,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1358116063}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1617352883
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1617352884}
+  m_Layer: 0
+  m_Name: FoldCenterProbe
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1617352884
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1617352883}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1, y: -0.18, z: -1.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 486310107}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1654644498
 GameObject:
   m_ObjectHideFlags: 0
@@ -8799,6 +8856,11 @@ MonoBehaviour:
   foldScaleDelay: 1.8
   foldScaleDuration: 1.5
   foldStepFlashDuration: 0.18
+  foldCenterSmoothTime: 0.16
+  foldCenterMaxCorrection: 1.5
+  foldCenterVertexIndex: -1
+  foldCenterProbeTarget: {fileID: 0}
+  foldCenterVertexDistance: 0
 --- !u!65 &1696808934
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -21035,7 +21097,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4379720799973194544, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4766195959028315573, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_LocalScale.x
@@ -21064,6 +21126,10 @@ PrefabInstance:
     - target: {fileID: 6998124857027179868, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: randomRange.z
       value: 0.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 7167099002967655913, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

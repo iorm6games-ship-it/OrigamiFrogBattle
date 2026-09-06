@@ -16,25 +16,33 @@ public sealed class CrystalEffectController : MonoBehaviour
     private float cornerFormationDelay = 0.14f;
 
     private Coroutine sequenceCoroutine;
-
+    public Transform CenterBirthPoint =>
+        centerFormation != null
+            ? centerFormation.BirthPoint
+            : null;
+            
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        // 手動確認用
+        if (Input.GetKeyDown(KeyCode.Space) &&
+            sequenceCoroutine == null)
         {
-            PlayTestSequence();
+            sequenceCoroutine =
+                StartCoroutine(
+                    PlayCrystalFormationSequence());
         }
     }
 
-    private void PlayTestSequence()
+    public IEnumerator PlaySequence()
     {
-        if (sequenceCoroutine != null)
+        if (sequenceCoroutine == null)
         {
-            StopCoroutine(sequenceCoroutine);
+            sequenceCoroutine =
+                StartCoroutine(
+                    PlayCrystalFormationSequence());
         }
 
-        sequenceCoroutine =
-            StartCoroutine(
-                PlayCrystalFormationSequence());
+        yield return sequenceCoroutine;
     }
 
     private IEnumerator PlayCrystalFormationSequence()
@@ -57,6 +65,32 @@ public sealed class CrystalEffectController : MonoBehaviour
             }
         }
 
+        yield return new WaitUntil(
+            AreAllFormationComplete);
+
         sequenceCoroutine = null;
+    }
+
+    private bool AreAllFormationComplete()
+    {
+        if (centerFormation != null &&
+            centerFormation.IsPlaying)
+        {
+            return false;
+        }
+        if (cornerFormations != null)
+        {
+            foreach (
+                CrystalFormationController formation
+                in cornerFormations)
+            {
+                if (formation != null &&
+                    formation.IsPlaying)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

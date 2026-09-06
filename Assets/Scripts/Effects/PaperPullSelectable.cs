@@ -207,7 +207,23 @@ public class PaperPullSelectable :
     private Coroutine foldStepFlashCoroutine;
     private Coroutine foldAnimationCoroutine;
 
-    private float foldCenterOffset;
+    [Header("Fold Center Alignment")]
+
+    [Min(0.01f)]
+    [SerializeField]
+    private float foldCenterSmoothTime = 0.16f;
+
+    [Min(0f)]
+    [SerializeField]
+    private float foldCenterMaxCorrection = 1.5f;
+
+    private bool foldCenterAlignmentActive;
+    private Transform foldCenterTarget;
+    private SkinnedMeshRenderer foldCenterRenderer;
+    private Mesh foldCenterBakedMesh;
+    private Vector3 foldAlignmentStartPosition;
+    private Vector3 foldCenterCorrection;
+    private Vector3 foldCenterCorrectionVelocity;
 
     private Coroutine floatingCoroutine;
     private Vector3 floatingBasePosition;
@@ -215,6 +231,19 @@ public class PaperPullSelectable :
     private float floatingElapsedTime;
     private float floatingLiftOffset;
     private bool hasFloatingBasePose;
+
+    [Header("Fold Center Anchor")]
+    [SerializeField]
+    private int foldCenterVertexIndex = 60;
+    [Header("Fold Center Vertex Probe")]
+
+    [SerializeField]
+    private Transform foldCenterProbeTarget;
+
+    [SerializeField]
+    private float foldCenterVertexDistance;
+
+    private Mesh foldCenterProbeMesh;
 
     private void Awake()
     {
@@ -785,7 +814,113 @@ public class PaperPullSelectable :
             );
         
     }
+    private void LateUpdate()
+    {
+        if (!foldCenterAlignmentActive ||
+            foldCenterRenderer == null ||
+            foldCenterTarget == null ||
+            targetCamera == null)
+        {
+            return;
+        }
 
+        foldCenterRenderer.BakeMesh(
+            foldCenterBakedMesh
+        );
+
+        Vector3[] vertices =
+            foldCenterBakedMesh.vertices;
+
+        if (vertices == null ||
+            vertices.Length == 0)
+        {
+            return;
+        }
+
+        if (foldCenterVertexIndex < 0 ||
+            foldCenterVertexIndex >= vertices.Length)
+        {
+            return;
+        }
+
+        // 現在のVertex 60のWorld位置
+        Vector3 anchorWorldPosition =
+            foldCenterRenderer.transform.TransformPoint(
+                vertices[foldCenterVertexIndex]
+            );
+
+        /*
+        * すでに適用済みの中心補正だけを取り除く。
+        *
+        * PreFoldLiftや浮遊による高さは
+        * 意図した動きなので取り除かない。
+        */
+        anchorWorldPosition -=
+            foldCenterCorrection;
+
+        Vector3 anchorViewport =
+            targetCamera.WorldToViewportPoint(
+                anchorWorldPosition
+            );
+
+        Vector3 targetViewport =
+            targetCamera.WorldToViewportPoint(
+                foldCenterTarget.position
+            );
+
+        if (anchorViewport.z <= 0f ||
+            targetViewport.z <= 0f)
+        {
+            return;
+        }
+
+        // 横方向だけを合わせる
+        float errorX =
+            anchorViewport.x -
+            targetViewport.x;
+
+        /*
+        * 実際に動かすPaper側の奥行きを使って
+        * Viewport差分をWorld距離へ変換する。
+        */
+        float depth =
+            anchorViewport.z;
+
+        float halfHeight =
+            Mathf.Tan(
+                targetCamera.fieldOfView *
+                0.5f *
+                Mathf.Deg2Rad
+            ) *
+            depth;
+
+        float halfWidth =
+            halfHeight *
+            targetCamera.aspect;
+
+        Vector3 desiredCorrection =
+            -targetCamera.transform.right *
+            errorX *
+            2f *
+            halfWidth;
+
+        if (foldCenterMaxCorrection > 0f)
+        {
+            desiredCorrection =
+                Vector3.ClampMagnitude(
+                    desiredCorrection,
+                    foldCenterMaxCorrection
+                );
+        }
+
+        foldCenterCorrection =
+            Vector3.SmoothDamp(
+                foldCenterCorrection,
+                desiredCorrection,
+                ref foldCenterCorrectionVelocity,
+                foldCenterSmoothTime
+            );
+    }
     private Vector3 CalculateFrontWorldPosition(
         Vector3 sourceWorldPosition
     )
@@ -1227,15 +1362,8 @@ public class PaperPullSelectable :
             position.y +=
                 floatingLiftOffset;
             
-            // 折り畳み中の中央補正
-            Vector3 rightDirection =
-                targetCamera != null
-                    ? targetCamera.transform.right
-                    : Vector3.right;
-
             position +=
-                rightDirection *
-                foldCenterOffset;
+                foldCenterCorrection;
             
             transform.position =
                 position;
@@ -1572,4 +1700,214 @@ public class PaperPullSelectable :
         foldStepFlashCoroutine = null;
     }
 
+    public void StartFoldCenterAlignment(
+        Transform centerTarget
+    )
+    {
+        if (centerTarget == null)
+        {
+            Debug.LogWarning(
+                $"{name}: Fold Center Target がありません",
+                this
+            );
+            return;
+        }
+
+        foldCenterRenderer =
+            TargetRenderer as SkinnedMeshRenderer;
+        
+        if (foldCenterRenderer == null)
+        {
+            Debug.LogWarning(
+                $"{name}: SkinnedMeshRenderer がありません",
+                this
+            );
+            return;
+        }
+        if (targetCamera == null)
+        {
+            targetCamera = Camera.main;
+        }
+
+        if (targetCamera == null)
+        {
+            Debug.LogWarning(
+                $"{name}: Target Camera がありません",
+                this
+            );
+            return;
+        }
+
+        if (foldCenterBakedMesh == null)
+        {
+            foldCenterBakedMesh =
+                new Mesh
+                {
+                    name =
+                        $"{name}:_FoldCenterBakedMesh"
+                };
+        }
+
+        foldCenterTarget =
+            centerTarget;
+        foldAlignmentStartPosition =
+            transform.position;
+        foldCenterCorrection =
+            Vector3.zero;
+        foldCenterCorrectionVelocity =
+            Vector3.zero;
+        foldCenterAlignmentActive = true;
+    }
+    
+    [ContextMenu("Find Fold Center Vertex")]
+    private void FindFoldCenterVertex()
+    {
+        SkinnedMeshRenderer renderer =
+            TargetRenderer as SkinnedMeshRenderer;
+
+        if (renderer == null)
+        {
+            Debug.LogWarning(
+                $"{name}: SkinnedMeshRenderer がありません。",
+                this
+            );
+            return;
+        }
+
+        if (foldCenterProbeTarget == null)
+        {
+            Debug.LogWarning(
+                $"{name}: Fold Center Probe Target がありません。",
+                this
+            );
+            return;
+        }
+
+        if (foldCenterProbeMesh == null)
+        {
+            foldCenterProbeMesh =
+                new Mesh
+                {
+                    name =
+                        $"{name}_FoldCenterProbeMesh"
+                };
+        }
+
+        renderer.BakeMesh(
+            foldCenterProbeMesh
+        );
+
+        Vector3[] vertices =
+            foldCenterProbeMesh.vertices;
+
+        float nearestSqrDistance =
+            float.PositiveInfinity;
+
+        int nearestIndex = -1;
+
+        Vector3 nearestWorldPosition =
+            Vector3.zero;
+
+        for (int i = 0;
+            i < vertices.Length;
+            i++)
+        {
+            Vector3 worldPosition =
+                renderer.transform.TransformPoint(
+                    vertices[i]
+                );
+
+            float sqrDistance =
+                (
+                    worldPosition -
+                    foldCenterProbeTarget.position
+                ).sqrMagnitude;
+
+            if (sqrDistance >=
+                nearestSqrDistance)
+            {
+                continue;
+            }
+
+            nearestSqrDistance =
+                sqrDistance;
+
+            nearestIndex = i;
+
+            nearestWorldPosition =
+                worldPosition;
+        }
+
+        foldCenterVertexIndex =
+            nearestIndex;
+
+        foldCenterVertexDistance =
+            Mathf.Sqrt(
+                nearestSqrDistance
+            );
+
+        Debug.Log(
+            $"[FoldCenterVertex] " +
+            $"Index={foldCenterVertexIndex}, " +
+            $"Distance={foldCenterVertexDistance:F6}, " +
+            $"WorldPosition={nearestWorldPosition}",
+            this
+        );
+    }
+    private void OnDrawGizmosSelected()
+    {
+        if (foldCenterProbeTarget != null)
+        {
+            Gizmos.color =
+                Color.green;
+
+            Gizmos.DrawSphere(
+                foldCenterProbeTarget.position,
+                0.025f
+            );
+        }
+
+        SkinnedMeshRenderer renderer =
+            TargetRenderer as SkinnedMeshRenderer;
+
+        if (renderer == null ||
+            foldCenterVertexIndex < 0)
+        {
+            return;
+        }
+
+        if (foldCenterProbeMesh == null)
+        {
+            foldCenterProbeMesh =
+                new Mesh();
+        }
+
+        renderer.BakeMesh(
+            foldCenterProbeMesh
+        );
+
+        Vector3[] vertices =
+            foldCenterProbeMesh.vertices;
+
+        if (foldCenterVertexIndex >=
+            vertices.Length)
+        {
+            return;
+        }
+
+        Vector3 worldPosition =
+            renderer.transform.TransformPoint(
+                vertices[
+                    foldCenterVertexIndex
+                ]
+            );
+
+        Gizmos.color =
+            Color.yellow;
+
+        Gizmos.DrawSphere(
+            worldPosition,
+            0.035f
+        );
+    }    
 }
