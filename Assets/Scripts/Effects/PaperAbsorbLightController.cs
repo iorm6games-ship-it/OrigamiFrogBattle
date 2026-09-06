@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using Unity.Mathematics;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -62,6 +61,55 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
         Shader.PropertyToID("_AbsorbTrailFade");
     [SerializeField]
     private float trailFadeDuration = 0.35f;
+    private static readonly int CrystalCenterChargeId =
+        Shader.PropertyToID(
+            "_CrystalCenterCharge"
+        );
+
+    private static readonly int CrystalShotProgressId =
+        Shader.PropertyToID(
+            "_CrystalShotProgress"
+        );
+
+    private static readonly int CrystalShotStrengthId =
+        Shader.PropertyToID(
+            "_CrystalShotStrength"
+        );
+
+    private static readonly int CrystalCornerChargeId =
+        Shader.PropertyToID(
+            "_CrystalCornerCharge"
+        );
+
+    private static readonly int CrystalCornerPulseId =
+        Shader.PropertyToID(
+            "_CrystalCornerPulse"
+        );
+    [Header("Crystal Ignition")]
+
+    [Min(0.01f)]
+    [SerializeField]
+    private float centerChargeDuration = 0.10f;
+
+    [Min(0.01f)]
+    [SerializeField]
+    private float crystalShotDuration = 0.13f;
+
+    [Min(0.01f)]
+    [SerializeField]
+    private float cornerChargeDuration = 0.16f;
+
+    [Min(0f)]
+    [SerializeField]
+    private float preCrystalHoldDuration = 0.08f;
+
+    [Min(0f)]
+    [SerializeField]
+    private float crystalChargeFadeDelay = 0.08f;
+
+    [Min(0.01f)]
+    [SerializeField]
+    private float crystalChargeFadeDuration = 0.22f;
 
     private void Awake()
     {
@@ -228,6 +276,206 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             AbsorbTrailFadeId,
             0f
         );
+        runtimeMaterial.SetFloat(
+            CrystalCenterChargeId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalShotProgressId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalShotStrengthId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalCornerChargeId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalCornerPulseId,
+            0f
+        );
+    }
+    private IEnumerator PlayCrystalIgnitionRoutine()
+    {
+        // -------------------------
+        // 初期状態
+        // -------------------------
+
+        runtimeMaterial.SetFloat(
+            CrystalCenterChargeId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalShotProgressId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalShotStrengthId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalCornerChargeId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalCornerPulseId,
+            0f
+        );
+
+        // -------------------------
+        // 1. 中心に一度ギュッと溜める
+        // -------------------------
+
+        float time = 0f;
+
+        while (time < centerChargeDuration)
+        {
+            time += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    time /
+                    centerChargeDuration
+                );
+
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+
+            runtimeMaterial.SetFloat(
+                CrystalCenterChargeId,
+                eased
+            );
+
+            yield return null;
+        }
+
+        runtimeMaterial.SetFloat(
+            CrystalCenterChargeId,
+            1f
+        );
+
+        // -------------------------
+        // 2. 中心 → 四隅へシュッ
+        // -------------------------
+
+        time = 0f;
+
+        runtimeMaterial.SetFloat(
+            CrystalShotStrengthId,
+            1f
+        );
+
+        while (time < crystalShotDuration)
+        {
+            time += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    time /
+                    crystalShotDuration
+                );
+
+            // 最初に強く飛び出して、
+            // 四隅へ近づくほど少し減速
+            float shotT =
+                1f -
+                Mathf.Pow(
+                    1f - t,
+                    3f
+                );
+
+            runtimeMaterial.SetFloat(
+                CrystalShotProgressId,
+                shotT
+            );
+
+            yield return null;
+        }
+
+        runtimeMaterial.SetFloat(
+            CrystalShotProgressId,
+            1f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalShotStrengthId,
+            0f
+        );
+
+        // -------------------------
+        // 3. 到達点で光が膨らむ
+        // -------------------------
+
+        time = 0f;
+
+        while (time < cornerChargeDuration)
+        {
+            time += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    time /
+                    cornerChargeDuration
+                );
+
+            float charge =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+
+            // 到達直後だけ軽く「ポン」と光る
+            float pulse =
+                Mathf.Sin(
+                    t *
+                    Mathf.PI
+                );
+
+            runtimeMaterial.SetFloat(
+                CrystalCornerChargeId,
+                charge
+            );
+
+            runtimeMaterial.SetFloat(
+                CrystalCornerPulseId,
+                pulse
+            );
+
+            yield return null;
+        }
+
+        runtimeMaterial.SetFloat(
+            CrystalCornerChargeId,
+            1f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalCornerPulseId,
+            0f
+        );
+
+        // 氷晶が出る直前の一瞬
+        if (preCrystalHoldDuration > 0f)
+        {
+            yield return new WaitForSeconds(
+                preCrystalHoldDuration
+            );
+        }
     }
 
     private IEnumerator PlayAbsorbRoutine(
@@ -254,7 +502,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             Mathf.Clamp01(
                 firstPhaseEndProgress
             );
-        UpdateBranch(0f);
+        // UpdateBranch(0f);
         
         // まず内部状態を初期化
         runtimeMaterial.SetVector(
@@ -302,7 +550,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
                     firstPhaseEndProgress,
                     eased
                 );
-            UpdateBranch(normalizedProgress);
+            // UpdateBranch(normalizedProgress);
 
             float shaderProgress =
                 Mathf.Lerp(
@@ -322,7 +570,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
 
             yield return null;
         }
-        UpdateBranch(firstPhaseEndProgress);
+        // UpdateBranch(firstPhaseEndProgress);
         // 境界を正確に固定
         float phase1ShaderProgress =
             Mathf.Lerp(
@@ -369,7 +617,7 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
                     1f,
                     eased
                 );
-            UpdateBranch(normalizedProgress);
+            // UpdateBranch(normalizedProgress);
             float shaderProgress =
                 Mathf.Lerp(
                     startProgress,
@@ -394,8 +642,10 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
         );
         onProgress?.Invoke(1f);
         
+        yield return PlayCrystalIgnitionRoutine();
+
         // 尾を中心から四隅へ向けて消す
-        yield return PlayTrailFadeRoutine();
+        // yield return PlayTrailFadeRoutine();
         
         // 浸透範囲を固定したまま
         // 元の紙色へ戻す
@@ -438,9 +688,75 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             AbsorbProgressId,
             startProgress
         );
-        UpdateBranch(1f);
+        // UpdateBranch(1f);
 
     }
+    public IEnumerator FadeCrystalIgnition()
+    {
+        if (runtimeMaterial == null)
+        {
+            yield break;
+        }
+
+        if (crystalChargeFadeDelay > 0f)
+        {
+            yield return new WaitForSeconds(
+                crystalChargeFadeDelay
+            );
+        }
+
+        float time = 0f;
+
+        while (time <
+            crystalChargeFadeDuration)
+        {
+            time += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    time /
+                    crystalChargeFadeDuration
+                );
+
+            float eased =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    t
+                );
+
+            float strength =
+                1f - eased;
+
+            runtimeMaterial.SetFloat(
+                CrystalCenterChargeId,
+                strength
+            );
+
+            runtimeMaterial.SetFloat(
+                CrystalCornerChargeId,
+                strength
+            );
+
+            yield return null;
+        }
+
+        runtimeMaterial.SetFloat(
+            CrystalCenterChargeId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalCornerChargeId,
+            0f
+        );
+
+        runtimeMaterial.SetFloat(
+            CrystalCornerPulseId,
+            0f
+        );
+    }
+
     private void OnDestroy()
     {
         if (runtimeMaterial != null)

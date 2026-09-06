@@ -453,10 +453,19 @@ public class SummonLightController : MonoBehaviour
             selectedPaper,
             target
         );
+        
         if (crystalEffectController != null)
         {
-            yield return crystalEffectController.PlaySequence();
+            // 氷晶が出始めるのと同時に
+            // 紙上の発光点を受け渡すように消す
+            StartCoroutine(
+                selectedPaper.FadeCrystalIgnition()
+            );
+
+            yield return
+                crystalEffectController.PlaySequence();
         }
+
         // // 浮上と同時に、折り畳み用カメラへ移動開始
         // if (summonCameraController != null)
         // {

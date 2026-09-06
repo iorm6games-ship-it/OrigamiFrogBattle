@@ -1910,4 +1910,15 @@ public class PaperPullSelectable :
             0.035f
         );
     }    
+    public IEnumerator FadeCrystalIgnition()
+    {
+        if (absorbLightController == null)
+        {
+            yield break;
+        }
+
+        yield return
+            absorbLightController
+                .FadeCrystalIgnition();
+    }
 }

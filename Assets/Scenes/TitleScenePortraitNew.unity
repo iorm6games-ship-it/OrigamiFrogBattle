@@ -166,8 +166,8 @@ MonoBehaviour:
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 1599020300}
   targetCamera: {fileID: 2107679577}
-  dustCount: 10
-  spawnInterval: 0.055
+  dustCount: 18
+  spawnInterval: 0.03
   firstDistanceMultiplier: 0.55
   lastDistanceMultiplier: 1.55
 --- !u!1 &36351073
@@ -1773,6 +1773,12 @@ MonoBehaviour:
   branchEndNormalizedProgress: 0.9
   branchMaxStrength: 0.1
   trailFadeDuration: 0.35
+  centerChargeDuration: 0.1
+  crystalShotDuration: 0.13
+  cornerChargeDuration: 0.16
+  preCrystalHoldDuration: 0.08
+  crystalChargeFadeDelay: 0.08
+  crystalChargeFadeDuration: 0.22
 --- !u!1001 &385355477
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2183,8 +2189,8 @@ MonoBehaviour:
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 2021587374}
   targetCamera: {fileID: 2107679577}
-  dustCount: 10
-  spawnInterval: 0.055
+  dustCount: 18
+  spawnInterval: 0.03
   firstDistanceMultiplier: 0.55
   lastDistanceMultiplier: 1.55
 --- !u!1 &541102414
@@ -3340,8 +3346,8 @@ MonoBehaviour:
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 1426977816}
   targetCamera: {fileID: 2107679577}
-  dustCount: 10
-  spawnInterval: 0.055
+  dustCount: 18
+  spawnInterval: 0.03
   firstDistanceMultiplier: 0.55
   lastDistanceMultiplier: 1.55
 --- !u!1001 &781709361
@@ -4143,6 +4149,12 @@ MonoBehaviour:
   branchEndNormalizedProgress: 0.9
   branchMaxStrength: 0.1
   trailFadeDuration: 0.35
+  centerChargeDuration: 0.1
+  crystalShotDuration: 0.13
+  cornerChargeDuration: 0.16
+  preCrystalHoldDuration: 0.08
+  crystalChargeFadeDelay: 0.08
+  crystalChargeFadeDuration: 0.22
 --- !u!1 &811444598
 GameObject:
   m_ObjectHideFlags: 1
@@ -4693,6 +4705,12 @@ MonoBehaviour:
   branchEndNormalizedProgress: 0.9
   branchMaxStrength: 0.1
   trailFadeDuration: 0.35
+  centerChargeDuration: 0.1
+  crystalShotDuration: 0.13
+  cornerChargeDuration: 0.16
+  preCrystalHoldDuration: 0.08
+  crystalChargeFadeDelay: 0.08
+  crystalChargeFadeDuration: 0.22
 --- !u!95 &909455296 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: dfb1958f229adca49975306dc64b5378, type: 3}
@@ -4805,8 +4823,8 @@ MonoBehaviour:
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 487469770}
   targetCamera: {fileID: 2107679577}
-  dustCount: 10
-  spawnInterval: 0.055
+  dustCount: 18
+  spawnInterval: 0.03
   firstDistanceMultiplier: 0.55
   lastDistanceMultiplier: 1.55
 --- !u!1 &926690342
@@ -5648,6 +5666,12 @@ MonoBehaviour:
   branchEndNormalizedProgress: 0.9
   branchMaxStrength: 0.1
   trailFadeDuration: 0.35
+  centerChargeDuration: 0.1
+  crystalShotDuration: 0.13
+  cornerChargeDuration: 0.16
+  preCrystalHoldDuration: 0.08
+  crystalChargeFadeDelay: 0.08
+  crystalChargeFadeDuration: 0.22
 --- !u!137 &973475907 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: -1323743223009653715, guid: dfb1958f229adca49975306dc64b5378, type: 3}
@@ -8984,6 +9008,12 @@ MonoBehaviour:
   branchEndNormalizedProgress: 0.9
   branchMaxStrength: 0.1
   trailFadeDuration: 0.35
+  centerChargeDuration: 0.1
+  crystalShotDuration: 0.13
+  cornerChargeDuration: 0.16
+  preCrystalHoldDuration: 0.08
+  crystalChargeFadeDelay: 0.08
+  crystalChargeFadeDuration: 0.22
 --- !u!1 &1697816822
 GameObject:
   m_ObjectHideFlags: 0
@@ -15086,7 +15116,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1992122447}
-  - component: {fileID: 1992122448}
   m_Layer: 0
   m_Name: Formation
   m_TagString: Untagged
@@ -15114,25 +15143,6 @@ Transform:
   - {fileID: 917086190}
   m_Father: {fileID: 486310107}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1992122448
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1992122446}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9e1b74fbc8dfd74da75f1985ddc11bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrystalFormationController
-  dustPrefab: {fileID: 0}
-  birthPoint: {fileID: 0}
-  targetCamera: {fileID: 0}
-  dustCount: 10
-  spawnInterval: 0.055
-  firstDistanceMultiplier: 0.55
-  lastDistanceMultiplier: 1.55
 --- !u!1001 &2009890910
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20283,8 +20293,8 @@ MonoBehaviour:
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 867957200}
   targetCamera: {fileID: 2107679577}
-  dustCount: 10
-  spawnInterval: 0.055
+  dustCount: 18
+  spawnInterval: 0.03
   firstDistanceMultiplier: 0.55
   lastDistanceMultiplier: 1.55
 --- !u!1 &2079854246
