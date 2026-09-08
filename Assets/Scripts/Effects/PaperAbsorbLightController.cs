@@ -856,4 +856,38 @@ public sealed class PaperAbsorbLightController : MonoBehaviour
             1f
         );
     }
+#if UNITY_EDITOR
+    [ContextMenu("Test Crystal Shot Progress 0.5")]
+    private void TestCrystalShotProgressHalf()
+    {
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning(
+                "Crystal Shot test は Play Mode で実行してください。",
+                this
+            );
+            return;
+        }
+
+        if (runtimeMaterial == null)
+        {
+            Debug.LogWarning(
+                "runtimeMaterial が初期化されていません。",
+                this
+            );
+            return;
+        }
+
+        runtimeMaterial.SetFloat(
+            CrystalShotProgressId,
+            0.5f
+        );
+
+        Debug.Log(
+            $"Crystal Shot direct material test: " +
+            $"progress={runtimeMaterial.GetFloat(CrystalShotProgressId):F2}",
+            this
+        );
+    }
+#endif
 }
