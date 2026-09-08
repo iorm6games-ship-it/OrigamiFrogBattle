@@ -29,6 +29,9 @@
         },
         {
             "m_Id": "1312c09daac94912a898e42607e17c48"
+        },
+        {
+            "m_Id": "597dbd3d6a244391b4fd9035084deec4"
         }
     ],
     "m_Keywords": [],
@@ -187,6 +190,9 @@
         },
         {
             "m_Id": "f1e64ca5438c40d4be38f891c9cb5fa7"
+        },
+        {
+            "m_Id": "ffaef9c7acd945bf92e85ec8211470df"
         }
     ],
     "m_StickyNoteDatas": [],
@@ -1260,7 +1266,7 @@
     "m_Guid": {
         "m_GuidSerialized": "b51f1409-37c7-4fc5-996c-8094becc1d38"
     },
-    "promotedFromAssetID": "f9db34a716ac1db48ae4ab237b6ede00",
+    "promotedFromAssetID": "",
     "promotedFromCategoryName": "",
     "promotedOrdering": -1,
     "m_Name": "GlowSoftnessScale",
@@ -1461,7 +1467,7 @@
     "m_Guid": {
         "m_GuidSerialized": "bf5fd9e4-83c5-4b23-81b6-eb3980ec7d6a"
     },
-    "promotedFromAssetID": "f9db34a716ac1db48ae4ab237b6ede00",
+    "promotedFromAssetID": "",
     "promotedFromCategoryName": "",
     "promotedOrdering": -1,
     "m_Name": "GlowWideScale",
@@ -1594,7 +1600,7 @@
     "m_Type": "UnityEditor.ShaderGraph.SubtractNode",
     "m_ObjectId": "248604b647214421b04e38281e78cae9",
     "m_Group": {
-        "m_Id": ""
+        "m_Id": "ffaef9c7acd945bf92e85ec8211470df"
     },
     "m_Name": "Subtract",
     "m_DrawState": {
@@ -2322,7 +2328,7 @@
     "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
     "m_ObjectId": "43888e1f18254be2a3b366e3bd129365",
     "m_Group": {
-        "m_Id": ""
+        "m_Id": "ffaef9c7acd945bf92e85ec8211470df"
     },
     "m_Name": "Property",
     "m_DrawState": {
@@ -2700,6 +2706,50 @@
 }
 
 {
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
+    "m_ObjectId": "597dbd3d6a244391b4fd9035084deec4",
+    "m_Guid": {
+        "m_GuidSerialized": "f1e12085-11fa-4d05-a02b-a92bf9dc4d47"
+    },
+    "promotedFromAssetID": "f9db34a716ac1db48ae4ab237b6ede00",
+    "promotedFromCategoryName": "",
+    "promotedOrdering": -1,
+    "m_Name": "TrailWidthScale",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "TrailWidthScale",
+    "m_DefaultReferenceName": "_TrailWidthScale",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_PerRendererData": false,
+    "m_customAttributes": [],
+    "m_Value": 0.44999998807907107,
+    "m_FloatType": 1,
+    "m_LiteralFloatMode": false,
+    "m_RangeValues": {
+        "x": 0.0,
+        "y": 1.0
+    },
+    "m_SliderType": 0,
+    "m_SliderPower": 3.0,
+    "m_EnumType": 0,
+    "m_CSharpEnumString": "",
+    "m_EnumNames": [
+        "Default"
+    ],
+    "m_EnumValues": [
+        0
+    ]
+}
+
+{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
     "m_ObjectId": "5beb31916bdb41e6b29832084d8a65a0",
@@ -3026,7 +3076,7 @@
     "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
     "m_ObjectId": "6d20b21f4b6d4ca0a299b4aef04a5cda",
     "m_Group": {
-        "m_Id": ""
+        "m_Id": "ffaef9c7acd945bf92e85ec8211470df"
     },
     "m_Name": "Property",
     "m_DrawState": {
@@ -3684,8 +3734,8 @@
     "m_ObjectId": "8ad7c47bc303479eb16f27702a5042c0",
     "m_Title": "TailMask",
     "m_Position": {
-        "x": 577.6000366210938,
-        "y": 317.60003662109377
+        "x": 577.5999755859375,
+        "y": 317.6000671386719
     }
 }
 
@@ -4487,7 +4537,7 @@
     "m_Type": "UnityEditor.ShaderGraph.OneMinusNode",
     "m_ObjectId": "ba58fcbf05c544fabe23d9743057a5cb",
     "m_Group": {
-        "m_Id": ""
+        "m_Id": "ffaef9c7acd945bf92e85ec8211470df"
     },
     "m_Name": "One Minus",
     "m_DrawState": {
@@ -5749,8 +5799,8 @@
     "m_ObjectId": "ee7d1043afa541329b16b0cb2baeb8f0",
     "m_Title": "FrontMask",
     "m_Position": {
-        "x": 706.39990234375,
-        "y": -558.39990234375
+        "x": 706.4000244140625,
+        "y": -558.3999633789063
     }
 }
 
@@ -5875,7 +5925,7 @@
     "m_ObjectId": "f1e64ca5438c40d4be38f891c9cb5fa7",
     "m_Title": "GlowWideMask",
     "m_Position": {
-        "x": 1428.7999267578125,
+        "x": 1428.800048828125,
         "y": -544.0
     }
 }
@@ -6049,6 +6099,9 @@
         },
         {
             "m_Id": "1312c09daac94912a898e42607e17c48"
+        },
+        {
+            "m_Id": "597dbd3d6a244391b4fd9035084deec4"
         }
     ]
 }
@@ -6074,7 +6127,7 @@
     "m_Type": "UnityEditor.ShaderGraph.SmoothstepNode",
     "m_ObjectId": "fa3c087537134b25b300412f19a10259",
     "m_Group": {
-        "m_Id": ""
+        "m_Id": "ffaef9c7acd945bf92e85ec8211470df"
     },
     "m_Name": "Smoothstep",
     "m_DrawState": {
@@ -6118,7 +6171,7 @@
     "m_Type": "UnityEditor.ShaderGraph.DotProductNode",
     "m_ObjectId": "fd60793be76d49328ebe1cbfb7d56a91",
     "m_Group": {
-        "m_Id": ""
+        "m_Id": "ffaef9c7acd945bf92e85ec8211470df"
     },
     "m_Name": "Dot Product",
     "m_DrawState": {
@@ -6202,5 +6255,16 @@
         "w": 0.0
     },
     "m_LiteralMode": false
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.GroupData",
+    "m_ObjectId": "ffaef9c7acd945bf92e85ec8211470df",
+    "m_Title": "StripMask_Tail",
+    "m_Position": {
+        "x": 376.800048828125,
+        "y": -301.6000061035156
+    }
 }
 
