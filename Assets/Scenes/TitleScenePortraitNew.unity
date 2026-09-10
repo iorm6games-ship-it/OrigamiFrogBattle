@@ -6988,13 +6988,13 @@ MonoBehaviour:
   selectedLightMoveDuration: 2
   preContactDistance: 0.22
   approachDuration: 1.3
-  preContactHoldDuration: 1.2
+  preContactHoldDuration: 0.5
   beforeSelectedMoveDelay: 0.35
   afterSelectionConfirmDelay: 0.5
-  soulAbsorbDuration: 2
-  remainingAbsorbDuration: 3
-  soulAbsorbEndProgress: 0.33
-  penetrateDuration: 1
+  soulAbsorbDuration: 1
+  remainingAbsorbDuration: 2
+  soulAbsorbEndProgress: 0.25
+  penetrateDuration: 0.5
   penetrateScaleMultiplier: 1.25
   paperReflectionGlow: {fileID: 280401255}
   reflectionFadeStart: 0.4
