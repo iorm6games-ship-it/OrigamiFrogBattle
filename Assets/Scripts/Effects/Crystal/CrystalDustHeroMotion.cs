@@ -1,59 +1,102 @@
-using System;
 using UnityEngine;
 
 public sealed class CrystalDustHeroMotion : MonoBehaviour
 {
+    public enum VortexRole
+    {
+        Seed,
+        Build
+    }
+
     private enum Phase
     {
         Idle,
         Birth,
-        Burst,
-        Drift
+        Vortex
     }
+
     [Header("Birth")]
     [SerializeField]
     private float birthDuration = 0.2f;
+
     [SerializeField]
     private float birthStartScale = 0.08f;
+
     [SerializeField]
     private float birthOverShoot = 1.12f;
 
-    private Vector3 baseScale;
-
-    [Header("Burst")]
     [SerializeField]
-    private float burstDuration = 0.35f;
+    private CrystalDustBirthVisualController birthVisual;
 
+    [Header("Vortex - Seed")]
     [SerializeField]
-    private float burstDistance = 0.8f;
-    private float currentBurstDistance;
-
-    [Header("Drift")]
-    [SerializeField]
-    private float driftAmplitude = 0.18f;
+    private float seedJoinDuration = 0.28f;
 
     [SerializeField]
-    private float driftFrequency = 2.2f;
+    private float seedRadius = 0.28f;
+
+    [Header("Vortex - Build")]
+    [SerializeField]
+    private float buildJoinDuration = 0.36f;
 
     [SerializeField]
-    private float driftVerticalSpeed = 0.08f;
+    private float buildRadiusMin = 0.32f;
 
-    [Header("Rotation")]
     [SerializeField]
-    private Vector3 rotationSpeed = new Vector3(6f, 10f, 4f);
+    private float buildRadiusMax = 0.50f;
+
+    [Header("Vortex - Rotation")]
+    [SerializeField]
+    private float vortexAngularSpeed = 320f;
+
+    [SerializeField]
+    private float vortexAngularSpeedVariation = 45f;
+
+    [Header("Vortex - Height")]
+    [SerializeField]
+    private float vortexMinHeight = 0.07f;
+
+    [SerializeField]
+    private float vortexMaxHeight = 0.22f;
+
+    [SerializeField]
+    private float vortexHeightFrequency = 0.85f;
+
+    [Header("Vortex - Organic Motion")]
+    [SerializeField]
+    private float radialWobble = 0.035f;
+
+    [SerializeField]
+    private float radialWobbleFrequency = 0.75f;
+
+    [Header("Crystal Rotation")]
+    [SerializeField]
+    private Vector3 rotationSpeed =
+        new Vector3(6f, 10f, 4f);
 
     private Phase phase = Phase.Idle;
 
-    private Vector3 startPosition;
-    private Vector3 burstDirection;
-    private Vector3 driftStartPosition;
+    private Vector3 baseScale;
+
+    private Vector3 vortexCenter;
+    private Vector3 vortexAxis;
+
+    private Vector3 vortexBasisX;
+    private Vector3 vortexBasisY;
 
     private float elapsedTime;
-    private float randomPhase;
-    public bool IsBurstComplete { get; private set; }
 
-    [SerializeField]
-    private CrystalDustBirthVisualController birthVisual;
+    private float startAngle;
+    private float currentAngularSpeed;
+    private float currentTargetRadius;
+    private float currentJoinDuration;
+
+    private float heightPhase;
+    private float radialPhase;
+
+    // 旧コードとの互換確認用。
+    // 現在は「初期の渦への合流が完了した」という意味。
+    public bool IsBurstComplete { get; private set; }
 
     private void Awake()
     {
@@ -62,35 +105,57 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
 
     public void Play(
         Vector3 origin,
-        Vector3 direction,
-        float burstDistanceMultiplier = 1f)
+        Vector3 axis,
+        VortexRole role)
     {
         IsBurstComplete = false;
 
-        startPosition = origin;
-        burstDirection = direction.normalized;
-        
-        currentBurstDistance =
-            burstDistance *
-            Mathf.Max(0f, burstDistanceMultiplier);
-        randomPhase =
-            UnityEngine.Random.Range(
-                0f,
-                100f);
+        vortexCenter = origin;
 
-        transform.position = origin;
-        transform.localScale = baseScale * birthStartScale;
+        vortexAxis =
+            axis.sqrMagnitude > 0.0001f
+                ? axis.normalized
+                : Vector3.up;
+
+        CreateVortexBasis();
+
+        ConfigureForRole(role);
+
+        startAngle =
+            Random.Range(
+                0f,
+                360f);
+
+        currentAngularSpeed =
+            vortexAngularSpeed +
+            Random.Range(
+                -vortexAngularSpeedVariation,
+                vortexAngularSpeedVariation);
+
+        heightPhase =
+            Random.Range(
+                0f,
+                Mathf.PI * 2f);
+
+        radialPhase =
+            Random.Range(
+                0f,
+                Mathf.PI * 2f);
+
+        transform.position = vortexCenter;
+
+        transform.localScale =
+            baseScale * birthStartScale;
 
         elapsedTime = 0f;
 
         birthVisual?.BeginBirth();
-        phase = Phase.Birth;
 
+        phase = Phase.Birth;
     }
 
     private void Update()
     {
-
         if (phase == Phase.Idle)
         {
             return;
@@ -98,47 +163,51 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
 
         transform.Rotate(
             rotationSpeed * Time.deltaTime,
-            Space.Self
-        );
+            Space.Self);
 
         switch (phase)
         {
             case Phase.Birth:
                 UpdateBirth();
                 break;
-            case Phase.Burst:
-                UpdateBurst();
-                break;
-            case Phase.Drift:
-                UpdateDrift();
+
+            case Phase.Vortex:
+                UpdateVortex();
                 break;
         }
     }
+
     private void UpdateBirth()
     {
         elapsedTime += Time.deltaTime;
-        float t = Mathf.Clamp01(elapsedTime / birthDuration);
+
+        float t =
+            Mathf.Clamp01(
+                elapsedTime /
+                Mathf.Max(0.01f, birthDuration));
+
         birthVisual?.UpdateBirthVisual(t);
 
         const float settleStart = 0.78f;
 
-        // 最初はゆっくり凝縮し、
-        // 終盤で少しだけ膨らんで結晶化した感触を出す
         float scaleMultiplier;
 
         if (t < settleStart)
         {
-            float growT = t / settleStart;
+            float growT =
+                t / settleStart;
+
             scaleMultiplier =
                 Mathf.Lerp(
                     birthStartScale,
                     birthOverShoot,
-                    growT
-                );
+                    growT);
         }
         else
         {
-            float settleT = (t - settleStart) / (1f - settleStart);
+            float settleT =
+                (t - settleStart) /
+                (1f - settleStart);
 
             settleT =
                 Mathf.SmoothStep(
@@ -150,100 +219,172 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
                 Mathf.Lerp(
                     birthOverShoot,
                     1f,
-                    settleT
-                );
+                    settleT);
         }
 
-        transform.localScale = baseScale * scaleMultiplier;
+        transform.localScale =
+            baseScale * scaleMultiplier;
 
         if (t >= 1f)
         {
             transform.localScale = baseScale;
+
             birthVisual?.CompleteBirth();
+
             elapsedTime = 0f;
-            phase = Phase.Burst;
+
+            phase = Phase.Vortex;
         }
     }
-    private void UpdateBurst()
+
+    private void UpdateVortex()
     {
         elapsedTime += Time.deltaTime;
 
-        float t = Mathf.Clamp01(elapsedTime / burstDuration);
+        float joinT =
+            Mathf.Clamp01(
+                elapsedTime /
+                Mathf.Max(
+                    0.01f,
+                    currentJoinDuration));
 
-        // 強く飛び出して、終盤で減速
-        float easedT = 1f - Mathf.Pow(1f - t, 3f);
+        //
+        // 中心から最初に勢いよく弾け、
+        // 後半で半径方向の動きが落ち着く。
+        //
+        float outwardT =
+            1f -
+            Mathf.Pow(
+                1f - joinT,
+                3f);
+
+        //
+        // 生まれた瞬間から回転する。
+        //
+        float angle =
+            startAngle +
+            currentAngularSpeed *
+            elapsedTime;
+
+        float angleRad =
+            angle *
+            Mathf.Deg2Rad;
+
+        Vector3 radialDirection =
+            vortexBasisX *
+            Mathf.Cos(angleRad) +
+            vortexBasisY *
+            Mathf.Sin(angleRad);
+
+        //
+        // 完全な円にせず、
+        // 半径をわずかに揺らす。
+        //
+        float radiusVariation =
+            Mathf.Sin(
+                elapsedTime *
+                radialWobbleFrequency *
+                Mathf.PI *
+                2f +
+                radialPhase) *
+            radialWobble;
+
+        float targetRadius =
+            Mathf.Max(
+                0f,
+                currentTargetRadius +
+                radiusVariation);
+
+        float radius =
+            targetRadius *
+            outwardT;
+
+        //
+        // 紙面から上側だけに高さを作る。
+        // 上下対称に振らないので紙の下へ潜らない。
+        //
+        float heightWave =
+            0.5f +
+            0.5f *
+            Mathf.Sin(
+                elapsedTime *
+                vortexHeightFrequency *
+                Mathf.PI *
+                2f +
+                heightPhase);
+
+        float targetHeight =
+            Mathf.Lerp(
+                vortexMinHeight,
+                vortexMaxHeight,
+                heightWave);
+
+        float height =
+            targetHeight *
+            Mathf.SmoothStep(
+                0f,
+                1f,
+                joinT);
 
         transform.position =
-            startPosition +
-            burstDirection * currentBurstDistance * easedT;
+            vortexCenter +
+            radialDirection * radius +
+            vortexAxis * height;
 
-        if (t >= 1f)
+        if (!IsBurstComplete &&
+            joinT >= 1f)
         {
-            driftStartPosition = transform.position;
             IsBurstComplete = true;
-            elapsedTime = 0f;
-            phase = Phase.Drift;
-        }        
+        }
     }
-    private void UpdateDrift()
+
+    private void ConfigureForRole(
+        VortexRole role)
     {
-        elapsedTime += Time.deltaTime;
+        switch (role)
+        {
+            case VortexRole.Seed:
+                currentJoinDuration =
+                    seedJoinDuration;
 
-        float t = elapsedTime;
+                currentTargetRadius =
+                    seedRadius;
+                break;
 
-        float noiseX =
-            Mathf.PerlinNoise(
-                randomPhase,
-                t * driftFrequency) * 2f - 1f;
+            case VortexRole.Build:
+                currentJoinDuration =
+                    buildJoinDuration;
 
-        float noiseY =
-            Mathf.PerlinNoise(
-                randomPhase + 13.7f,
-                t * driftFrequency * 0.57f) * 2f - 1f;
+                currentTargetRadius =
+                    Random.Range(
+                        buildRadiusMin,
+                        buildRadiusMax);
+                break;
+        }
+    }
 
-        float noiseZ =
-            Mathf.PerlinNoise(
-                randomPhase + 29.3f,
-                t * driftFrequency * 1.31f) * 2f - 1f;
+    private void CreateVortexBasis()
+    {
+        //
+        // vortexAxisに対して垂直な2本の軸を作る。
+        // この2本が渦の回転面になる。
+        //
+        Vector3 reference =
+            Mathf.Abs(
+                Vector3.Dot(
+                    vortexAxis,
+                    Vector3.up)) < 0.95f
+                ? Vector3.up
+                : Vector3.forward;
 
-        Vector3 driftOffset = new Vector3(
-            noiseX,
-            noiseY * 0.55f,
-            noiseZ * 0.75f
-        );
+        vortexBasisX =
+            Vector3.Cross(
+                vortexAxis,
+                reference).normalized;
 
-        driftOffset *= driftAmplitude;
-
-        // 一方向へ流し続けず、ゆっくり変化する流れにする
-        float flowX =
-            Mathf.PerlinNoise(
-                randomPhase + 41.2f,
-                t * 0.35f) * 2f - 1f;
-
-        float flowY =
-            Mathf.PerlinNoise(
-                randomPhase + 57.8f,
-                t * 0.28f) * 2f - 1f;
-
-        float flowZ =
-            Mathf.PerlinNoise(
-                randomPhase + 73.4f,
-                t * 0.31f) * 2f - 1f;
-
-        Vector3 slowFlow = new Vector3(
-            flowX * 0.05f,
-            flowY * driftVerticalSpeed,
-            flowZ * 0.04f
-        );
-
-        transform.position =
-            driftStartPosition +
-            driftOffset +
-            slowFlow;
-
-        // if (elapsedTime >= driftDuration)
-        // {
-        //     phase = Phase.Idle;
-        // }
+        vortexBasisY =
+            Vector3.Cross(
+                vortexAxis,
+                vortexBasisX).normalized;
     }
 }

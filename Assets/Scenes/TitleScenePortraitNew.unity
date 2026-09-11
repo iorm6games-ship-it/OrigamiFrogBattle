@@ -165,11 +165,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrystalFormationController
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 1599020300}
-  targetCamera: {fileID: 2107679577}
-  dustCount: 18
-  spawnInterval: 0.03
-  firstDistanceMultiplier: 0.55
-  lastDistanceMultiplier: 1.55
+  dustCount: 8
+  seedDustCount: 2
+  seedSpawnInterval: 0.06
+  buildDuration: 0.55
+  peakDuration: 0.18
+  condenseDuration: 0.35
 --- !u!1 &36351073
 GameObject:
   m_ObjectHideFlags: 0
@@ -2059,7 +2060,6 @@ GameObject:
   m_Component:
   - component: {fileID: 486310107}
   - component: {fileID: 486310109}
-  - component: {fileID: 486310110}
   m_Layer: 0
   m_Name: CrystalEffectRoot
   m_TagString: Untagged
@@ -2112,44 +2112,6 @@ MonoBehaviour:
   - {fileID: 525140417}
   - {fileID: 917086191}
   cornerFormationDelay: 0.22
---- !u!114 &486310110
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 486310106}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eba019fe871dad343999785483487b10, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrystalShotController
-  targetRenderer: {fileID: 909455297}
-  duration: 0.22
-  progressCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1 &487469769
 GameObject:
   m_ObjectHideFlags: 0
@@ -2227,11 +2189,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrystalFormationController
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 2021587374}
-  targetCamera: {fileID: 2107679577}
-  dustCount: 18
-  spawnInterval: 0.03
-  firstDistanceMultiplier: 0.55
-  lastDistanceMultiplier: 1.55
+  dustCount: 8
+  seedDustCount: 2
+  seedSpawnInterval: 0.06
+  buildDuration: 0.55
+  peakDuration: 0.18
+  condenseDuration: 0.35
 --- !u!1 &541102414
 GameObject:
   m_ObjectHideFlags: 0
@@ -3384,11 +3347,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrystalFormationController
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 1426977816}
-  targetCamera: {fileID: 2107679577}
-  dustCount: 18
-  spawnInterval: 0.03
-  firstDistanceMultiplier: 0.55
-  lastDistanceMultiplier: 1.55
+  dustCount: 8
+  seedDustCount: 2
+  seedSpawnInterval: 0.06
+  buildDuration: 0.55
+  peakDuration: 0.18
+  condenseDuration: 0.35
 --- !u!1001 &781709361
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4861,11 +4825,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrystalFormationController
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 487469770}
-  targetCamera: {fileID: 2107679577}
-  dustCount: 18
-  spawnInterval: 0.03
-  firstDistanceMultiplier: 0.55
-  lastDistanceMultiplier: 1.55
+  dustCount: 8
+  seedDustCount: 2
+  seedSpawnInterval: 0.06
+  buildDuration: 0.55
+  peakDuration: 0.18
+  condenseDuration: 0.35
 --- !u!1 &926690342
 GameObject:
   m_ObjectHideFlags: 0
@@ -20331,11 +20296,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrystalFormationController
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 867957200}
-  targetCamera: {fileID: 2107679577}
-  dustCount: 18
-  spawnInterval: 0.03
-  firstDistanceMultiplier: 0.55
-  lastDistanceMultiplier: 1.55
+  dustCount: 8
+  seedDustCount: 2
+  seedSpawnInterval: 0.06
+  buildDuration: 0.55
+  peakDuration: 0.18
+  condenseDuration: 0.35
 --- !u!1 &2079854246
 GameObject:
   m_ObjectHideFlags: 0
@@ -21077,12 +21043,32 @@ PrefabInstance:
       value: 0.018
       objectReference: {fileID: 0}
     - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: seedRadius
+      value: 0.18
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: swirlAxis.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: swirlAxis.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: burstDistance
-      value: 3
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: driftDuration
       value: 1.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: buildRadiusMax
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: buildRadiusMin
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: driftAmplitude

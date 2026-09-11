@@ -55,14 +55,20 @@ MonoBehaviour:
   birthDuration: 0.22
   birthStartScale: 0.08
   birthOverShoot: 1.12
-  burstDuration: 0.35
-  burstDistance: 0.8
-  driftDuration: 1.2
-  driftAmplitude: 0.18
-  driftFrequency: 2.2
-  driftVerticalSpeed: 0.08
-  rotationSpeed: {x: 6, y: 10, z: 4}
   birthVisual: {fileID: 1497501819958369431}
+  seedJoinDuration: 0.34
+  seedRadius: 0.25
+  buildJoinDuration: 0.46
+  buildRadiusMin: 0.32
+  buildRadiusMax: 0.5
+  vortexAngularSpeed: 320
+  vortexAngularSpeedVariation: 45
+  vortexMinHeight: 0.07
+  vortexMaxHeight: 0.22
+  vortexHeightFrequency: 0.85
+  radialWobble: 0.035
+  radialWobbleFrequency: 0.75
+  rotationSpeed: {x: 6, y: 10, z: 4}
 --- !u!114 &577178152485152759
 MonoBehaviour:
   m_ObjectHideFlags: 0
