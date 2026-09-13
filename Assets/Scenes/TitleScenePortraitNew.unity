@@ -165,12 +165,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrystalFormationController
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 1599020300}
-  dustCount: 8
-  seedDustCount: 2
+  vortexWindPrefab: {fileID: 7430490742057101192, guid: d645cee4eb5a83e48bbaceabd07f4555, type: 3}
+  condenseGlowPrefab: {fileID: -3192856027991199978, guid: ef670761632ed0c4c9254a21d4654b79, type: 3}
+  crystalVisual: {fileID: 2036214075}
+  dustCount: 400
+  seedDustCount: 50
   seedSpawnInterval: 0.06
   buildDuration: 0.55
-  peakDuration: 0.18
-  condenseDuration: 0.35
+  peakRiseDuration: 0.22
+  peakHoldDuration: 0.16
+  peakRadiusScale: 1.2
+  peakHeightScale: 1.55
+  peakSpinScale: 1.75
+  peakPulseAmount: 0.07
+  peakPulseSpinBoost: 0.18
+  condenseDuration: 0.52
+  condenseTightenPoint: 0.62
+  condenseMidRadiusScale: 0.28
+  condenseMidHeightScale: 0.22
+  condenseSpinPeak: 1.95
+  seedSparkleEnergy: 0.18
+  buildSparkleEnergy: 0.65
+  peakSparkleEnergy: 1
+  condenseSparkleFadeStart: 0.55
+  condenseGlowStart: 0.15
+  condenseGlowStartScale: 1.15
+  condenseGlowEndScale: 0.38
+  condenseGlowFadeDuration: 0.16
+  crystalFormStartPoint: 0.82
+  crystalFormDuration: 0.42
+  crystalVisualScale: 0.5
+  crystalVisualLift: 1.2
+  crystalFormOffset: {x: 0, y: 0, z: 0}
+  seedRadiusScale: 0.82
+  seedHeightScale: 0.8
+  seedSpinScale: 0.95
 --- !u!1 &36351073
 GameObject:
   m_ObjectHideFlags: 0
@@ -737,6 +766,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 961148250}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &267488138
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 267488139}
+  m_Layer: 0
+  m_Name: e642b022-3228-4af7-bc71-5f4e9c013536
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &267488139
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267488138}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 811444599}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &280401253
 GameObject:
@@ -2189,12 +2249,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrystalFormationController
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 2021587374}
-  dustCount: 8
-  seedDustCount: 2
+  vortexWindPrefab: {fileID: 7430490742057101192, guid: d645cee4eb5a83e48bbaceabd07f4555, type: 3}
+  condenseGlowPrefab: {fileID: -3192856027991199978, guid: ef670761632ed0c4c9254a21d4654b79, type: 3}
+  crystalVisual: {fileID: 1908560209}
+  dustCount: 200
+  seedDustCount: 50
   seedSpawnInterval: 0.06
   buildDuration: 0.55
-  peakDuration: 0.18
+  peakRiseDuration: 0.22
+  peakHoldDuration: 0.16
+  peakRadiusScale: 1.06
+  peakHeightScale: 1.12
+  peakSpinScale: 1.18
+  peakPulseAmount: 0.04
+  peakPulseSpinBoost: 0.08
   condenseDuration: 0.35
+  condenseTightenPoint: 0.6
+  condenseMidRadiusScale: 0.55
+  condenseMidHeightScale: 0.55
+  condenseSpinPeak: 1.3
+  seedSparkleEnergy: 0.18
+  buildSparkleEnergy: 0.65
+  peakSparkleEnergy: 1
+  condenseSparkleFadeStart: 0.55
+  condenseGlowStart: 0.15
+  condenseGlowStartScale: 1.15
+  condenseGlowEndScale: 0.38
+  condenseGlowFadeDuration: 0.16
+  crystalFormStartPoint: 0.82
+  crystalFormDuration: 0.42
+  crystalVisualScale: 0.5
+  crystalVisualLift: 0.5
+  crystalFormOffset: {x: 0, y: 0, z: 0}
+  seedRadiusScale: 0.82
+  seedHeightScale: 0.8
+  seedSpinScale: 0.95
 --- !u!1 &541102414
 GameObject:
   m_ObjectHideFlags: 0
@@ -3347,12 +3436,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrystalFormationController
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 1426977816}
-  dustCount: 8
-  seedDustCount: 2
+  vortexWindPrefab: {fileID: 7430490742057101192, guid: d645cee4eb5a83e48bbaceabd07f4555, type: 3}
+  condenseGlowPrefab: {fileID: -3192856027991199978, guid: ef670761632ed0c4c9254a21d4654b79, type: 3}
+  crystalVisual: {fileID: 675227756}
+  dustCount: 200
+  seedDustCount: 50
   seedSpawnInterval: 0.06
   buildDuration: 0.55
-  peakDuration: 0.18
+  peakRiseDuration: 0.22
+  peakHoldDuration: 0.16
+  peakRadiusScale: 1.06
+  peakHeightScale: 1.12
+  peakSpinScale: 1.18
+  peakPulseAmount: 0.04
+  peakPulseSpinBoost: 0.08
   condenseDuration: 0.35
+  condenseTightenPoint: 0.6
+  condenseMidRadiusScale: 0.55
+  condenseMidHeightScale: 0.55
+  condenseSpinPeak: 1.3
+  seedSparkleEnergy: 0.18
+  buildSparkleEnergy: 0.65
+  peakSparkleEnergy: 1
+  condenseSparkleFadeStart: 0.55
+  condenseGlowStart: 0.15
+  condenseGlowStartScale: 1.15
+  condenseGlowEndScale: 0.38
+  condenseGlowFadeDuration: 0.16
+  crystalFormStartPoint: 0.82
+  crystalFormDuration: 0.42
+  crystalVisualScale: 0.5
+  crystalVisualLift: 0.5
+  crystalFormOffset: {x: 0, y: 0, z: 0}
+  seedRadiusScale: 0.82
+  seedHeightScale: 0.8
+  seedSpinScale: 0.95
 --- !u!1001 &781709361
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4188,6 +4306,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 202884438}
+  - {fileID: 2059584027}
+  - {fileID: 2003943289}
+  - {fileID: 267488139}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &838492832
@@ -4825,12 +4946,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrystalFormationController
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 487469770}
-  dustCount: 8
-  seedDustCount: 2
+  vortexWindPrefab: {fileID: 7430490742057101192, guid: d645cee4eb5a83e48bbaceabd07f4555, type: 3}
+  condenseGlowPrefab: {fileID: -3192856027991199978, guid: ef670761632ed0c4c9254a21d4654b79, type: 3}
+  crystalVisual: {fileID: 433708250}
+  dustCount: 200
+  seedDustCount: 50
   seedSpawnInterval: 0.06
   buildDuration: 0.55
-  peakDuration: 0.18
+  peakRiseDuration: 0.22
+  peakHoldDuration: 0.16
+  peakRadiusScale: 1.06
+  peakHeightScale: 1.12
+  peakSpinScale: 1.18
+  peakPulseAmount: 0.04
+  peakPulseSpinBoost: 0.08
   condenseDuration: 0.35
+  condenseTightenPoint: 0.6
+  condenseMidRadiusScale: 0.55
+  condenseMidHeightScale: 0.55
+  condenseSpinPeak: 1.3
+  seedSparkleEnergy: 0.18
+  buildSparkleEnergy: 0.65
+  peakSparkleEnergy: 1
+  condenseSparkleFadeStart: 0.55
+  condenseGlowStart: 0.15
+  condenseGlowStartScale: 1.15
+  condenseGlowEndScale: 0.38
+  condenseGlowFadeDuration: 0.16
+  crystalFormStartPoint: 0.82
+  crystalFormDuration: 0.42
+  crystalVisualScale: 0.5
+  crystalVisualLift: 0.5
+  crystalFormOffset: {x: 0, y: 0, z: 0}
+  seedRadiusScale: 0.82
+  seedHeightScale: 0.8
+  seedSpinScale: 0.95
 --- !u!1 &926690342
 GameObject:
   m_ObjectHideFlags: 0
@@ -15147,6 +15297,37 @@ Transform:
   - {fileID: 917086190}
   m_Father: {fileID: 486310107}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2003943288
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2003943289}
+  m_Layer: 0
+  m_Name: 62ebf8ba-6515-4beb-8c82-28c698f88c73
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2003943289
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2003943288}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 811444599}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2009890910
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15260,7 +15441,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2036214075
 Transform:
   m_ObjectHideFlags: 0
@@ -15414,6 +15595,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2057932843}
   m_CullTransparentMesh: 1
+--- !u!1 &2059584026
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2059584027}
+  m_Layer: 0
+  m_Name: 77050142-7f41-4219-85d7-4abe2e821999
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2059584027
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2059584026}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 811444599}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2068805388
 GameObject:
   m_ObjectHideFlags: 0
@@ -20296,12 +20508,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrystalFormationController
   dustPrefab: {fileID: 2101605634}
   birthPoint: {fileID: 867957200}
-  dustCount: 8
-  seedDustCount: 2
+  vortexWindPrefab: {fileID: 7430490742057101192, guid: d645cee4eb5a83e48bbaceabd07f4555, type: 3}
+  condenseGlowPrefab: {fileID: -3192856027991199978, guid: ef670761632ed0c4c9254a21d4654b79, type: 3}
+  crystalVisual: {fileID: 2144802466}
+  dustCount: 200
+  seedDustCount: 50
   seedSpawnInterval: 0.06
   buildDuration: 0.55
-  peakDuration: 0.18
+  peakRiseDuration: 0.22
+  peakHoldDuration: 0.16
+  peakRadiusScale: 1.06
+  peakHeightScale: 1.12
+  peakSpinScale: 1.18
+  peakPulseAmount: 0.04
+  peakPulseSpinBoost: 0.08
   condenseDuration: 0.35
+  condenseTightenPoint: 0.6
+  condenseMidRadiusScale: 0.55
+  condenseMidHeightScale: 0.55
+  condenseSpinPeak: 1.3
+  seedSparkleEnergy: 0.18
+  buildSparkleEnergy: 0.65
+  peakSparkleEnergy: 1
+  condenseSparkleFadeStart: 0.55
+  condenseGlowStart: 0.15
+  condenseGlowStartScale: 1.15
+  condenseGlowEndScale: 0.38
+  condenseGlowFadeDuration: 0.16
+  crystalFormStartPoint: 0.82
+  crystalFormDuration: 0.42
+  crystalVisualScale: 0.5
+  crystalVisualLift: 0.7
+  crystalFormOffset: {x: 0, y: 0, z: 0}
+  seedRadiusScale: 0.82
+  seedHeightScale: 0.8
+  seedSpinScale: 0.95
 --- !u!1 &2079854246
 GameObject:
   m_ObjectHideFlags: 0
@@ -20973,6 +21214,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PS_CrystalDustAmbient
       objectReference: {fileID: 0}
+    - target: {fileID: 8556284813795361484, guid: 5f7c28db9acdb2d4487a69f9fc457435, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -21004,7 +21249,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 754142826207319649, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 876279972879519805, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_IsActive
@@ -21079,8 +21324,16 @@ PrefabInstance:
       value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: vortexMaxHeight
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: driftVerticalSpeed
       value: 0.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 2637266463136519812, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: peakAngularSpeedMultiplier
+      value: 1.2
       objectReference: {fileID: 0}
     - target: {fileID: 3342090603888790070, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_LocalPosition.x
@@ -21133,6 +21386,18 @@ PrefabInstance:
     - target: {fileID: 4379720799973194544, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4578600431481798376, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4578600431481798376, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4578600431481798376, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4766195959028315573, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
       propertyPath: m_LocalScale.x

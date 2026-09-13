@@ -55,6 +55,16 @@ Material:
     - _EdgeStrength: 0.7
     - _EmissionStrength: 0
     - _FaceHighlightStrength: 0.15
+    - _FormFacetVariation: 0.14
+    - _FormFrontStrength: 1.8
+    - _FormFrontWidth: 0.12
+    - _FormProgress: 1
+    - _FormRadius: 0.018
+    - _FormSoftness: 0.08
+    - _InnerSparkleRadius1: 0.005
+    - _InnerSparkleRadius2: 0.005
+    - _InnerSparkleStrength1: 1
+    - _InnerSparkleStrength2: 1
     - _InnerStrength: 0.02
     - _QueueControl: 0
     - _QueueOffset: 0
@@ -63,6 +73,12 @@ Material:
     - _BaseColor: {r: 0.88235295, g: 0.93333334, b: 0.9607843, a: 1}
     - _EdgeColor: {r: 3.4764395, g: 4.8795805, b: 5.3403134, a: 1}
     - _FaceHighlightColor: {r: 200, g: 235, b: 255, a: 1}
+    - _FormAxisWeight: {r: 1, g: 0.35, b: 1, a: 0}
+    - _FormFacetDirection: {r: 0.58, g: 0.72, b: 0.38, a: 0}
     - _InnerColor: {r: 0.45, g: 0.7, b: 0.95, a: 1}
+    - _InnerSparkleColor1: {r: 0.75, g: 0.88, b: 1, a: 1}
+    - _InnerSparkleColor2: {r: 1, g: 0.85, b: 0.45, a: 1}
+    - _InnerSparklePosition1: {r: 0, g: 0, b: 0, a: 0}
+    - _InnerSparklePosition2: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

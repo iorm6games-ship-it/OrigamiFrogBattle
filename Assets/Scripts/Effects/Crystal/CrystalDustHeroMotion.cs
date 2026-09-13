@@ -69,12 +69,27 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
     [SerializeField]
     private float radialWobbleFrequency = 0.75f;
 
+    [Header("Condense Visual")]
+    [SerializeField]
+    [Range(0f, 1f)]
+    private float condenseScaleStart = 0.75f;
+
+    [SerializeField]
+    [Range(0.01f, 1f)]
+    private float condenseEndScale = 0.08f;
+
     [Header("Crystal Rotation")]
     [SerializeField]
     private Vector3 rotationSpeed =
         new Vector3(6f, 10f, 4f);
 
-    private Phase phase = Phase.Idle;
+    [SerializeField]
+    private CrystalInnerSparkleController innerSparkle;
+
+    private Phase phase =
+        Phase.Idle;
+
+    private CrystalFormationController formation;
 
     private Vector3 baseScale;
 
@@ -87,28 +102,40 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
     private float elapsedTime;
 
     private float startAngle;
+    private float currentAngle;
+
     private float currentAngularSpeed;
+
     private float currentTargetRadius;
     private float currentJoinDuration;
 
     private float heightPhase;
     private float radialPhase;
 
+    //
     // 旧コードとの互換確認用。
-    // 現在は「初期の渦への合流が完了した」という意味。
+    // 現在はVortexへの合流完了という意味。
+    //
     public bool IsBurstComplete { get; private set; }
+
+    public bool IsVortexReady { get; private set; }
 
     private void Awake()
     {
-        baseScale = transform.localScale;
+        baseScale =
+            transform.localScale;
     }
 
     public void Play(
         Vector3 origin,
         Vector3 axis,
-        VortexRole role)
+        VortexRole role,
+        CrystalFormationController owner)
     {
+        formation = owner;
+
         IsBurstComplete = false;
+        IsVortexReady = false;
 
         vortexCenter = origin;
 
@@ -119,12 +146,16 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
 
         CreateVortexBasis();
 
-        ConfigureForRole(role);
+        ConfigureForRole(
+            role);
 
         startAngle =
             Random.Range(
                 0f,
                 360f);
+
+        currentAngle =
+            startAngle;
 
         currentAngularSpeed =
             vortexAngularSpeed +
@@ -142,10 +173,12 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
                 0f,
                 Mathf.PI * 2f);
 
-        transform.position = vortexCenter;
+        transform.position =
+            vortexCenter;
 
         transform.localScale =
-            baseScale * birthStartScale;
+            baseScale *
+            birthStartScale;
 
         elapsedTime = 0f;
 
@@ -161,8 +194,12 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
             return;
         }
 
+        //
+        // 結晶そのものの自転。
+        //
         transform.Rotate(
-            rotationSpeed * Time.deltaTime,
+            rotationSpeed *
+            Time.deltaTime,
             Space.Self);
 
         switch (phase)
@@ -179,23 +216,29 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
 
     private void UpdateBirth()
     {
-        elapsedTime += Time.deltaTime;
+        elapsedTime +=
+            Time.deltaTime;
 
         float t =
             Mathf.Clamp01(
                 elapsedTime /
-                Mathf.Max(0.01f, birthDuration));
+                Mathf.Max(
+                    0.01f,
+                    birthDuration));
 
-        birthVisual?.UpdateBirthVisual(t);
+        birthVisual?.UpdateBirthVisual(
+            t);
 
-        const float settleStart = 0.78f;
+        const float settleStart =
+            0.78f;
 
         float scaleMultiplier;
 
         if (t < settleStart)
         {
             float growT =
-                t / settleStart;
+                t /
+                settleStart;
 
             scaleMultiplier =
                 Mathf.Lerp(
@@ -223,23 +266,27 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
         }
 
         transform.localScale =
-            baseScale * scaleMultiplier;
+            baseScale *
+            scaleMultiplier;
 
         if (t >= 1f)
         {
-            transform.localScale = baseScale;
+            transform.localScale =
+                baseScale;
 
             birthVisual?.CompleteBirth();
 
             elapsedTime = 0f;
 
-            phase = Phase.Vortex;
+            phase =
+                Phase.Vortex;
         }
     }
 
     private void UpdateVortex()
     {
-        elapsedTime += Time.deltaTime;
+        elapsedTime +=
+            Time.deltaTime;
 
         float joinT =
             Mathf.Clamp01(
@@ -249,8 +296,7 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
                     currentJoinDuration));
 
         //
-        // 中心から最初に勢いよく弾け、
-        // 後半で半径方向の動きが落ち着く。
+        // 各Dust自身が中心から渦へ合流する進捗。
         //
         float outwardT =
             1f -
@@ -259,26 +305,32 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
                 3f);
 
         //
-        // 生まれた瞬間から回転する。
+        // Formation全体の回転倍率。
         //
-        float angle =
-            startAngle +
+        float spinScale =
+            formation != null
+                ? formation.VortexSpinScale
+                : 1f;
+
+        currentAngle +=
             currentAngularSpeed *
-            elapsedTime;
+            spinScale *
+            Time.deltaTime;
 
         float angleRad =
-            angle *
+            currentAngle *
             Mathf.Deg2Rad;
 
         Vector3 radialDirection =
             vortexBasisX *
-            Mathf.Cos(angleRad) +
+            Mathf.Cos(
+                angleRad) +
             vortexBasisY *
-            Mathf.Sin(angleRad);
+            Mathf.Sin(
+                angleRad);
 
         //
-        // 完全な円にせず、
-        // 半径をわずかに揺らす。
+        // 個体ごとのわずかな半径揺らぎ。
         //
         float radiusVariation =
             Mathf.Sin(
@@ -295,13 +347,22 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
                 currentTargetRadius +
                 radiusVariation);
 
-        float radius =
+        //
+        // Formation全体の半径倍率。
+        //
+        float radiusScale =
+            formation != null
+                ? formation.VortexRadiusScale
+                : 1f;
+
+        float currentRadius =
             targetRadius *
-            outwardT;
+            outwardT *
+            radiusScale;
 
         //
-        // 紙面から上側だけに高さを作る。
-        // 上下対称に振らないので紙の下へ潜らない。
+        // 個体ごとの高さ。
+        // 正方向のみなので紙の下へ潜らない。
         //
         float heightWave =
             0.5f +
@@ -319,22 +380,74 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
                 vortexMaxHeight,
                 heightWave);
 
-        float height =
+        //
+        // Formation全体の高さ倍率。
+        //
+        float heightScale =
+            formation != null
+                ? formation.VortexHeightScale
+                : 1f;
+
+        float currentHeight =
             targetHeight *
             Mathf.SmoothStep(
                 0f,
                 1f,
-                joinT);
+                joinT) *
+            heightScale;
 
         transform.position =
             vortexCenter +
-            radialDirection * radius +
-            vortexAxis * height;
+            radialDirection *
+            currentRadius +
+            vortexAxis *
+            currentHeight;
 
-        if (!IsBurstComplete &&
+        //
+        // Formationの凝縮進捗に合わせて、
+        // 終盤だけDust自体も縮小する。
+        //
+        float condenseProgress =
+            formation != null
+                ? formation.CondenseProgress
+                : 0f;
+
+        float scaleT =
+            Mathf.InverseLerp(
+                condenseScaleStart,
+                1f,
+                condenseProgress);
+
+        scaleT =
+            Mathf.SmoothStep(
+                0f,
+                1f,
+                scaleT);
+
+        transform.localScale =
+            Vector3.Lerp(
+                baseScale,
+                baseScale *
+                condenseEndScale,
+                scaleT);
+        //
+        // Formation 全体のエネルギーを
+        // InnerSparkle へ反映
+        //
+        if (innerSparkle != null &&
+            formation != null)
+        {
+            innerSparkle.SetEnergyLevel(formation.SparkleEnergy);
+        }
+
+        //
+        // 自分自身のVortexへの合流完了。
+        //
+        if (!IsVortexReady &&
             joinT >= 1f)
         {
             IsBurstComplete = true;
+            IsVortexReady = true;
         }
     }
 
@@ -366,8 +479,8 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
     private void CreateVortexBasis()
     {
         //
-        // vortexAxisに対して垂直な2本の軸を作る。
-        // この2本が渦の回転面になる。
+        // vortexAxisに対して垂直な
+        // 2本のBasisを作る。
         //
         Vector3 reference =
             Mathf.Abs(
@@ -386,5 +499,14 @@ public sealed class CrystalDustHeroMotion : MonoBehaviour
             Vector3.Cross(
                 vortexAxis,
                 vortexBasisX).normalized;
+    }
+
+    public void CompleteFormation()
+    {
+        phase =
+            Phase.Idle;
+
+        Destroy(
+            gameObject);
     }
 }

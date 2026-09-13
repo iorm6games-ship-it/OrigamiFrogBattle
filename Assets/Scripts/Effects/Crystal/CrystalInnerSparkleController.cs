@@ -1,7 +1,5 @@
 using System.Collections;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.InputSystem.LowLevel;
 
 public sealed class CrystalInnerSparkleController : MonoBehaviour
 {
@@ -41,9 +39,13 @@ public sealed class CrystalInnerSparkleController : MonoBehaviour
     [Header("Strength")]
     [SerializeField]
     private Vector2 strengthRange = new Vector2(1.5f, 3f);
-
+    private float energyLevel;
     private MaterialPropertyBlock propertyBlock;
-
+    public void SetEnergyLevel(float value)
+    {
+        energyLevel =
+            Mathf.Clamp01(value);
+    }
     private void Awake()
     {
         propertyBlock = new MaterialPropertyBlock();
@@ -68,20 +70,38 @@ public sealed class CrystalInnerSparkleController : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(
+            float waitMultiplier =
+                Mathf.Lerp(
+                    1.35f,
+                    0.30f,
+                    energyLevel);
+
+            float waitTime =
                 UnityEngine.Random.Range(
                     waitRange.x,
-                    waitRange.y
-                ));
+                    waitRange.y) *
+                waitMultiplier;
+
+            yield return new WaitForSeconds(
+                waitTime);
+
             Vector3 position = new Vector3(
                 UnityEngine.Random.Range(xRange.x, xRange.y),
                 UnityEngine.Random.Range(yRange.x, yRange.y),
                 0f);
-            
+    
+            float strengthMultiplier =
+                Mathf.Lerp(
+                    0.75f,
+                    1.35f,
+                    energyLevel);
+
             float peakStrength =
                 UnityEngine.Random.Range(
                     strengthRange.x,
-                    strengthRange.y);
+                    strengthRange.y) *
+                strengthMultiplier;
+
             SetPosition(positionId, position);
 
             yield return AnimateStrength(
