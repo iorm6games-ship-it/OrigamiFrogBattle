@@ -192,11 +192,11 @@ MonoBehaviour:
   condenseGlowStartScale: 1.15
   condenseGlowEndScale: 0.38
   condenseGlowFadeDuration: 0.16
-  crystalFormStartPoint: 0.82
-  crystalFormDuration: 0.42
+  crystalFormStartPoint: 0.58
+  crystalFormDuration: 0.75
   crystalVisualScale: 0.5
   crystalVisualLift: 1.2
-  crystalAssemblyPrefab: {fileID: 0}
+  crystalAssemblyPrefab: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
   crystalFormOffset: {x: 0, y: 0, z: 0}
   seedRadiusScale: 0.82
   seedHeightScale: 0.8
@@ -2279,11 +2279,11 @@ MonoBehaviour:
   condenseGlowStartScale: 1.15
   condenseGlowEndScale: 0.38
   condenseGlowFadeDuration: 0.16
-  crystalFormStartPoint: 0.82
-  crystalFormDuration: 0.42
+  crystalFormStartPoint: 0.58
+  crystalFormDuration: 0.75
   crystalVisualScale: 0.5
   crystalVisualLift: 0.5
-  crystalAssemblyPrefab: {fileID: 0}
+  crystalAssemblyPrefab: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
   crystalFormOffset: {x: 0, y: 0, z: 0}
   seedRadiusScale: 0.82
   seedHeightScale: 0.8
@@ -3467,11 +3467,11 @@ MonoBehaviour:
   condenseGlowStartScale: 1.15
   condenseGlowEndScale: 0.38
   condenseGlowFadeDuration: 0.16
-  crystalFormStartPoint: 0.82
-  crystalFormDuration: 0.42
+  crystalFormStartPoint: 0.58
+  crystalFormDuration: 0.75
   crystalVisualScale: 0.5
   crystalVisualLift: 0.5
-  crystalAssemblyPrefab: {fileID: 0}
+  crystalAssemblyPrefab: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
   crystalFormOffset: {x: 0, y: 0, z: 0}
   seedRadiusScale: 0.82
   seedHeightScale: 0.8
@@ -4978,11 +4978,11 @@ MonoBehaviour:
   condenseGlowStartScale: 1.15
   condenseGlowEndScale: 0.38
   condenseGlowFadeDuration: 0.16
-  crystalFormStartPoint: 0.82
-  crystalFormDuration: 0.42
+  crystalFormStartPoint: 0.58
+  crystalFormDuration: 0.75
   crystalVisualScale: 0.5
   crystalVisualLift: 0.5
-  crystalAssemblyPrefab: {fileID: 0}
+  crystalAssemblyPrefab: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
   crystalFormOffset: {x: 0, y: 0, z: 0}
   seedRadiusScale: 0.82
   seedHeightScale: 0.8
@@ -20541,11 +20541,11 @@ MonoBehaviour:
   condenseGlowStartScale: 1.15
   condenseGlowEndScale: 0.38
   condenseGlowFadeDuration: 0.16
-  crystalFormStartPoint: 0.82
-  crystalFormDuration: 0.42
+  crystalFormStartPoint: 0.58
+  crystalFormDuration: 0.75
   crystalVisualScale: 0.5
   crystalVisualLift: 0.7
-  crystalAssemblyPrefab: {fileID: 0}
+  crystalAssemblyPrefab: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
   crystalFormOffset: {x: 0, y: 0, z: 0}
   seedRadiusScale: 0.82
   seedHeightScale: 0.8

@@ -45,15 +45,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrystalAssemblyController
   fragmentPrefab: {fileID: 8351603117671171113, guid: ece8800c566787046b4f346ff7a40e0f, type: 3}
-  fragmentCount: 9
+  fragmentCount: 18
+  fragmentTargetsRoot: {fileID: 0}
   startRadiusMultiplier: 2.4
   startHeightMultiplier: 0.75
-  fragmentScaleRange: {x: 0.65, y: 1.05}
+  fragmentScaleRange: {x: 0.42, y: 0.72}
   curveAmountMultiplier: 0.65
-  staggerAmount: 0.18
-  finalCrystalStart: 0.46
-  fragmentMergeStart: 0.68
+  stackStart: 0.05
+  stackEnd: 0.72
+  fragmentTravelWindow: 0.3
+  orderJitter: 0.025
+  settlePortion: 0.22
+  settleScaleOvershoot: 0.06
+  finalCrystalStart: 0.82
+  fragmentMergeStart: 0.86
   fragmentEndScale: 0.16
+  mergeHeightStagger: 0.04
   floatAmplitude: 0.025
   floatFrequency: 0.72
   swayDegrees: 1.25
