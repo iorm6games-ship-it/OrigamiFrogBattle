@@ -168,8 +168,8 @@ MonoBehaviour:
   vortexWindPrefab: {fileID: 7430490742057101192, guid: d645cee4eb5a83e48bbaceabd07f4555, type: 3}
   condenseGlowPrefab: {fileID: -3192856027991199978, guid: ef670761632ed0c4c9254a21d4654b79, type: 3}
   crystalVisual: {fileID: 2036214075}
-  dustCount: 400
-  seedDustCount: 50
+  dustCount: 100
+  seedDustCount: 20
   seedSpawnInterval: 0.06
   buildDuration: 0.55
   peakRiseDuration: 0.22
@@ -192,11 +192,14 @@ MonoBehaviour:
   condenseGlowStartScale: 1.15
   condenseGlowEndScale: 0.38
   condenseGlowFadeDuration: 0.16
-  crystalFormStartPoint: 0.58
-  crystalFormDuration: 0.75
+  crystalFormDuration: 2
   crystalVisualScale: 0.5
   crystalVisualLift: 1.2
   crystalAssemblyPrefab: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+  anchorGatherStart: 0.55
+  anchorFormStart: 0.62
+  anchorGatherDelaySpread: 0.22
+  anchorGatherCurve: 0.3
   crystalFormOffset: {x: 0, y: 0, z: 0}
   seedRadiusScale: 0.82
   seedHeightScale: 0.8
@@ -488,6 +491,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 905d161162d4c6242aac965745b34533, type: 3}
   m_PrefabInstance: {fileID: 58811056}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &66521902
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 66521903}
+  m_Layer: 0
+  m_Name: LiftTarget_Corner_02
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &66521903
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 66521902}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.6, y: 1.1, z: -0.3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1834653445}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &87194161 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4399297380550577486, guid: dfb1958f229adca49975306dc64b5378, type: 3}
@@ -2154,6 +2188,7 @@ Transform:
   - {fileID: 1992122447}
   - {fileID: 1617352884}
   - {fileID: 1452223536217606832}
+  - {fileID: 1834653445}
   m_Father: {fileID: 1025863796}
   m_LocalEulerAnglesHint: {x: 0, y: -20, z: 0}
 --- !u!114 &486310109
@@ -2175,6 +2210,10 @@ MonoBehaviour:
   - {fileID: 525140417}
   - {fileID: 917086191}
   cornerFormationDelay: 0.22
+  centerLiftTarget: {fileID: 0}
+  cornerLiftTargets: []
+  cornerLiftFollowDelay: 0.1
+  cornerLiftStagger: 0.015
 --- !u!1 &487469769
 GameObject:
   m_ObjectHideFlags: 0
@@ -2255,8 +2294,8 @@ MonoBehaviour:
   vortexWindPrefab: {fileID: 7430490742057101192, guid: d645cee4eb5a83e48bbaceabd07f4555, type: 3}
   condenseGlowPrefab: {fileID: -3192856027991199978, guid: ef670761632ed0c4c9254a21d4654b79, type: 3}
   crystalVisual: {fileID: 1908560209}
-  dustCount: 200
-  seedDustCount: 50
+  dustCount: 50
+  seedDustCount: 5
   seedSpawnInterval: 0.06
   buildDuration: 0.55
   peakRiseDuration: 0.22
@@ -2279,11 +2318,14 @@ MonoBehaviour:
   condenseGlowStartScale: 1.15
   condenseGlowEndScale: 0.38
   condenseGlowFadeDuration: 0.16
-  crystalFormStartPoint: 0.58
-  crystalFormDuration: 0.75
+  crystalFormDuration: 2
   crystalVisualScale: 0.5
   crystalVisualLift: 0.5
   crystalAssemblyPrefab: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+  anchorGatherStart: 0.55
+  anchorFormStart: 0.62
+  anchorGatherDelaySpread: 0.22
+  anchorGatherCurve: 0.3
   crystalFormOffset: {x: 0, y: 0, z: 0}
   seedRadiusScale: 0.82
   seedHeightScale: 0.8
@@ -2456,6 +2498,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 781709363}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &570559485
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 570559486}
+  m_Layer: 0
+  m_Name: LiftTarget_Corner_01
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &570559486
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570559485}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.7, y: 1.1, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1834653445}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &575715954
 GameObject:
   m_ObjectHideFlags: 0
@@ -2591,6 +2664,37 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &605240631
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 605240632}
+  m_Layer: 0
+  m_Name: LiftTarget_Center
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &605240632
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 605240631}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.2, y: 1.5, z: -0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1834653445}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &609846607
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3443,8 +3547,8 @@ MonoBehaviour:
   vortexWindPrefab: {fileID: 7430490742057101192, guid: d645cee4eb5a83e48bbaceabd07f4555, type: 3}
   condenseGlowPrefab: {fileID: -3192856027991199978, guid: ef670761632ed0c4c9254a21d4654b79, type: 3}
   crystalVisual: {fileID: 675227756}
-  dustCount: 200
-  seedDustCount: 50
+  dustCount: 50
+  seedDustCount: 5
   seedSpawnInterval: 0.06
   buildDuration: 0.55
   peakRiseDuration: 0.22
@@ -3467,11 +3571,14 @@ MonoBehaviour:
   condenseGlowStartScale: 1.15
   condenseGlowEndScale: 0.38
   condenseGlowFadeDuration: 0.16
-  crystalFormStartPoint: 0.58
-  crystalFormDuration: 0.75
+  crystalFormDuration: 2
   crystalVisualScale: 0.5
   crystalVisualLift: 0.5
   crystalAssemblyPrefab: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+  anchorGatherStart: 0.55
+  anchorFormStart: 0.62
+  anchorGatherDelaySpread: 0.22
+  anchorGatherCurve: 0.3
   crystalFormOffset: {x: 0, y: 0, z: 0}
   seedRadiusScale: 0.82
   seedHeightScale: 0.8
@@ -4314,6 +4421,8 @@ Transform:
   - {fileID: 2059584027}
   - {fileID: 2003943289}
   - {fileID: 267488139}
+  - {fileID: 1415701487}
+  - {fileID: 933323003}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &838492832
@@ -4954,8 +5063,8 @@ MonoBehaviour:
   vortexWindPrefab: {fileID: 7430490742057101192, guid: d645cee4eb5a83e48bbaceabd07f4555, type: 3}
   condenseGlowPrefab: {fileID: -3192856027991199978, guid: ef670761632ed0c4c9254a21d4654b79, type: 3}
   crystalVisual: {fileID: 433708250}
-  dustCount: 200
-  seedDustCount: 50
+  dustCount: 50
+  seedDustCount: 5
   seedSpawnInterval: 0.06
   buildDuration: 0.55
   peakRiseDuration: 0.22
@@ -4978,11 +5087,14 @@ MonoBehaviour:
   condenseGlowStartScale: 1.15
   condenseGlowEndScale: 0.38
   condenseGlowFadeDuration: 0.16
-  crystalFormStartPoint: 0.58
-  crystalFormDuration: 0.75
+  crystalFormDuration: 2
   crystalVisualScale: 0.5
   crystalVisualLift: 0.5
   crystalAssemblyPrefab: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+  anchorGatherStart: 0.55
+  anchorFormStart: 0.62
+  anchorGatherDelaySpread: 0.22
+  anchorGatherCurve: 0.3
   crystalFormOffset: {x: 0, y: 0, z: 0}
   seedRadiusScale: 0.82
   seedHeightScale: 0.8
@@ -5023,6 +5135,37 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 150}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &933323002
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 933323003}
+  m_Layer: 0
+  m_Name: 24c86a23-d0ac-44b9-a5ec-1113e52e6241
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &933323003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 933323002}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 811444599}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &961148247
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6826,6 +6969,14 @@ MonoBehaviour:
   - {fileID: 525140417}
   - {fileID: 917086191}
   cornerFormationDelay: 0.22
+  centerLiftTarget: {fileID: 605240632}
+  cornerLiftTargets:
+  - {fileID: 570559486}
+  - {fileID: 66521903}
+  - {fileID: 1328596496}
+  - {fileID: 1887362352}
+  cornerLiftFollowDelay: 0.1
+  cornerLiftStagger: 0.015
 --- !u!1 &1176528980
 GameObject:
   m_ObjectHideFlags: 0
@@ -7132,7 +7283,8 @@ MonoBehaviour:
   preFoldFlashDuration: 0.22
   preFoldFlashStrength: 0.7
   preFoldReflectionAlpha: 0.461
-  crystalEffectController: {fileID: 486310109}
+  crystalEffectController: {fileID: 1167202060}
+  crystalToPaperLiftDelay: 0.1
 --- !u!1 &1239388578
 GameObject:
   m_ObjectHideFlags: 0
@@ -7250,6 +7402,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1025863796}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1328596495
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1328596496}
+  m_Layer: 0
+  m_Name: LiftTarget_Corner_03
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1328596496
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1328596495}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1, y: 1.05, z: -0.7}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1834653445}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1330770014
 GameObject:
@@ -7409,6 +7592,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 961148249}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1415701486
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1415701487}
+  m_Layer: 0
+  m_Name: a5eb80c6-e02e-41e3-a307-be3354036b5b
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1415701487
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1415701486}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 811444599}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1422068660
 GameObject:
@@ -9907,6 +10121,42 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 876279972879519805, guid: 3bf9595472d0ef84f9328cf81e1c9842, type: 3}
   m_PrefabInstance: {fileID: 2658670252481542320}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1834653444
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1834653445}
+  m_Layer: 0
+  m_Name: CrystalLiftTargets
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1834653445
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1834653444}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 605240632}
+  - {fileID: 570559486}
+  - {fileID: 66521903}
+  - {fileID: 1328596496}
+  - {fileID: 1887362352}
+  m_Father: {fileID: 486310107}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1851094734
 GameObject:
   m_ObjectHideFlags: 0
@@ -9960,6 +10210,37 @@ MonoBehaviour:
   paperSelectionRoot: {fileID: 686168155}
   summonLightController: {fileID: 1238285613}
   afterTitleFadeDelay: 0.35
+--- !u!1 &1887362351
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1887362352}
+  m_Layer: 0
+  m_Name: LiftTarget_Corner_04
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1887362352
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1887362351}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.1, y: 1.05, z: -1.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1834653445}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1908560208
 GameObject:
   m_ObjectHideFlags: 0
@@ -15447,7 +15728,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2036214075
 Transform:
   m_ObjectHideFlags: 0
@@ -20517,8 +20798,8 @@ MonoBehaviour:
   vortexWindPrefab: {fileID: 7430490742057101192, guid: d645cee4eb5a83e48bbaceabd07f4555, type: 3}
   condenseGlowPrefab: {fileID: -3192856027991199978, guid: ef670761632ed0c4c9254a21d4654b79, type: 3}
   crystalVisual: {fileID: 2144802466}
-  dustCount: 200
-  seedDustCount: 50
+  dustCount: 50
+  seedDustCount: 5
   seedSpawnInterval: 0.06
   buildDuration: 0.55
   peakRiseDuration: 0.22
@@ -20541,11 +20822,14 @@ MonoBehaviour:
   condenseGlowStartScale: 1.15
   condenseGlowEndScale: 0.38
   condenseGlowFadeDuration: 0.16
-  crystalFormStartPoint: 0.58
-  crystalFormDuration: 0.75
+  crystalFormDuration: 2
   crystalVisualScale: 0.5
   crystalVisualLift: 0.7
   crystalAssemblyPrefab: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+  anchorGatherStart: 0.55
+  anchorFormStart: 0.62
+  anchorGatherDelaySpread: 0.22
+  anchorGatherCurve: 0.3
   crystalFormOffset: {x: 0, y: 0, z: 0}
   seedRadiusScale: 0.82
   seedHeightScale: 0.8
@@ -21182,6 +21466,34 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 486310107}
     m_Modifications:
+    - target: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+      propertyPath: piecesRoot
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+      propertyPath: seamHealDelay
+      value: 0.0125
+      objectReference: {fileID: 0}
+    - target: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+      propertyPath: seamHealDuration
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+      propertyPath: assemblyVisualRoot
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+      propertyPath: embeddedFinalCrystal
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+      propertyPath: visualSizeMultiplier
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1479135130832131224, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+      propertyPath: matchLegacyRendererBounds
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2493588073789576426, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -21225,6 +21537,10 @@ PrefabInstance:
     - target: {fileID: 3210467085935066762, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
       propertyPath: m_Name
       value: CrystalAssembly
+      objectReference: {fileID: 0}
+    - target: {fileID: 3210467085935066762, guid: 80a3356abcb9b7344a9c5ba7ac12e10d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

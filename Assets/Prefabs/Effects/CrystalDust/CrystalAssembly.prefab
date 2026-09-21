@@ -29,7 +29,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1862331498344396393}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1479135130832131224
@@ -44,24 +45,170 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3946c60950b89a54fbc0dec2fb4fc8da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrystalAssemblyController
-  fragmentPrefab: {fileID: 8351603117671171113, guid: ece8800c566787046b4f346ff7a40e0f, type: 3}
-  fragmentCount: 18
-  fragmentTargetsRoot: {fileID: 0}
+  assemblyVisualRoot: {fileID: 1862331498344396393}
+  piecesRoot: {fileID: 8886959539319618634}
+  embeddedFinalCrystal: {fileID: 1570076208124676653}
+  matchLegacyRendererBounds: 0
+  visualSizeMultiplier: 0.5
+  visualOffsetInCenterSpace: {x: 0, y: 0, z: 0}
+  scatterSeed: 73129
   startRadiusMultiplier: 2.4
   startHeightMultiplier: 0.75
   fragmentScaleRange: {x: 0.42, y: 0.72}
   curveAmountMultiplier: 0.65
   stackStart: 0.05
   stackEnd: 0.72
-  fragmentTravelWindow: 0.3
+  fragmentTravelWindow: 0.38
   orderJitter: 0.025
+  useAuthoredLayerOrder: 1
+  withinLayerStartSpread: 0.015
   settlePortion: 0.22
-  settleScaleOvershoot: 0.06
+  settleScaleOvershoot: 0.012
+  shardTravelDuration: 0.28
+  shardStartInterval: 0.08
+  postAssemblyHoldDuration: 0.07
+  finalBlendDuration: 0.16
+  rotationFollowDelay: 0.1
+  arrivalCurveDamping: 0.72
+  waitingDriftAmount: 0.018
+  waitingDriftFrequency: 0.85
+  shardPreSpawnDuration: 0.1
+  shardPreSpawnStartScale: 0.88
+  shardPreSpawnDriftAmount: 0.006
+  assemblyEdgeSuppression: 0.1
+  assemblyEmissionSuppression: 0.3
+  seamFadeStart: 0.55
+  settledEdgeMultiplier: 0.015
+  settledEmissionMultiplier: 0.06
+  assemblyFaceHighlightSuppression: 0.45
+  settledFaceHighlightMultiplier: 0.03
+  progressiveSeamHealing: 1
+  seamHealDelay: 0.035
+  seamHealDuration: 0.1
+  healedShardAlpha: 0.02
+  finalHealRevealLead: 0.025
+  steppedLayerFinalReveal: 1
+  layerRevealPadding: 0.025
+  settleScaleResponse: 0.22
+  settleVisualResponse: 0.45
+  anchorFragmentName: Crystal_Lower
+  anchorStartScale: 0.88
+  anchorGatherBoundsFill: 0.72
+  shardAlphaMultiplier: 0.82
+  shardEmissionMultiplier: 0.1
+  shardEdgeMultiplier: 0.45
+  settleEmissionBoost: 1.25
+  settleEdgeBoost: 1.1
   finalCrystalStart: 0.82
   fragmentMergeStart: 0.86
   fragmentEndScale: 0.16
   mergeHeightStagger: 0.04
-  floatAmplitude: 0.025
-  floatFrequency: 0.72
-  swayDegrees: 1.25
+  completedLiftDistance: 0.25
+  completedLiftDuration: 0.65
+  completedLiftOvershoot: 0.012
+  completedLiftGlideDurationMultiplier: 1.7
+  floatAmplitude: 0.02
+  floatFrequency: 0.58
+  secondaryFloatAmplitude: 0.006
+  secondaryFloatFrequencyMultiplier: 1.73
+  lateralFloatAmplitude: 0.0045
+  lateralFloatFrequencyMultiplier: 0.67
+  swayDegrees: 0.75
+  swayFrequencyMultiplier: 0.81
   phaseOffsetRange: 0.12
+--- !u!1001 &2454316749331289624
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2493588073789576426}
+    m_Modifications:
+    - target: {fileID: 3502947398933035723, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_Name
+      value: PF_CrystalAssembly_16Pieces
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6438931999184185938, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 6438931999184185938, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 6438931999184185938, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 90
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+--- !u!4 &1570076208124676653 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4018754489157590069, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+  m_PrefabInstance: {fileID: 2454316749331289624}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1862331498344396393 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+  m_PrefabInstance: {fileID: 2454316749331289624}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8886959539319618634 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6438931999184185938, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+  m_PrefabInstance: {fileID: 2454316749331289624}
+  m_PrefabAsset: {fileID: 0}

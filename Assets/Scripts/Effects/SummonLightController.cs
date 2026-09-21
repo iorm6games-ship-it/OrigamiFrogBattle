@@ -194,12 +194,12 @@ public class SummonLightController : MonoBehaviour
     [SerializeField]
     private float afterFoldLineFloatDuration = 0.4f;
 
-    [Tooltip("折り畳み直前に紙を浮き上がらせる距離")]
+    [Tooltip("5個のCrystal上昇完了後、折り紙が追従して浮き上がる距離")]
     [Min(0f)]
     [SerializeField]
     private float preFoldLiftDistance = 0.12f;
 
-    [Tooltip("折り畳み直前の浮き上がり時間")]
+    [Tooltip("Crystalのあとを追って折り紙が浮き上がる時間")]
     [Min(0.01f)]
     [SerializeField]
     private float preFoldLiftDuration = 0.45f;
@@ -224,6 +224,12 @@ public class SummonLightController : MonoBehaviour
     [Header("Crystal Formation")]
     [SerializeField]
     private CrystalEffectController crystalEffectController;
+
+    [Header("Crystal To Paper Lift")]
+    [Tooltip("5個すべてのCrystalが先行上昇を完了してから、折り紙が追従して上がり始めるまでの短い間")]
+    [Min(0f)]
+    [SerializeField]
+    private float crystalToPaperLiftDelay = 0.10f;
 
     private void Awake()
     {
@@ -462,9 +468,31 @@ public class SummonLightController : MonoBehaviour
                 selectedPaper.FadeCrystalIgnition()
             );
 
+            //
+            // CrystalEffectController.PlaySequence() は
+            // 中央 → 四隅の先行Liftをすべて完了してから戻る。
+            //
             yield return
                 crystalEffectController.PlaySequence();
+
+            //
+            // 5個のCrystalが持ち上がった状態をほんの少し見せてから、
+            // 折り紙が後を追って上昇する。
+            //
+            yield return WaitForDuration(
+                crystalToPaperLiftDelay
+            );
         }
+
+        //
+        // Crystal群のあとをPaperが追従して浮上。
+        // ここで上げておくことで、
+        // 「Crystalが先導してPaperを引き上げた」因果を見せる。
+        //
+        yield return selectedPaper.PlayPreFoldLift(
+            preFoldLiftDistance,
+            preFoldLiftDuration
+        );
 
         // // 浮上と同時に、折り畳み用カメラへ移動開始
         // if (summonCameraController != null)
@@ -482,15 +510,9 @@ public class SummonLightController : MonoBehaviour
             );
         }
 
-        // 折れ線完成後も少し浮遊したまま見せる
+        // 折れ線完成後も、持ち上がった位置で少し浮遊を見せる
         yield return WaitForDuration(
             afterFoldLineFloatDuration
-        );
-
-        // 今の浮遊位置から少し上へ
-        yield return selectedPaper.PlayPreFoldLift(
-            preFoldLiftDistance,
-            preFoldLiftDuration
         );
 
         // 折り始める直前に一瞬発光

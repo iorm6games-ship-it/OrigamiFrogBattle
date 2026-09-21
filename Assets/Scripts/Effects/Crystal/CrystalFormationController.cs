@@ -135,10 +135,7 @@ public sealed class CrystalFormationController : MonoBehaviour
     private float condenseGlowFadeDuration = 0.16f;
 
     [Header("Crystal Form")]
-    [Range(0f, 1f)]
-    [SerializeField]
-    private float crystalFormStartPoint = 0.82f;
-
+    [Tooltip("Assembly Prefab未使用時のFallbackだけで使用。16片Assemblyの速度はCrystalAssemblyController側で指定する。")]
     [Min(0.01f)]
     [SerializeField]
     private float crystalFormDuration = 0.42f;
@@ -153,6 +150,29 @@ public sealed class CrystalFormationController : MonoBehaviour
     private CrystalAssemblyController crystalAssemblyPrefab;
 
     private CrystalAssemblyController crystalAssemblyInstance;
+
+    [Header("Anchor Handoff")]
+    [Tooltip("Condenseの何割から細かい結晶をCrystal_Lowerへ吸い込み始めるか。")]
+    [Range(0f, 0.95f)]
+    [SerializeField]
+    private float anchorGatherStart = 0.55f;
+
+    [Tooltip("Condenseの何割からCrystal_Lower自体を結晶化させ始めるか。")]
+    [Range(0f, 0.98f)]
+    [SerializeField]
+    private float anchorFormStart = 0.62f;
+
+    [Tooltip("Dustごとの吸い込み開始を少しずらす割合。全Dustが同時に一点へ飛ぶのを防ぐ。")]
+    [Range(0f, 0.5f)]
+    [SerializeField]
+    private float anchorGatherDelaySpread = 0.22f;
+
+    [Tooltip("DustがCrystal_Lowerへ入るときの巻き込みカーブ量。")]
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float anchorGatherCurve = 0.30f;
+
+    private bool anchorGatherStarted;
 
     private Vector3 crystalInitialScale;
 
@@ -185,6 +205,19 @@ public sealed class CrystalFormationController : MonoBehaviour
 
     public bool IsPlaying { get; private set; }
 
+    /// <summary>
+    /// 欠片の組み立てとFinal Crystalへの一体化まで完了した状態。
+    /// 完成後の先行Lift完了とは別。
+    /// </summary>
+    public bool IsCrystalBuilt { get; private set; }
+
+    /// <summary>
+    /// CrystalEffectControllerが中央→四隅のLift順を制御するときに使用する。
+    /// </summary>
+    public bool IsCompletedLiftComplete =>
+        crystalAssemblyInstance == null ||
+        crystalAssemblyInstance.IsLeadLiftComplete;
+
     public float VortexRadiusScale { get; private set; } = 1f;
     public float VortexHeightScale { get; private set; } = 1f;
     public float VortexSpinScale { get; private set; } = 1f;
@@ -202,11 +235,14 @@ public sealed class CrystalFormationController : MonoBehaviour
 
     private Vector3 condenseGlowBaseScale;
 
-    private Vector3 crystalBaseScale;
     private Quaternion crystalBaseRotation;
 
     private bool crystalFormStarted;
     private bool crystalFormComplete;
+
+    private bool externalLiftControl;
+    private bool externalLiftRequested;
+    private Transform externalLiftTarget;
 
     private void Awake()
     {
@@ -216,9 +252,6 @@ public sealed class CrystalFormationController : MonoBehaviour
         if (crystalVisual != null)
         {
             crystalInitialScale =
-                crystalVisual.localScale;
-
-            crystalBaseScale =
                 crystalVisual.localScale;
 
             crystalBaseRotation =
@@ -265,6 +298,97 @@ public sealed class CrystalFormationController : MonoBehaviour
                 crystalPropertyBlock);
         }
     }
+    /// <summary>
+    /// true の場合、Crystal完成後の先行Liftを自動開始せず、
+    /// CrystalEffectControllerからのStartCompletedLiftを待つ。
+    /// Play()より前に設定する。
+    /// </summary>
+    public void SetExternalLiftControl(
+        bool enabled)
+    {
+        externalLiftControl =
+            enabled;
+    }
+
+    /// <summary>
+    /// 完成済みCrystalの先行Liftを開始する。
+    /// 外部制御時はCrystalEffectControllerから呼ばれる。
+    /// </summary>
+    public void StartCompletedLift()
+    {
+        StartCompletedLift(null);
+    }
+
+    /// <summary>
+    /// 指定したLift Targetへ完成Crystalを移動させる。
+    /// Target未指定時はAssembly側の従来距離Liftへフォールバックする。
+    /// </summary>
+    public void StartCompletedLift(
+        Transform liftTarget)
+    {
+        externalLiftRequested = true;
+        externalLiftTarget =
+            liftTarget;
+
+        if (crystalAssemblyInstance != null &&
+            IsCrystalBuilt)
+        {
+            StartAssemblyCompletedLift();
+        }
+    }
+
+    private void StartAssemblyCompletedLift()
+    {
+        if (crystalAssemblyInstance == null)
+        {
+            return;
+        }
+
+        if (externalLiftTarget != null)
+        {
+            crystalAssemblyInstance.StartCompletedLift(
+                externalLiftTarget.position);
+        }
+        else
+        {
+            crystalAssemblyInstance.StartCompletedLift();
+        }
+    }
+
+    /// <summary>
+    /// 完成済みAssemblyを指定Targetへ直接Liftする。
+    /// CrystalEffectControllerのシーケンスから直接StartCoroutineされる。
+    /// </summary>
+    public IEnumerator PlayCompletedLiftTo(
+        Transform liftTarget)
+    {
+        if (!IsCrystalBuilt)
+        {
+            Debug.LogWarning(
+                $"[CrystalLift] {name}: IsCrystalBuilt=false のためDirect Liftを開始できません。",
+                this);
+            yield break;
+        }
+
+        if (crystalAssemblyInstance == null)
+        {
+            Debug.LogWarning(
+                $"[CrystalLift] {name}: CrystalAssemblyInstanceがありません。",
+                this);
+            yield break;
+        }
+
+        Debug.Log(
+            $"[CrystalLift] {name}: Formation -> Assembly direct lift, " +
+            $"target={(liftTarget != null ? liftTarget.name : "null")}, " +
+            $"world={(liftTarget != null ? liftTarget.position.ToString("F3") : "-")}",
+            this);
+
+        yield return
+            crystalAssemblyInstance.PlayCompletedLiftTo(
+                liftTarget);
+    }
+
     public void Play()
     {
         if (IsPlaying)
@@ -389,6 +513,11 @@ public sealed class CrystalFormationController : MonoBehaviour
     private void ResetVisualState()
     {
         crystalFormStarted = false;
+        anchorGatherStarted = false;
+
+        IsCrystalBuilt = false;
+        externalLiftRequested = false;
+        externalLiftTarget = null;
 
         crystalFormComplete =
             crystalVisual == null;
@@ -704,6 +833,8 @@ public sealed class CrystalFormationController : MonoBehaviour
 
     private IEnumerator PlayCondense()
     {
+        PrepareCrystalAssemblyForAnchor();
+
         float duration =
             Mathf.Max(
                 0.01f,
@@ -842,13 +973,38 @@ public sealed class CrystalFormationController : MonoBehaviour
                 t);
 
             //
-            // Condenseが十分進み、
-            // 強い核ができてからCrystal Form開始。
+            // Condense後半:
+            // Micro DustをCrystal_Lowerへ集め、
+            // 同じ場所でLower自体を結晶化する。
             //
-            if (!crystalFormStarted &&
-                t >= crystalFormStartPoint)
+            if (crystalAssemblyInstance != null &&
+                crystalAssemblyInstance.HasAnchorFragment)
             {
-                StartCrystalFormation();
+                if (!anchorGatherStarted &&
+                    t >= anchorGatherStart)
+                {
+                    StartDustAnchorGather(
+                        duration,
+                        t);
+                }
+
+                float anchorT =
+                    Mathf.InverseLerp(
+                        anchorFormStart,
+                        1f,
+                        t);
+
+                anchorT =
+                    Mathf.SmoothStep(
+                        0f,
+                        1f,
+                        anchorT);
+
+                crystalAssemblyInstance.SetAnchorProgress(
+                    anchorT);
+
+                UpdateCondenseGlowAnchorPosition(
+                    t);
             }
 
             elapsed +=
@@ -867,9 +1023,16 @@ public sealed class CrystalFormationController : MonoBehaviour
         UpdateCondenseGlow(
             1f);
 
-        if (!crystalFormStarted)
+        if (crystalAssemblyInstance != null &&
+            crystalAssemblyInstance.HasAnchorFragment)
         {
-            StartCrystalFormation();
+            crystalAssemblyInstance.SetAnchorProgress(
+                1f);
+
+            crystalAssemblyInstance.CompleteAnchorFormation();
+
+            UpdateCondenseGlowAnchorPosition(
+                1f);
         }
     }
 
@@ -917,6 +1080,175 @@ public sealed class CrystalFormationController : MonoBehaviour
             glowT);
     }
 
+    private void PrepareCrystalAssemblyForAnchor()
+    {
+        if (crystalVisual == null ||
+            crystalAssemblyPrefab == null ||
+            crystalAssemblyInstance != null)
+        {
+            return;
+        }
+
+        AlignCrystalToFormationPoint();
+
+        crystalVisual.localScale =
+            crystalInitialScale *
+            crystalVisualScale;
+
+        crystalVisual.rotation =
+            crystalBaseRotation;
+
+        SetCrystalFormProgress(0f);
+
+        crystalVisual.gameObject.SetActive(true);
+
+        crystalAssemblyInstance =
+            Instantiate(
+                crystalAssemblyPrefab,
+                birthPoint.position,
+                birthPoint.rotation,
+                transform);
+
+        crystalAssemblyInstance.Begin(
+            birthPoint,
+            crystalVisual);
+    }
+
+    private void StartDustAnchorGather(
+        float condenseTotalDuration,
+        float currentCondenseT)
+    {
+        if (anchorGatherStarted ||
+            crystalAssemblyInstance == null ||
+            !crystalAssemblyInstance.HasAnchorFragment)
+        {
+            return;
+        }
+
+        anchorGatherStarted = true;
+
+        float remainingNormalized =
+            Mathf.Max(
+                0.01f,
+                1f -
+                currentCondenseT);
+
+        float gatherDuration =
+            Mathf.Max(
+                0.10f,
+                condenseTotalDuration *
+                remainingNormalized);
+
+        int validCount = 0;
+
+        for (int i = 0;
+             i < spawnedDust.Count;
+             i++)
+        {
+            if (spawnedDust[i] != null)
+            {
+                validCount++;
+            }
+        }
+
+        if (validCount <= 0)
+        {
+            return;
+        }
+
+        int validIndex = 0;
+
+        for (int i = 0;
+             i < spawnedDust.Count;
+             i++)
+        {
+            CrystalDustHeroMotion dust =
+                spawnedDust[i];
+
+            if (dust == null)
+            {
+                continue;
+            }
+
+            Vector3 target =
+                crystalAssemblyInstance.GetAnchorGatherPoint(
+                    validIndex,
+                    validCount);
+
+            float normalizedOrder =
+                validCount <= 1
+                    ? 0f
+                    : validIndex /
+                      (float)(
+                          validCount - 1);
+
+            //
+            // 同時収束を避けるため、
+            // Golden-ratio系の位相で順番を崩す。
+            //
+            float stagger01 =
+                Mathf.Repeat(
+                    normalizedOrder *
+                    7.61803398875f,
+                    1f);
+
+            float delay =
+                gatherDuration *
+                anchorGatherDelaySpread *
+                stagger01;
+
+            CrystalDustAnchorGatherController gather =
+                dust.GetComponent<
+                    CrystalDustAnchorGatherController>();
+
+            if (gather == null)
+            {
+                gather =
+                    dust.gameObject.AddComponent<
+                        CrystalDustAnchorGatherController>();
+            }
+
+            gather.BeginGather(
+                dust,
+                target,
+                birthPoint.up,
+                gatherDuration,
+                delay,
+                anchorGatherCurve);
+
+            validIndex++;
+        }
+    }
+
+    private void UpdateCondenseGlowAnchorPosition(
+        float condenseT)
+    {
+        if (condenseGlowInstance == null ||
+            crystalAssemblyInstance == null ||
+            !crystalAssemblyInstance.HasAnchorFragment)
+        {
+            return;
+        }
+
+        float moveT =
+            Mathf.InverseLerp(
+                anchorGatherStart,
+                1f,
+                condenseT);
+
+        moveT =
+            Mathf.SmoothStep(
+                0f,
+                1f,
+                moveT);
+
+        condenseGlowInstance.transform.position =
+            Vector3.Lerp(
+                birthPoint.position,
+                crystalAssemblyInstance.AnchorWorldPosition,
+                moveT);
+    }
+
     private void StartCrystalFormation()
     {
         if (crystalFormStarted)
@@ -956,15 +1288,12 @@ public sealed class CrystalFormationController : MonoBehaviour
 
         crystalVisual.gameObject.SetActive(true);
 
-        if (crystalAssemblyInstance != null)
-        {
-            Destroy(
-                crystalAssemblyInstance.gameObject);
-
-            crystalAssemblyInstance = null;
-        }
-
-        if (crystalAssemblyPrefab != null)
+        //
+        // 通常はCondense開始時にAssemblyを準備済み。
+        // Prefab未設定やAnchorなしの場合だけここで従来通り生成する。
+        //
+        if (crystalAssemblyInstance == null &&
+            crystalAssemblyPrefab != null)
         {
             crystalAssemblyInstance =
                 Instantiate(
@@ -978,52 +1307,88 @@ public sealed class CrystalFormationController : MonoBehaviour
                 crystalVisual);
         }
 
-        float duration =
-            Mathf.Max(
-                0.01f,
-                crystalFormDuration);
-
-        float elapsed = 0f;
-
-        while (elapsed < duration)
+        if (crystalAssemblyInstance != null)
         {
-            elapsed +=
-                Time.deltaTime;
-
-            float t =
-                Mathf.Clamp01(
-                    elapsed /
-                    duration);
-
-            float formT =
-                Mathf.SmoothStep(
-                    0f,
-                    1f,
-                    t);
-
-            if (crystalAssemblyInstance != null)
-            {
-                crystalAssemblyInstance.SetProgress(
-                    formT);
-            }
-            else
-            {
-                // Assembly Prefab未設定時のFallback。
-                SetCrystalFormProgress(
-                    formT);
-            }
-
-            yield return null;
+            crystalAssemblyInstance.BeginRemainingAssembly();
         }
 
         if (crystalAssemblyInstance != null)
         {
+            //
+            // 1片の速度と全体時間を切り離すため、
+            // Assembly側の実時間シーケンスをそのまま待つ。
+            //
+            yield return
+                crystalAssemblyInstance.PlayRemainingAssembly();
+
             crystalAssemblyInstance.SetProgress(1f);
-            crystalAssemblyInstance.CompleteAssembly();
+
+            //
+            // 外部制御時は完成だけ確定して、その場で待つ。
+            // CrystalEffectControllerが中央→四隅の順でLiftを開始する。
+            //
+            crystalAssemblyInstance.CompleteAssembly(
+                startCompletedLift:
+                    !externalLiftControl);
+
+            IsCrystalBuilt = true;
+
+            if (!externalLiftControl)
+            {
+                //
+                // 単独再生時だけ従来どおりAssembly自身のLift完了を待つ。
+                //
+                yield return new WaitUntil(
+                    () =>
+                        crystalAssemblyInstance == null ||
+                        crystalAssemblyInstance.IsLeadLiftComplete);
+            }
+            else
+            {
+                //
+                // CrystalEffectController管理時はここでは待たない。
+                // 「形成完了」と「Lift」を完全に分離し、
+                // EffectControllerが5本の順序を直接制御する。
+                //
+                Debug.Log(
+                    $"[CrystalLift] {name}: Crystal build complete; waiting for EffectController lift sequence.",
+                    this);
+            }
         }
         else
         {
+            float duration =
+                Mathf.Max(
+                    0.01f,
+                    crystalFormDuration);
+
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+
+                float t =
+                    Mathf.Clamp01(
+                        elapsed /
+                        duration);
+
+                SetCrystalFormProgress(
+                    Mathf.SmoothStep(
+                        0f,
+                        1f,
+                        t));
+
+                yield return null;
+            }
+
             SetCrystalFormProgress(1f);
+
+            //
+            // Assembly未使用FallbackではLift対象がないため、
+            // 「Build完了」として外部シーケンスを止めない。
+            //
+            IsCrystalBuilt = true;
         }
 
         crystalFormComplete = true;

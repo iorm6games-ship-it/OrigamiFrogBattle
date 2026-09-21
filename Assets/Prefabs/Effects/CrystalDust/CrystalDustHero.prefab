@@ -68,7 +68,10 @@ MonoBehaviour:
   vortexHeightFrequency: 0.85
   radialWobble: 0.035
   radialWobbleFrequency: 0.75
+  condenseScaleStart: 0.75
+  condenseEndScale: 0.08
   rotationSpeed: {x: 6, y: 10, z: 4}
+  innerSparkle: {fileID: 577178152485152759}
 --- !u!114 &577178152485152759
 MonoBehaviour:
   m_ObjectHideFlags: 0
