@@ -25,6 +25,15 @@ public sealed class CrystalAssemblyController : MonoBehaviour
     private static readonly int FormFrontStrengthId =
         Shader.PropertyToID("_FormFrontStrength");
 
+    [Header("Visual Rotation Correction")]
+
+    [Tooltip(
+        "BirthPointから継承した傾きをCrystal Visualだけ補正する。"
+    )]
+    [SerializeField]
+    private Vector3 visualRotationCorrectionEuler =
+        new Vector3(30f, 0f, 0f);
+
     [Header("Assembly References")]
     [Tooltip("配置した PF_CrystalAssembly_16Pieces のルート。完成後の浮遊もこのTransformへ適用する。")]
     [SerializeField]
@@ -90,6 +99,60 @@ public sealed class CrystalAssemblyController : MonoBehaviour
     [Tooltip("Crystal_Layer01_... のLayer番号を優先して、Blenderで設計した建築順をそのまま使う。名前を解析できない欠片が1つでもある場合は、高さ順へ自動フォールバックする。")]
     [SerializeField]
     private bool useAuthoredLayerOrder = true;
+
+    [Header("Authored Growth Order")]
+
+    [Tooltip(
+        "Layer順ではなく、結晶が隣接Shardへ伝播するように組み立てる。"
+    )]
+    [SerializeField]
+    private bool useAuthoredGrowthOrder = true;
+
+    [Tooltip(
+        "Crystal_Lowerを除く15片のAssembly順。"
+    )]
+    [SerializeField]
+    private string[] authoredGrowthOrder =
+    {
+        // Front / Right branch
+        "Crystal_Layer01_B",
+        "Crystal_Layer02_Front_B",
+
+        // Front / Left branch
+        "Crystal_Layer01_A",
+
+        // Right branch grows upward first
+        "Crystal_Layer03_Right_C",
+
+        "Crystal_Layer02_Front_A",
+
+        // Back branch starts later
+        "Crystal_Layer01_C",
+
+        // First branch reaches upper area
+        "Crystal_Layer04_A",
+
+        // Left side follows
+        "Crystal_Layer03_Left_A",
+
+        // Back-right branch
+        "Crystal_Layer02_Back_D",
+
+        // Left branch reaches Layer04
+        "Crystal_Layer04_B",
+
+        "Crystal_Layer03_Right_D",
+
+        // Back-left fills later
+        "Crystal_Layer02_Back_C",
+        "Crystal_Layer03_Left_B",
+
+        // Upper rear closes last
+        "Crystal_Layer04_C",
+
+        // Final cap
+        "Crystal_Top"
+    };
 
     [Tooltip("同じLayer内の欠片を完全同時にせず、少しだけ重ねて開始する幅。Formation Progress単位。")]
     [Range(0f, 0.15f)]
@@ -160,7 +223,6 @@ public sealed class CrystalAssemblyController : MonoBehaviour
     [Range(0f, 0.05f)]
     [SerializeField]
     private float shardPreSpawnDriftAmount = 0.006f;
-
 
     [Header("Assembly Seam Suppression")]
     [Tooltip("16片それぞれのEdgeを抑え、接合面に白い線が残るのを防ぐ。既存Shard Edge Multiplierへさらに掛かる。")]
@@ -361,6 +423,14 @@ public sealed class CrystalAssemblyController : MonoBehaviour
     [SerializeField]
     private float phaseOffsetRange = 0.12f;
 
+    [Header("Energy Transfer")]
+
+    [Tooltip("完成Crystal 先端のエネルギー送受信用Anchor")]
+    [SerializeField]
+    private Transform energyTip;
+
+    public Transform EnergyTip => energyTip;
+    
     public bool IsComplete { get; private set; }
     public bool IsLeadLiftComplete { get; private set; }
     public float FloatSignal { get; private set; }
@@ -403,6 +473,10 @@ public sealed class CrystalAssemblyController : MonoBehaviour
 
     private bool hasCompletedLiftTarget;
     private Vector3 completedLiftTargetPosition;
+
+    private Quaternion completedLiftRotationOffset =
+        Quaternion.identity;
+    private float completedLiftScaleMultiplier = 1f;
 
     private bool hierarchyCached;
     private bool initialized;
@@ -674,7 +748,7 @@ public sealed class CrystalAssemblyController : MonoBehaviour
 
         center = centerPoint;
         legacyFinalTarget = finalCrystalTransform;
-
+        
         IsComplete = false;
         IsLeadLiftComplete = false;
         FloatSignal = 0f;
@@ -683,6 +757,9 @@ public sealed class CrystalAssemblyController : MonoBehaviour
 
         hasCompletedLiftTarget = false;
         completedLiftTargetPosition = Vector3.zero;
+        completedLiftRotationOffset =
+            Quaternion.identity;
+        completedLiftScaleMultiplier = 1f;
 
         if (completedLiftCoroutine != null)
         {
@@ -1082,6 +1159,21 @@ public sealed class CrystalAssemblyController : MonoBehaviour
             hasCompletedLiftTarget = true;
             completedLiftTargetPosition =
                 liftTarget.position;
+
+            completedLiftRotationOffset =
+                Quaternion.identity;
+            completedLiftScaleMultiplier = 1f;
+            CrystalFinalPose finalPose =
+                liftTarget.GetComponent<CrystalFinalPose>();
+
+            if (finalPose != null)
+            {
+                completedLiftRotationOffset =
+                    finalPose.RotationOffset;
+                completedLiftScaleMultiplier =
+                    finalPose.ScaleMultiplier;
+
+            }
         }
 
         if (completedLiftCoroutine != null)
@@ -1212,9 +1304,23 @@ public sealed class CrystalAssemblyController : MonoBehaviour
 
         Vector3 startPosition =
             floatTarget.position;
-
+        
         Quaternion startRotation =
             floatTarget.rotation;
+
+        Vector3 startScale =
+            floatTarget.localScale;
+        
+        Quaternion targetRotation =
+            startRotation *
+            completedLiftRotationOffset;
+
+        Vector3 targetScale =
+            startScale *
+            completedLiftScaleMultiplier;
+        
+        Vector3 startVisualAnchor =
+            GetCompletedCrystalVisualAnchor();
 
         Vector3 targetPosition;
 
@@ -1321,26 +1427,64 @@ public sealed class CrystalAssemblyController : MonoBehaviour
                 overshoot;
 
             floatTarget.rotation =
-                startRotation;
+                Quaternion.Slerp(
+                    startRotation,
+                    targetRotation,
+                    eased);
+            floatTarget.localScale =
+                Vector3.Lerp(
+                    startScale,
+                    targetScale,
+                    eased);
+            
+            if (hasCompletedLiftTarget)
+            {
+                Vector3 desiredVisualAnchor =
+                    Vector3.Lerp(
+                        startVisualAnchor,
+                        completedLiftTargetPosition,
+                        eased);
+                Vector3 currentVisualAnchor =
+                    GetCompletedCrystalVisualAnchor();
+                floatTarget.position +=
+                    desiredVisualAnchor -
+                    currentVisualAnchor;
+            }
 
             yield return null;
         }
 
-        floatTarget.position =
-            targetPosition;
-
-        floatTarget.rotation =
-            startRotation;
+        if (hasCompletedLiftTarget)
+        {
+            floatTarget.position =
+                targetPosition;
+            floatTarget.localScale =
+                targetScale;
+            Vector3 currentVisualAnchor =
+                GetCompletedCrystalVisualAnchor();
+            floatTarget.position +=
+                completedLiftTargetPosition -
+                currentVisualAnchor;
+        }
+        else
+        {
+            floatTarget.position =
+                targetPosition;
+            floatTarget.rotation =
+                targetRotation;
+            floatTarget.localScale =
+                targetScale;
+        }
 
         //
         // ここから先の浮遊中心は、
         // 「紙より先に上がった位置」そのもの。
         //
         floatBasePosition =
-            targetPosition;
+            floatTarget.position;
 
         floatBaseRotation =
-            startRotation;
+            targetRotation;
 
         floatElapsedTime = 0f;
         FloatSignal = 0f;
@@ -1666,6 +1810,8 @@ public sealed class CrystalAssemblyController : MonoBehaviour
         // 旧CrystalとFBXではメッシュ軸が異なるため、旧Transformの
         // rotationはコピーせず、Prefabに保存したローカル回転を維持する。
         assemblyVisualRoot.localRotation =
+            Quaternion.Euler(
+                visualRotationCorrectionEuler) *
             assemblyVisualAuthoredLocalRotation;
 
         Vector3 finalPositionInRoot =
@@ -2098,14 +2244,44 @@ public sealed class CrystalAssemblyController : MonoBehaviour
 
         int movingFragmentCount = 0;
 
-        for (int i = 0; i < fragments.Count; i++)
+        for (int i = 0;
+            i < fragments.Count;
+            i++)
         {
             if (!fragments[i].IsAnchor)
             {
-                fragments[i].SequenceIndex =
-                    movingFragmentCount;
-
                 movingFragmentCount++;
+            }
+        }
+
+        bool usingAuthoredGrowthOrder =
+            TryAssignAuthoredGrowthSequence();
+
+        //
+        // Growth Orderを使えなかった場合のみ、
+        // これまでのLayer順をそのままSequenceとして使う。
+        //
+        if (!usingAuthoredGrowthOrder)
+        {
+            int sequenceIndex = 0;
+
+            for (int i = 0;
+                i < fragments.Count;
+                i++)
+            {
+                FragmentState state =
+                    fragments[i];
+
+                if (state.IsAnchor)
+                {
+                    state.SequenceIndex = -1;
+                    continue;
+                }
+
+                state.SequenceIndex =
+                    sequenceIndex;
+
+                sequenceIndex++;
             }
         }
 
@@ -3042,11 +3218,13 @@ public sealed class CrystalAssemblyController : MonoBehaviour
             //
             // Alphaだけでは透明Crystalの内部面/屈折が残るため、
             // Layer Heal完了時点で実GeometryもOFFにする。
-            // これが「全部完成するまで切れ目が残る」問題の本命対策。
+            // IMPORTANT:
+            // Final phaseへ入っても再表示しない。
+            // SetProgress(1)の瞬間にShardを再Active化すると、
+            // 最終発光時だけ16分割の切れ目が一瞬復活するため。
             //
             if (progressiveSeamHealing &&
                 disableHealedShardObjects &&
-                progress < mergeStart &&
                 GetShardHealProgress(
                     state,
                     progress) >= 0.999f)
@@ -4102,5 +4280,122 @@ public sealed class CrystalAssemblyController : MonoBehaviour
     {
         t = Mathf.Clamp01(t);
         return t * t * t;
+    }
+
+    private bool TryAssignAuthoredGrowthSequence()
+    {
+        if (!useAuthoredGrowthOrder ||
+            authoredGrowthOrder == null ||
+            authoredGrowthOrder.Length == 0)
+        {
+            return false;
+        }
+
+        int movingFragmentCount = 0;
+
+        for (int i = 0; i < fragments.Count; i++)
+        {
+            FragmentState state = fragments[i];
+
+            state.SequenceIndex = -1;
+
+            if (!state.IsAnchor)
+            {
+                movingFragmentCount++;
+            }
+        }
+
+        if (authoredGrowthOrder.Length !=
+            movingFragmentCount)
+        {
+            Debug.LogWarning(
+                $"{name}: Authored Growth Orderの要素数が不正です。 " +
+                $"expected={movingFragmentCount}, " +
+                $"actual={authoredGrowthOrder.Length}. " +
+                "従来順へフォールバックします。",
+                this);
+
+            return false;
+        }
+
+        for (int sequenceIndex = 0;
+            sequenceIndex < authoredGrowthOrder.Length;
+            sequenceIndex++)
+        {
+            string targetName =
+                authoredGrowthOrder[sequenceIndex];
+
+            FragmentState matchedState = null;
+
+            for (int i = 0;
+                i < fragments.Count;
+                i++)
+            {
+                FragmentState state =
+                    fragments[i];
+
+                if (state.IsAnchor ||
+                    state.Transform == null)
+                {
+                    continue;
+                }
+
+                if (string.Equals(
+                        state.Transform.name,
+                        targetName,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    matchedState = state;
+                    break;
+                }
+            }
+
+            if (matchedState == null)
+            {
+                Debug.LogWarning(
+                    $"{name}: Authored Growth OrderのShard " +
+                    $"'{targetName}' が見つかりません。 " +
+                    "従来順へフォールバックします。",
+                    this);
+
+                return false;
+            }
+
+            if (matchedState.SequenceIndex >= 0)
+            {
+                Debug.LogWarning(
+                    $"{name}: Authored Growth Orderに " +
+                    $"'{targetName}' が重複しています。 " +
+                    "従来順へフォールバックします。",
+                    this);
+
+                return false;
+            }
+
+            matchedState.SequenceIndex =
+                sequenceIndex;
+        }
+
+        for (int i = 0;
+            i < fragments.Count;
+            i++)
+        {
+            FragmentState state =
+                fragments[i];
+
+            if (!state.IsAnchor &&
+                state.SequenceIndex < 0)
+            {
+                Debug.LogWarning(
+                    $"{name}: Growth Orderに含まれていないShardがあります。 " +
+                    $"Shard={state.Transform.name}. " +
+                    "従来順へフォールバックします。",
+                    this);
+
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -45,12 +45,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3946c60950b89a54fbc0dec2fb4fc8da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrystalAssemblyController
+  visualRotationCorrectionEuler: {x: 30, y: 0, z: 0}
   assemblyVisualRoot: {fileID: 1862331498344396393}
   piecesRoot: {fileID: 8886959539319618634}
   embeddedFinalCrystal: {fileID: 1570076208124676653}
   matchLegacyRendererBounds: 0
   visualSizeMultiplier: 0.5
-  visualOffsetInCenterSpace: {x: 0, y: 0, z: 0}
+  visualOffsetInCenterSpace: {x: 0, y: 0.25, z: 0}
   scatterSeed: 73129
   startRadiusMultiplier: 2.4
   startHeightMultiplier: 0.75
@@ -61,6 +62,23 @@ MonoBehaviour:
   fragmentTravelWindow: 0.38
   orderJitter: 0.025
   useAuthoredLayerOrder: 1
+  useAuthoredGrowthOrder: 1
+  authoredGrowthOrder:
+  - Crystal_Layer01_B
+  - Crystal_Layer02_Front_B
+  - Crystal_Layer01_A
+  - Crystal_Layer03_Right_C
+  - Crystal_Layer02_Front_A
+  - Crystal_Layer01_C
+  - Crystal_Layer04_A
+  - Crystal_Layer03_Left_A
+  - Crystal_Layer02_Back_D
+  - Crystal_Layer04_B
+  - Crystal_Layer03_Right_D
+  - Crystal_Layer02_Back_C
+  - Crystal_Layer03_Left_B
+  - Crystal_Layer04_C
+  - Crystal_Top
   withinLayerStartSpread: 0.015
   settlePortion: 0.22
   settleScaleOvershoot: 0.012
@@ -87,7 +105,9 @@ MonoBehaviour:
   seamHealDuration: 0.1
   healedShardAlpha: 0.02
   finalHealRevealLead: 0.025
-  steppedLayerFinalReveal: 1
+  layerFinalRevealDelay: 0.045
+  layerHealFormFrontMultiplier: 0
+  disableHealedShardObjects: 1
   layerRevealPadding: 0.025
   settleScaleResponse: 0.22
   settleVisualResponse: 0.45
@@ -116,6 +136,38 @@ MonoBehaviour:
   swayDegrees: 0.75
   swayFrequencyMultiplier: 0.81
   phaseOffsetRange: 0.12
+  energyTip: {fileID: 8731000918887211076}
+--- !u!1 &4859133411321835857
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8731000918887211076}
+  m_Layer: 0
+  m_Name: EnergyTip
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8731000918887211076
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4859133411321835857}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -1.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8886959539319618634}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2454316749331289624
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -194,8 +246,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 6438931999184185938, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8731000918887211076}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1029929253995459407, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6529352931894150376}
   m_SourcePrefab: {fileID: 100100000, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
 --- !u!4 &1570076208124676653 stripped
 Transform:
@@ -207,6 +265,24 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4311959926335889521, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
   m_PrefabInstance: {fileID: 2454316749331289624}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3189805446982559063 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1029929253995459407, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}
+  m_PrefabInstance: {fileID: 2454316749331289624}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6529352931894150376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3189805446982559063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef5f19419b5a0fd41b84df1f6541a807, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrystalPieceLayoutLogger
+  crystalRoot: {fileID: 0}
 --- !u!4 &8886959539319618634 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6438931999184185938, guid: 0bf76d5b65a399b4aaf40b76884ef2ab, type: 3}

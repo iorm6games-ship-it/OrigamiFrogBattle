@@ -34,6 +34,9 @@ public sealed class CrystalEffectController : MonoBehaviour
     [Min(0f)]
     [SerializeField]
     private float cornerLiftStagger = 0.015f;
+    [Header("Energy Transfer")]
+    [SerializeField]
+    private CrystalEnergyTransferController energyTransferController;
 
     private Coroutine sequenceCoroutine;
 
@@ -181,7 +184,8 @@ public sealed class CrystalEffectController : MonoBehaviour
             AreAllCompletedLiftsComplete);
 
         //
-        // 7. Formation側のCondenseGlow Fade等の後処理完了を待つ。
+        // 7. Formation側のCondenseGlow Fade等の
+        //    後処理完了を待つ。
         //
         yield return new WaitUntil(
             AreAllFormationComplete);
@@ -189,9 +193,38 @@ public sealed class CrystalEffectController : MonoBehaviour
         SetExternalLiftControl(
             false);
 
+        //
+        // 8. 5本のCrystalが完成・浮遊状態に入り、
+        //    Formation VFXも消えたところで
+        //    Corner → CenterのEnergy Transferへ移行。
+        //
+        if (TryBindEnergyTransfer())
+        {
+            yield return
+                energyTransferController.Play();
+        }
+
         sequenceCoroutine = null;
     }
+    private void SetExternalLiftControl(
+        bool enabled)
+    {
+        centerFormation?.SetExternalLiftControl(
+            enabled);
 
+        if (cornerFormations == null)
+        {
+            return;
+        }
+
+        foreach (
+            CrystalFormationController formation
+            in cornerFormations)
+        {
+            formation?.SetExternalLiftControl(
+                enabled);
+        }
+    }
     private Transform GetCornerLiftTarget(
         int index)
     {
@@ -300,23 +333,65 @@ public sealed class CrystalEffectController : MonoBehaviour
         return true;
     }
 
-    private void SetExternalLiftControl(
-        bool enabled)
+    private bool TryBindEnergyTransfer()
     {
-        centerFormation?.SetExternalLiftControl(
-            enabled);
-
-        if (cornerFormations == null)
+        if (energyTransferController == null)
         {
-            return;
+            Debug.LogWarning(
+                $"{name}: Energy Transfer Controllerが未設定です。",
+                this);
+
+            return false;
         }
 
-        foreach (
-            CrystalFormationController formation
-            in cornerFormations)
+        if (centerFormation == null ||
+            centerFormation.AssemblyInstance == null)
         {
-            formation?.SetExternalLiftControl(
-                enabled);
+            Debug.LogWarning(
+                $"{name}: Center Crystal Assemblyがありません。",
+                this);
+
+            return false;
         }
+
+        if (cornerFormations == null ||
+            cornerFormations.Length != 4)
+        {
+            Debug.LogWarning(
+                $"{name}: Corner Formationは4本必要です。",
+                this);
+
+            return false;
+        }
+
+        CrystalAssemblyController[] corners =
+            new CrystalAssemblyController[
+                cornerFormations.Length];
+
+        for (int i = 0;
+            i < cornerFormations.Length;
+            i++)
+        {
+            CrystalFormationController formation =
+                cornerFormations[i];
+
+            if (formation == null ||
+                formation.AssemblyInstance == null)
+            {
+                Debug.LogWarning(
+                    $"{name}: Corner[{i}]のAssemblyがありません。",
+                    this);
+
+                return false;
+            }
+
+            corners[i] =
+                formation.AssemblyInstance;
+        }
+
+        return
+            energyTransferController.BindCrystals(
+                centerFormation.AssemblyInstance,
+                corners);
     }
 }

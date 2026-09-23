@@ -151,6 +151,14 @@ public sealed class CrystalFormationController : MonoBehaviour
 
     private CrystalAssemblyController crystalAssemblyInstance;
 
+    public CrystalAssemblyController AssemblyInstance =>
+        crystalAssemblyInstance;
+    
+    public Transform EnergyTip =>
+        crystalAssemblyInstance != null
+            ? crystalAssemblyInstance.EnergyTip
+            : null;
+
     [Header("Anchor Handoff")]
     [Tooltip("Condenseの何割から細かい結晶をCrystal_Lowerへ吸い込み始めるか。")]
     [Range(0f, 0.95f)]
