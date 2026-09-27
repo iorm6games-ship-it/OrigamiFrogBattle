@@ -204,6 +204,18 @@ public sealed class CrystalFormationController : MonoBehaviour
     [Range(0f, 2f)]
     [SerializeField]
     private float seedSpinScale = 0.95f;
+
+    [Header("Assembly Initial Scale")]
+    [SerializeField]
+    private float assemblyInitialScaleMultiplier = 1f;
+
+    public void SetAssemblyInitialScaleMultiplier(
+        float multiplier)
+    {
+        assemblyInitialScaleMultiplier =
+            Mathf.Max(0.01f, multiplier);
+    }
+
     private static readonly int FormProgressId =
         Shader.PropertyToID("_FormProgress");
 
@@ -1116,7 +1128,9 @@ public sealed class CrystalFormationController : MonoBehaviour
                 birthPoint.position,
                 birthPoint.rotation,
                 transform);
-
+        crystalAssemblyInstance.SetInitialScaleMultiplier(
+            assemblyInitialScaleMultiplier);
+            
         crystalAssemblyInstance.Begin(
             birthPoint,
             crystalVisual);

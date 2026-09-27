@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MAT_CrystalEnergyCharge_Core
-  m_Shader: {fileID: -6465566751694194690, guid: 89de8c97e28ef8346985a5d7dfcc0a4b, type: 3}
+  m_Name: MAT_CrystalEnergyCharge_Spark
+  m_Shader: {fileID: -6465566751694194690, guid: 3a3324a6d06cbb2429f2f6f28011b40d, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -124,16 +124,15 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _Intensity: 5
+    - _Intensity: 2.5
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Radius: 0.6
     - _ReceiveShadows: 1
-    - _Sharpness: 3.5
+    - _SideSharpness: 4
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SoftParticlesEnabled: 0
@@ -143,16 +142,16 @@ Material:
     - _SrcBlend: 5
     - _SrcBlendAlpha: 1
     - _Surface: 1
+    - _VerticalSharpness: 12
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
     - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 0.9647059, g: 0.99215686, b: 1, a: 1}
+    - _BaseColor: {r: 0.85, g: 0.96, b: 1, a: 1}
     - _BaseColorAddSubDiff: {r: 0, g: 0, b: 0, a: 0}
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
-    - _Color: {r: 0.9647059, g: 0.9921568, b: 1, a: 1}
-    - _CoreColor: {r: 5.512785, g: 5.872314, b: 5.992157, a: 1}
-    - _EmissionColor: {r: 4.9044924, g: 5.458864, b: 5.656854, a: 1}
+    - _Color: {r: 0.96078426, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 4.236984, g: 5.3004723, b: 5.656854, a: 1}
     - _SoftParticleFadeParams: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []

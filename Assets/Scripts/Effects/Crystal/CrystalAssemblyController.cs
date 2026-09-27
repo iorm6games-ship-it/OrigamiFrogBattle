@@ -61,6 +61,10 @@ public sealed class CrystalAssemblyController : MonoBehaviour
     [SerializeField]
     private Vector3 visualOffsetInCenterSpace = Vector3.zero;
 
+    [Header("Initial Scale")]
+    [SerializeField]
+    private float initialScaleMultiplier = 1f;
+
     [Header("Scatter")]
     [SerializeField]
     private int scatterSeed = 73129;
@@ -428,9 +432,15 @@ public sealed class CrystalAssemblyController : MonoBehaviour
     [Tooltip("完成Crystal 先端のエネルギー送受信用Anchor")]
     [SerializeField]
     private Transform energyTip;
-
-    public Transform EnergyTip => energyTip;
     
+    public Transform EnergyTip => energyTip;
+
+    public void SetInitialScaleMultiplier(
+        float multiplier)
+    {
+        initialScaleMultiplier =
+            Mathf.Max(0.01f, multiplier);
+    }
     public bool IsComplete { get; private set; }
     public bool IsLeadLiftComplete { get; private set; }
     public float FloatSignal { get; private set; }
@@ -1170,8 +1180,14 @@ public sealed class CrystalAssemblyController : MonoBehaviour
             {
                 completedLiftRotationOffset =
                     finalPose.RotationOffset;
+                
                 completedLiftScaleMultiplier =
-                    finalPose.ScaleMultiplier;
+                    Mathf.Max(
+                        0.01f,
+                        finalPose.ScaleMultiplier) /
+                    Mathf.Max(
+                        0.01f,
+                        initialScaleMultiplier);
 
             }
         }
@@ -1839,6 +1855,8 @@ public sealed class CrystalAssemblyController : MonoBehaviour
                 assemblyVisualRoot.TransformVector(finalPositionInRoot);
 
             MatchLegacyRendererBounds();
+            assemblyVisualRoot.localScale *=
+                initialScaleMultiplier;
 
             Debug.Log(
                 $"[CrystalAssemblyScale] Applied mode=Bounds, " +
@@ -1852,7 +1870,9 @@ public sealed class CrystalAssemblyController : MonoBehaviour
         // 掛け合わせず、Inspectorの値を全体の絶対Scaleとして適用する。
         // これにより、保存Scaleが大きくても倍率が相殺されない。
         assemblyVisualRoot.localScale =
-            Vector3.one * visualSizeMultiplier;
+            Vector3.one * 
+            visualSizeMultiplier *
+            initialScaleMultiplier;
 
         Debug.Log(
             $"[CrystalAssemblyScale] Applied mode=Manual, " +

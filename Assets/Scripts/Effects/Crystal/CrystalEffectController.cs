@@ -73,6 +73,7 @@ public sealed class CrystalEffectController : MonoBehaviour
     {
         SetExternalLiftControl(
             true);
+        ApplyInitialAssemblyScales();
 
         //
         // 1. Formation自体は従来どおり
@@ -206,6 +207,63 @@ public sealed class CrystalEffectController : MonoBehaviour
 
         sequenceCoroutine = null;
     }
+    
+    private void ApplyInitialAssemblyScales()
+    {
+        if (centerFormation != null)
+        {
+            centerFormation.SetAssemblyInitialScaleMultiplier(
+                GetLiftTargetScaleMultiplier(
+                    centerLiftTarget));
+        }
+
+        if (cornerFormations == null)
+        {
+            return;
+        }
+
+        for (int i = 0;
+            i < cornerFormations.Length;
+            i++)
+        {
+            CrystalFormationController formation =
+                cornerFormations[i];
+
+            if (formation == null)
+            {
+                continue;
+            }
+
+            Transform liftTarget =
+                GetCornerLiftTarget(i);
+
+            formation.SetAssemblyInitialScaleMultiplier(
+                GetLiftTargetScaleMultiplier(
+                    liftTarget));
+        }
+    }
+
+    private float GetLiftTargetScaleMultiplier(
+        Transform liftTarget)
+    {
+        if (liftTarget == null)
+        {
+            return 1f;
+        }
+
+        CrystalFinalPose finalPose =
+            liftTarget.GetComponent<CrystalFinalPose>();
+
+        if (finalPose == null)
+        {
+            return 1f;
+        }
+
+        return Mathf.Max(
+            0.01f,
+            finalPose.ScaleMultiplier);
+}
+
     private void SetExternalLiftControl(
         bool enabled)
     {

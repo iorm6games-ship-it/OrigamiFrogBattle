@@ -34,10 +34,6 @@ public sealed class CrystalEnergyTransferController : MonoBehaviour
 
     [Min(0f)]
     [SerializeField]
-    private float chargeDuration = 0.20f;
-
-    [Min(0f)]
-    [SerializeField]
     private float cornerBeamStagger = 0.035f;
 
     [Min(0.01f)]
@@ -69,6 +65,11 @@ public sealed class CrystalEnergyTransferController : MonoBehaviour
     [SerializeField]
     private CrystalEnergyBeam testBeam;
 
+    [Header("Tip Charge")]
+    [SerializeField]
+    private CrystalEnergyTipChargeController tipChargePrefab;
+
+    private CrystalEnergyTipChargeController testTipChargeInstance;
 
     public TransferPhase Phase { get; private set; } =
         TransferPhase.Idle;
@@ -135,12 +136,12 @@ public sealed class CrystalEnergyTransferController : MonoBehaviour
         // 次段階:
         // Corner先端のEmission / Sparkle集束
         //
-        if (chargeDuration > 0f)
+        if (testTipChargeInstance == null)
         {
-            yield return
-                new WaitForSeconds(
-                    chargeDuration);
+            yield break;
         }
+        yield return
+            testTipChargeInstance.PlayCharge();
     }
 
 
@@ -292,7 +293,42 @@ public sealed class CrystalEnergyTransferController : MonoBehaviour
             testBeam.SetVisibleImmediate(
                 false);
         }
-
+        CreateTestTipCharge();
         return true;
+    }
+
+    private void CreateTestTipCharge()
+    {
+        if (testTipChargeInstance != null)
+        {
+            Destroy(
+                testTipChargeInstance.gameObject);
+            testTipChargeInstance = null;
+        }
+        
+        if (tipChargePrefab == null ||
+            cornerCrystals == null ||
+            cornerCrystals.Length == 0 ||
+            cornerCrystals[0] == null ||
+            cornerCrystals[0].EnergyTip == null)
+        {
+            return;
+        }
+
+        Transform energyTip =
+            cornerCrystals[0].EnergyTip;
+        
+        testTipChargeInstance =
+            Instantiate(
+                tipChargePrefab,
+                energyTip.position,
+                energyTip.rotation,
+                energyTip);
+        
+        testTipChargeInstance.transform.localPosition =
+            Vector3.zero;
+        
+        testTipChargeInstance.transform.localRotation =
+            Quaternion.identity;
     }
 }
