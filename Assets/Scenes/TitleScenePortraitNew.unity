@@ -8078,8 +8078,16 @@ PrefabInstance:
       value: 0.014
       objectReference: {fileID: 0}
     - target: {fileID: 2900030368473554512, guid: af6f2e786806dd74391f32b7039da58a, type: 3}
+      propertyPath: absorptionPower
+      value: 1.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2900030368473554512, guid: af6f2e786806dd74391f32b7039da58a, type: 3}
       propertyPath: accelerationPower
       value: 3.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2900030368473554512, guid: af6f2e786806dd74391f32b7039da58a, type: 3}
+      propertyPath: absorptionDuration
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 3671484637215627021, guid: af6f2e786806dd74391f32b7039da58a, type: 3}
       propertyPath: m_Name

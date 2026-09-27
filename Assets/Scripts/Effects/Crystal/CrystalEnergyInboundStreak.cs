@@ -49,13 +49,30 @@ public sealed class CrystalEnergyInboundStreakController : MonoBehaviour
     [Range(1f, 6f)]
     [SerializeField] private float absorptionPower = 2.5f;
 
+    [Header("Absorption Visual")]
+    [SerializeField] private float coreIntensityMultiplier = 1.6f;
+
+    [Range(0.1f, 1f)]
+    [SerializeField] private float glowWidthEndMultiplier = 0.35f;
+
     private Vector3[] positions;
+    private float glowBaseWidthMultiplier;
+
+    private static readonly int IntensityId =
+        Shader.PropertyToID("_Intensity");
+
+    private MaterialPropertyBlock corePropertyBlock;
+
+    private float coreBaseIntensity = 4f;
 
     private void Awake()
     {
         PrepareRenderer(core);
         PrepareRenderer(glow);
-
+        
+        glowBaseWidthMultiplier = glow.widthMultiplier;
+        corePropertyBlock =
+            new MaterialPropertyBlock();
         positions = new Vector3[Mathf.Max(3, segmentCount)];
 
         SetVisible(false);
@@ -181,6 +198,27 @@ public sealed class CrystalEnergyInboundStreakController : MonoBehaviour
         }
         core.SetPositions(positions);
         glow.SetPositions(positions);
+        glow.widthMultiplier =
+            glowBaseWidthMultiplier *
+            Mathf.Lerp(
+                1f,
+                glowWidthEndMultiplier,
+                absorbT);
+         float intensity =
+        coreBaseIntensity *
+        Mathf.Lerp(
+            1f,
+            coreIntensityMultiplier,
+            absorbT);
+
+        core.GetPropertyBlock(corePropertyBlock);
+        
+        corePropertyBlock.SetFloat(
+            IntensityId,
+            intensity);
+
+        core.SetPropertyBlock(
+            corePropertyBlock);
     }
     
     private void UpdateStreak(float headT)
